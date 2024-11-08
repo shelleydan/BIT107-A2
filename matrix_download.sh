@@ -15,21 +15,27 @@ read GEOID #prompts the user for the ID
 
 GEOLINK=${GEOID::-3}nnn #Customises the ID to work with the NCBI link
 
-######################## Downloading Matrix #######################
+######################## FILE DOWNLOAD #######################
 
 wget -O ${WORKDIR}/${GEOID}.matrix.txt.gz \
 	https://ftp.ncbi.nlm.nih.gov/geo/series/${GEOLINK}/${GEOID}/matrix/${GEOID}_series_matrix.txt.gz
 
+wget -O ${WORKDIR}/${GEOID}.counts.csv.gz \
+	https://www.ncbi.nlm.nih.gov/geo/download/?acc=${GEOID}&format=file&file=${GEOID}%5Fhost%5Fcounts%5Fmatrix%2Ecsv%2Egz
+
 #Assigned a jobid to the wget command to let the download finish before moving on
-pid=$!
-wait $pid
+pid0=$!
+wait $pid0
+pid1=$!
+wait $pid1
 
 #The downloaded file is zipped and is useless without unzipping first.
 gunzip ${GEOID}.matrix.txt.gz 
+gunzip ${GEOID}.counts.csv.gz
 
 #The above is all commented out to continue with the next part REMOVE THIS
 
-####################### Extracting Info #######################
+####################### EXTRACTION #######################
 
 ### Key Info to Extract ###
 # - !Sample_description - sample name (e.g. SKA for this assignment) 
@@ -65,12 +71,12 @@ sed -i '1 s/^.*$/Sample Time/' 6_matrix.txt
 sed -i '1 s/^.*$/ID/' 7_matrix.txt
 
 paste *_matrix.txt > targets.txt
-pid=$!
-wait $pid
+pid2=$!
+wait $pid2
 
 rm ${WORKDIR}/*_matrix.txt #Just some simple tidying
 
-####################### Clean Targets.txt #######################
+####################### CLEANING TARGETS #######################
 
 sed -i 's/"//g' targets.txt
 sed -i 's/cell line: //g' targets.txt
@@ -79,3 +85,4 @@ sed -i 's/genotype: //g' targets.txt
 sed -i 's/treatment: //g' targets.txt
 sed -i 's/time point_(in_hours): //g' targets.txt
 
+echo "targets.txt is ready for use"
