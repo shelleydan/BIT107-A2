@@ -48,26 +48,37 @@ cat ${GEOID}.matrix.txt | grep \
 
 #We need to take the extracted information and make a matrix with it:
 
-awk -F '|' ' /^!Sample/ {
-   # For lines starting with !Sample*, split them into fields using "|"
-   for (i = 1; i <= NF; i++) { data[NR, i] = $i # Store each field in the "data" array (row,column)
-   }
-    max_fields = NF # Store the maximum number of fields encountered
-}
-END {
-    # Now print the data transposed into columns
-   for (i = 1; i <= max_fields; i++) 
-	{ for (j = 1; j <= NR; j++) {
-           # Print the field in the transposed format (columns)
-		printf "%s", data[j, i]
-		if (j < NR) { 
-			printf "\t" # Tab after the field
-		} #else {
-   			#printf "%s", data[j, i]
-		#}
-	}
-	}
-} 
-' extracted_metadata.txt > output.txt
+# The data is extracted into extracted_metadata.txt
 
+
+lineN=$(cat extracted_metadata.txt | wc -l)
+echo ${lineN}
+
+for i in $(seq 1 ${lineN}); do
+	sed -n ${i}p extracted_metadata.txt > ${i}_matrix.txt
+	sed -i 's/\t/\n/g' ${i}_matrix.txt
+done
+
+sed -i '1 s/^.*$/Cell Type/' 1_matrix.txt
+sed -i '1 s/^.*$/Cell Type/' 2_matrix.txt
+sed -i '1 s/^.*$/Cell Line/' 3_matrix.txt
+sed -i '1 s/^.*$/Genotype/' 4_matrix.txt
+sed -i '1 s/^.*$/Test Condition/' 5_matrix.txt
+sed -i '1 s/^.*$/Sample Time/' 6_matrix.txt
+sed -i '1 s/^.*$/ID/' 7_matrix.txt
+
+paste *_matrix.txt > targets.txt
+pid=$!
+wait $pid
+
+rm ${WORKDIR}/*_matrix.txt #Just some simple tidying
+
+####################### Clean Targets.txt #######################
+
+sed -i 's/"//g' targets.txt
+sed -i 's/cell line: //g' targets.txt
+sed -i 's/cell type: //g' targets.txt
+sed -i 's/genotype: //g' targets.txt
+sed -i 's/treatment: //g' targets.txt
+sed -i 's/time point_(in_hours): //g' targets.txt
 
