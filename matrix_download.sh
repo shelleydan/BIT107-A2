@@ -44,6 +44,30 @@ cat ${GEOID}.matrix.txt | grep \
 				-e '!Sample_source_name_ch1'\
 				-e '!Sample_characteristics_ch1'\
 				-e '!Sample_characteristics_ch1'\
-				>> extracted_metadata.txt
+				> extracted_metadata.txt
+
+#We need to take the extracted information and make a matrix with it:
+
+awk -F '|' ' /^!Sample/ {
+   # For lines starting with !Sample*, split them into fields using "|"
+   for (i = 1; i <= NF; i++) { data[NR, i] = $i # Store each field in the "data" array (row,column)
+   }
+    max_fields = NF # Store the maximum number of fields encountered
+}
+END {
+    # Now print the data transposed into columns
+   for (i = 1; i <= max_fields; i++) 
+	{ for (j = 1; j <= NR; j++) {
+           # Print the field in the transposed format (columns)
+		printf "%s", data[j, i]
+		if (j < NR) { 
+			printf "\t" # Tab after the field
+		} #else {
+   			#printf "%s", data[j, i]
+		#}
+	}
+	}
+} 
+' extracted_metadata.txt > output.txt
 
 
