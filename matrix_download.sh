@@ -8,26 +8,24 @@
 
 #Setting Variables
 WORKDIR=$(pwd)
-GEOID=GSE217504
-GEOLINK=${GEOID::-3}nnn
 
-# sed -i 's/$GEOLINK/$GEOLINK\nnn/'
+######################## USER INPUT GEO ID #######################
+echo "Enter the geoprofile ID of the Project: (The GEO for this assignment is: GSE217504)" 
+read GEOID #prompts the user for the ID
 
-echo ${GEOID}
-echo ${GEOLINK}
+GEOLINK=${GEOID::-3}nnn #Customises the ID to work with the NCBI link
 
+######################## Downloading Matrix #######################
 
-####################### Downloading Matrix #######################
-
-#wget -O ${WORKDIR}/${GEOID}.matrix.txt.gz \
-#	https://ftp.ncbi.nlm.nih.gov/geo/series/${GEOLINK}/${GEOID}/matrix/${GEOID}_series_matrix.txt.gz
+wget -O ${WORKDIR}/${GEOID}.matrix.txt.gz \
+	https://ftp.ncbi.nlm.nih.gov/geo/series/${GEOLINK}/${GEOID}/matrix/${GEOID}_series_matrix.txt.gz
 
 #Assigned a jobid to the wget command to let the download finish before moving on
-#pid=$!
-#wait $pid
+pid=$!
+wait $pid
 
 #The downloaded file is zipped and is useless without unzipping first.
-#gunzip ${GEOID}.matrix.txt.gz 
+gunzip ${GEOID}.matrix.txt.gz 
 
 #The above is all commented out to continue with the next part REMOVE THIS
 
@@ -49,7 +47,6 @@ cat ${GEOID}.matrix.txt | grep \
 #We need to take the extracted information and make a matrix with it:
 
 # The data is extracted into extracted_metadata.txt
-
 
 lineN=$(cat extracted_metadata.txt | wc -l)
 echo ${lineN}
