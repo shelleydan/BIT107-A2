@@ -22,7 +22,7 @@ echo ${GEOLINK}
 wget -O ${WORKDIR}/${GEOID}.matrix.txt.gz \
 	https://ftp.ncbi.nlm.nih.gov/geo/series/${GEOLINK}/${GEOID}/matrix/${GEOID}_series_matrix.txt.gz
 
-#pid=$!
-#wait $pid
+pid=$!
+wait $pid
 
-#gunzip ${GEOID}.matrix.txt.gz
+gunzip ${GEOID}.matrix.txt.gz
