@@ -15,6 +15,7 @@ library(pheatmap)
 library(dplyr)
 library(tidyverse)
 library(Rsamtools)
+library(DESeq2)
 library(RColorBrewer)
 library(ggplot2)
 library(ggrepel)
@@ -102,6 +103,74 @@ results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0
 #COPY FROM POSIT
 
 write.csv(results_DEG, "output_data/raw_DEG_results.csv") #Output of the non-filtered DESeq2 results
+
+############################
+###### PRETTY FIGURES ######
+############################
+
+#####################
+## DISPERSION PLOT ##
+#####################
+
+#We expect that when a gene's read count increases the dispersion of that same gene decreases
+plotDispEsts(DEG)
+
+##################################
+## PRINCIPLE COMPONENT ANALYSIS ##
+##################################
+
+# Variance stabilisation transformation
+vst <- DESeq2::vst(DEG, blind = F)
+
+# Generating the PCA Plot
+DESeq2::plotPCA(vst, 
+                intgroup=c("Sequencing", "Treatment")) #Applying layers like found above.
+
+#LOOK AT PCA WITH GGPLOT
+
+##############
+## HEATMAPS ##
+##############
+
+#This used pheatmaps to analyse some gene expression clusting.
+
+# Sample-to-sample distance matrix (normalised counts)
+
+sampleDist <- dist(t(assay(vst)))
+sampleDistMatrix <- as.matrix(sampleDist) # Generate a matrix
+colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colours and range of those. 
+
+#Generating the Heatmap
+pheatmap(sampleDistMatrix, #Matrix input
+         clustering_distance_rows = sampleDist,
+         clustering_distance_cols = sampleDist,
+         color = colours) #as defined above
+
+#This heatmap colours show the different between the samples. So the darkest blue shows no difference (e.g. when the same samples are plotted against eachother)
+
+# Log transformed normalised counts (using top 10 genes)
+
+DEG_padj_orders <- results_DEG[order(results_DEG$padj),] #Ascending order of padj values
+
+top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,] #Selecting the top 10
+top10DEGs_names <- row.names(top10DEGs) #Extracting names of the top 10 genes
+
+rld <- rlog(DEG, blind = F) 
+pheatmap(assay(rld)[top10DEGs_names,], #Subset by labels extracted
+         cluster_rows = T, #Adds column tree-clustering
+         show_rownames = T, 
+         cluster_cols = T, #Adds rows tree-clustering
+         annotation_col = anno_info) 
+
+anno_info <- as.data.frame(colData(DEG)[,c("Sequencing", "Treatment")])
+
+
+
+# Z-Scores with top 10 genes
+
+
+
+
 
 
 ######################################
