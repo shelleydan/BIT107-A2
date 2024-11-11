@@ -1,0 +1,7 @@
+############ DIFFERENTIAL EXPRESSED GENES ############ 
+
+### LIBRARY ###
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+
+BiocManager::install("DESeq2")
