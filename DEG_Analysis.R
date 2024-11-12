@@ -119,7 +119,9 @@ write.csv(results_DEG, "output_data/raw_DEG_results.csv") #Output of the non-fil
 #####################
 
 #We expect that when a gene's read count increases the dispersion of that same gene decreases
-plotDispEsts(DEG) #This is run on the Analysis Data
+plotDispEsts(DEG, 
+             ylab = "Dispersion",
+             xlab = "Mean of Normalised Counts") #This is run on the Analysis Data
 
 ##################################
 ## PRINCIPLE COMPONENT ANALYSIS ##
@@ -231,9 +233,9 @@ results_DEG$diffexpressed <- "NO"
 results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$padj < 0.05] <- "UP"
 results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0.05] <- "DOWN"
 
-######################################
+#####################################
 ## VOLCANO PLOT OF DIFFERENTIATION ##
-######################################
+#####################################
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
 top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
