@@ -203,6 +203,25 @@ resLFC <- lfcShrink(DEG,
 
 plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
 
+## MA Plot with ggplot 2
+colnames(results_DEG)
+
+ggplot(data=resLFC, aes(x=baseMean, y=log2FoldChange, colour=diffexpressed)) + 
+  geom_point(alpha=0.4, size=1.8) + 
+  geom_hline(aes(yintercept = 0), colour = "black", linewidth = 1.2) +
+  ylim(c(min(results_DEG$log2FoldChange), max(results_DEG$log2FoldChange))) + 
+  scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  xlab("Mean expression") + 
+  ylab("Log2 Fold Change") + 
+  theme(axis.title.x = element_text(face = "bold", size = 15),
+        axis.text.x = element_text(face = "bold", size = 12)) +
+  theme(axis.title.y = element_text(face = "bold", size = 15),
+        axis.text.y = element_text(face = "bold", size = 12)) +
+  theme(legend.title = element_text(face = "bold", size = 15)) +
+  theme(legend.text = element_text(size = 14))
+dev.off()
+
 ###########################
 ## FILTERING THE RESULTS ## - For Volcano Plot
 ###########################
@@ -224,8 +243,15 @@ summary(results_DEG$difflabel)
 #Setting the theme for standardization
 theme_set(theme_classic(base_size = 15) +
             theme(
-              axis.title.y = element_text(face = 'bold', margin = margin(0,20,0,0), size = rel(1), color = 'black'),
-              axis.title.x = element_text(hjust = 0.5, face = "bold", margin = margin(20,0,0,0), size = rel(1), color = 'black'),
+              axis.title.y = element_text(face = 'bold', 
+                                          margin = margin(0,20,0,0), 
+                                          size = rel(1), 
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5, 
+                                          face = "bold", 
+                                          margin = margin(20,0,0,0), 
+                                          size = rel(1), 
+                                          color = 'black'),
               plot.title = element_text(hjust = 0.5)
             ))
 
@@ -241,6 +267,7 @@ ggplot(data = results_DEG, aes(x = log2FoldChange,
              col = "gray", 
              linetype = "dashed") + #Adding Horizontal line to show p-value cut off
   geom_point() + #Setting Point size
+  scale_shape_manual(values = 6) +
   scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
                      labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
   coord_cartesian(ylim = c(0, 200), xlim = c(-5,5)) + #Applying figure axis limits
