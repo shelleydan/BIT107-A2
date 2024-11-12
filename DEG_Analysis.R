@@ -2,23 +2,22 @@
 ############ DIFFERENTIAL EXPRESSED GENES ############ 
 ######################################################
 
-## SCRIPT CREDITS ##
+## SCRIPT REFERENCES ##
 # Batut et al - https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html
 # Cristofides - https://github.com/ecologysarah?tab=repositories
-
-
 
 #############
 ## LIBRARY ##
 #############
 
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager") #DESeq2 is now built under Bioconductor and needs to be installed differently. 
+install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
 
+#Bioconductor Package Installs
 BiocManager::install("DESeq2") #Downloads DESeq2 from Bioconductor
 BiocManager::install("Rsamtools") #Downloads SAMTools from Bioconductor
 BiocManager::install("apeglm")
 
+#Library Loading
 library(pheatmap)
 library(dplyr)
 library(tidyverse)
@@ -33,13 +32,14 @@ library(ggrepel)
 ## DIRECTORY SETTING ##
 #######################
 
-setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" #Site for all DEG data produced to be inputted to (Change LPT for PC use)
+setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" 
+#Site for all DEG data (inputs and outputs)
 
 ####################
 ## IMPORTING DATA ##
 ####################
 
-counts_data <- read.csv("DEGdata/count_matrix.csv", #Counts
+counts_data <- read.csv("DEGdata/count_matrix.csv", #Input Counts Data
                         header = T, 
                         row.names = 1)
 
@@ -161,16 +161,15 @@ DEG_padj_orders <- results_DEG[order(results_DEG$padj),] #Ascending order of pad
 topDEGs <- results_DEG[order(results_DEG$padj), ][1:10,] #Selecting the top 10
 topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
 
-rld <- rlog(DEG, blind = F) 
+rld <- rlog(DEG, blind = F) #Performling a log transformation
+
+anno_info <- as.data.frame(colData(DEG)[,c("Sequencing", "Treatment")]) #Setting Annotation Levels
+
 pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_rows = T, #Adds column tree-clustering
          show_rownames = T, 
          cluster_cols = T, #Adds rows tree-clustering
          annotation_col = anno_info) 
-
-anno_info <- as.data.frame(colData(DEG)[,c("Sequencing", "Treatment")])
-
-
 
 # Z-Scores with top 10 genes
 
@@ -178,10 +177,11 @@ z_calc <- function(x) { #Function for calculating z-scores
   ((x - mean(x)) / sd(x))
 }
 
-normal_counts <- counts(DEG, normalized = T)
+top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
+top10DEGs_names <- row.names(top10DEGs)
 
+normal_counts <- counts(DEG, normalized = T) #Normalising the counts
 zscore_all <- t(apply(normal_counts, 1, z_calc)) #Z-scores for all genes
-
 zscore_sub <- zscore_all[top10DEGs_names,] #Subsetting for the top 10 genes
 
 pheatmap(zscore_sub)
@@ -191,8 +191,9 @@ pheatmap(zscore_sub)
 #############
 
 #These plots are used to see the distribution of gene expressions
+#The default alpha for MA plots is 0.1
 
-plotMA(DEG, ylim=c(-2,2))
+plotMA(DEG, ylim=c(-2,2), alpha = 0.05) #Setting the alpha value to 0.05
 
 #Removing Noise
 
@@ -200,7 +201,7 @@ resLFC <- lfcShrink(DEG,
                     coef = "Treatment_treated_vs_untreated", 
                     type = "apeglm") #This gives a ref
 
-plotMA(resLFC, ylim=c(-2,2))
+plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
 
 ###########################
 ## FILTERING THE RESULTS ## - For Volcano Plot
@@ -212,15 +213,13 @@ results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$padj < 0.
 results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0.05] <- "DOWN"
 
 ######################################
-## VOLCANO PLOT OF DIFFERENTIALTION ##
+## VOLCANO PLOT OF DIFFERENTIATION ##
 ######################################
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
 top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
 results_DEG$difflabel <- ifelse(row.names(results_DEG) %in% row.names(top10DEGs), row.names(results_DEG), NA)
 summary(results_DEG$difflabel)
-
-
 
 #Setting the theme for standardization
 theme_set(theme_classic(base_size = 15) +
@@ -230,24 +229,28 @@ theme_set(theme_classic(base_size = 15) +
               plot.title = element_text(hjust = 0.5)
             ))
 
-
 #Volcano Plot with ggplot2
-ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffexpressed, label = difflabel)) +
-  geom_vline(xintercept = c(1, -1), col = "gray", linetype = "dashed") + #Adding vertical lines to show fold change cut off
-  geom_hline(yintercept = c(-log10(0.05)), col = "gray", linetype = "dashed") + #Adding Horizontal line to show p-value cut off
-               geom_point() + #Setting Point size
-               scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
-                                  labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
-               coord_cartesian(ylim = c(0, 200), xlim = c(-5,5)) + #Applying figure axis limits
-               scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
-               labs(color = "Regulation", # Changing the colour legend title
-                    x = expression("log"[2]*" Fold Change"), #Changing the x axis
-                    y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
-               ggtitle("DEGs") + # Setting a Figure Title
-               geom_text_repel(max.overlaps = Inf) #Adding labels which we express in ggplot line 1
+ggplot(data = results_DEG, aes(x = log2FoldChange, 
+                               y = -log10(padj), 
+                               col = diffexpressed, 
+                               label = difflabel)) +
+  geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
+             col = "gray", 
+             linetype = "dashed") + #Adding vertical lines to show fold change cut off
+  geom_hline(yintercept = c(-log10(0.05)), 
+             col = "gray", 
+             linetype = "dashed") + #Adding Horizontal line to show p-value cut off
+  geom_point() + #Setting Point size
+  scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  coord_cartesian(ylim = c(0, 200), xlim = c(-5,5)) + #Applying figure axis limits
+  scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
+  labs(color = "Regulation", # Changing the colour legend title
+       x = expression("log"[2]*" Fold Change"), #Changing the x axis
+       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+  ggtitle("DEGs") + # Setting a Figure Title
+  geom_text_repel(max.overlaps = Inf) #Adding labels which we express in ggplot line 1
              
-
-
 
 
 
