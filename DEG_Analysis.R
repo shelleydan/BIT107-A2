@@ -2,6 +2,12 @@
 ############ DIFFERENTIAL EXPRESSED GENES ############ 
 ######################################################
 
+## SCRIPT CREDITS ##
+# Batut et al - https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html
+# Cristofides - https://github.com/ecologysarah?tab=repositories
+
+
+
 #############
 ## LIBRARY ##
 #############
@@ -198,7 +204,6 @@ resLFC <- lfcShrink(DEG,
                     type = "apeglm") #This gives a ref
 
 plotMA(resLFC, ylim=c(-2,2))
-
 
 ######################################
 ## VOLCANO PLOT OF DIFFERENTIALTION ##
