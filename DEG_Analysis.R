@@ -40,7 +40,7 @@ setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" #Site for all DEG data produced 
 ####################
 
 counts_data <- read.csv("DEGdata/count_matrix.csv", #Counts
-                        header = T,
+                        header = T, 
                         row.names = 1)
 
 colnames(counts_data) #Checking samples are column names
@@ -53,6 +53,7 @@ target_data <- read.csv("DEGdata/design.csv", #Target meta data
 colnames(target_data) #Checking samples are column names
 head(target_data) #Checking the data imported correctly
 
+
 ###################
 ## FACTOR LEVELS ## - Infected vs Mock
 ###################
@@ -64,7 +65,8 @@ target_data$Sequencing <- factor(target_data$Sequencing) #Setting Sequencing met
 ## CREATING A DESeq OBJECT ##
 #############################
 
-DEG <- DESeq2::DESeqDataSetFromMatrix(countData = counts_data, #Adding Counts Data
+DEG <- DESeq2::DESeqDataSetFromMatrix(countData = counts_data, 
+                                      #Adding Counts Data, 2:8 removes column 1 with row names in. 
                                       colData = target_data, #Adding targets data
                                       design = ~Sequencing + Treatment) #Factors for Comparison
 #If we're looking at a multi-factor analysis, we want to input our primary factor should be inputted last.
@@ -92,18 +94,13 @@ results_DEG #Printing the results into the console
 #Need to change the DESeq object into a dataframe
 results_DEG <- as.data.frame(results_DEG) # Produces and R dataframe
 
-#Changing table order by ascending padj
-results_DEG_acending <- results_DEG[order(results_DEG$padj),]
-head(results_DEG_acending)
+##################
+## DATA CLEANUP ##
+##################
 
-###########################
-## FILTERING THE RESULTS ##
-###########################
+#Those that would be 0 are denoted by 'NA'
+#results_DEG <- subset(results_DEG, padj != 0) #Removing any padj values with 0
 
-#Setting a column for the Volcano plot
-results_DEG$diffexpressed <- "NO"
-results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$padj < 0.05] <- "UP"
-results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0.05] <- "DOWN"
 
 ########################################
 ## SAVING THE RAW-COUNTS AND FILTERED ##
@@ -122,7 +119,7 @@ write.csv(results_DEG, "output_data/raw_DEG_results.csv") #Output of the non-fil
 #####################
 
 #We expect that when a gene's read count increases the dispersion of that same gene decreases
-plotDispEsts(DEG)
+plotDispEsts(DEG) #This is run on the Analysis Data
 
 ##################################
 ## PRINCIPLE COMPONENT ANALYSIS ##
@@ -161,11 +158,11 @@ pheatmap(sampleDistMatrix, #Matrix input
 
 DEG_padj_orders <- results_DEG[order(results_DEG$padj),] #Ascending order of padj values
 
-top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,] #Selecting the top 10
-top10DEGs_names <- row.names(top10DEGs) #Extracting names of the top 10 genes
+topDEGs <- results_DEG[order(results_DEG$padj), ][1:10,] #Selecting the top 10
+topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
 
 rld <- rlog(DEG, blind = F) 
-pheatmap(assay(rld)[top10DEGs_names,], #Subset by labels extracted
+pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_rows = T, #Adds column tree-clustering
          show_rownames = T, 
          cluster_cols = T, #Adds rows tree-clustering
@@ -205,9 +202,25 @@ resLFC <- lfcShrink(DEG,
 
 plotMA(resLFC, ylim=c(-2,2))
 
+###########################
+## FILTERING THE RESULTS ## - For Volcano Plot
+###########################
+
+#Setting a column for the Volcano plot
+results_DEG$diffexpressed <- "NO"
+results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$padj < 0.05] <- "UP"
+results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0.05] <- "DOWN"
+
 ######################################
 ## VOLCANO PLOT OF DIFFERENTIALTION ##
 ######################################
+
+#Extracting GeneIDs from the row.names without needing for a new GeneID column
+top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
+results_DEG$difflabel <- ifelse(row.names(results_DEG) %in% row.names(top10DEGs), row.names(results_DEG), NA)
+summary(results_DEG$difflabel)
+
+
 
 #Setting the theme for standardization
 theme_set(theme_classic(base_size = 15) +
@@ -217,19 +230,20 @@ theme_set(theme_classic(base_size = 15) +
               plot.title = element_text(hjust = 0.5)
             ))
 
+
 #Volcano Plot with ggplot2
-ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffexpressed, label = deflabel)) +
+ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffexpressed, label = difflabel)) +
   geom_vline(xintercept = c(1, -1), col = "gray", linetype = "dashed") + #Adding vertical lines to show fold change cut off
   geom_hline(yintercept = c(-log10(0.05)), col = "gray", linetype = "dashed") + #Adding Horizontal line to show p-value cut off
                geom_point() + #Setting Point size
                scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
                                   labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
-               coord_cartesian(ylim = c(0, 250), xlim = c(-5,5)) + #Applying figure axis limits
+               coord_cartesian(ylim = c(0, 200), xlim = c(-5,5)) + #Applying figure axis limits
                scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
                labs(color = "Regulation", # Changing the colour legend title
                     x = expression("log"[2]*" Fold Change"), #Changing the x axis
                     y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
-               ggtitle("DEGs")  # Setting a Figure Title
+               ggtitle("DEGs") + # Setting a Figure Title
                geom_text_repel(max.overlaps = Inf) #Adding labels which we express in ggplot line 1
              
 
