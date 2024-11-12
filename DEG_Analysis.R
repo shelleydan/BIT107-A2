@@ -11,10 +11,13 @@ if (!require("BiocManager", quietly = TRUE))
 
 BiocManager::install("DESeq2") #Downloads DESeq2 from Bioconductor
 BiocManager::install("Rsamtools") #Downloads SAMTools from Bioconductor
+BiocManager::install("apeglm")
+
 library(pheatmap)
 library(dplyr)
 library(tidyverse)
 library(Rsamtools)
+library(apeglm)
 library(DESeq2)
 library(RColorBrewer)
 library(ggplot2)
@@ -168,9 +171,33 @@ anno_info <- as.data.frame(colData(DEG)[,c("Sequencing", "Treatment")])
 
 # Z-Scores with top 10 genes
 
+z_calc <- function(x) { #Function for calculating z-scores
+  ((x - mean(x)) / sd(x))
+}
 
+normal_counts <- counts(DEG, normalized = T)
 
+zscore_all <- t(apply(normal_counts, 1, z_calc)) #Z-scores for all genes
 
+zscore_sub <- zscore_all[top10DEGs_names,] #Subsetting for the top 10 genes
+
+pheatmap(zscore_sub)
+
+#############
+## MA PLOT ## - Gene Expression vs log2FoldChange
+#############
+
+#These plots are used to see the distribution of gene expressions
+
+plotMA(DEG, ylim=c(-2,2))
+
+#Removing Noise
+
+resLFC <- lfcShrink(DEG, 
+                    coef = "Treatment_treated_vs_untreated", 
+                    type = "apeglm") #This gives a ref
+
+plotMA(resLFC, ylim=c(-2,2))
 
 
 ######################################
@@ -186,7 +213,7 @@ theme_set(theme_classic(base_size = 15) +
             ))
 
 #Volcano Plot with ggplot2
-ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffexpressed)) +
+ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffexpressed, label = deflabel)) +
   geom_vline(xintercept = c(1, -1), col = "gray", linetype = "dashed") + #Adding vertical lines to show fold change cut off
   geom_hline(yintercept = c(-log10(0.05)), col = "gray", linetype = "dashed") + #Adding Horizontal line to show p-value cut off
                geom_point() + #Setting Point size
@@ -198,7 +225,7 @@ ggplot(data = results_DEG, aes(x = log2FoldChange, y = -log10(padj), col = diffe
                     x = expression("log"[2]*" Fold Change"), #Changing the x axis
                     y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
                ggtitle("DEGs")  # Setting a Figure Title
-               #geom_text_repel(max.overlaps = Inf) #Adding labels which we express in ggplot line 1
+               geom_text_repel(max.overlaps = Inf) #Adding labels which we express in ggplot line 1
              
 
 
