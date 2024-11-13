@@ -73,7 +73,7 @@ summary(counts_data)
 ################################################################################
 
 #Defining Colours
-test_colours <- c("mock" = "Green",
+test_colours <- c("mock" = "Blue",
                   "infected" = "Red")
 
 condition_colours <- c("4" = "Blue",
@@ -102,7 +102,56 @@ moaninModel <- create_moanin_model(data=data,
                                     group_variable = "Test",
                                     time_variable = "Condition")
 
-show(moaninModel)
+show(moaninModel) # Gives a summary of the produced model
+dim(moaninModel) #Dimensions of the model... its big
+
+#Defining groups to contrasts for analysis
+contrasts <- create_timepoints_contrasts(moaninModel, "mock", "infected") 
+#These contrasts output all the groups for comparison for all the timepoints, e.g. mock.4hrs_vs_infected.4hrs
+
+hour_de_analysis <- DE_timepoints(moaninModel, contrasts, use_voom_weights = T) #Set vooms to F for microarray data
+#This provides a comparative table of pvals, logfoldchange(lfc) and adjusted p (qval)
+
+
+#PLOT: Histogram to highlight DEGs at different timepoints
+time = names(condition_colours)
+perWeek_barplot(hour_de_analysis, labels=time, main="Mock vs Infected", las=3) #More genes are differentially expressed at 12 hours
+
+#Code for counting the number of unique combinations of time points that are DE
+getTimepoint<-function(x){sapply(strsplit(gsub("_qval","",x),"\\."),.subset2,3)}
+qval_colnames = colnames(hour_de_analysis)[
+  grepl("qval", colnames(hour_de_analysis))]
+signifCombos<-apply(hour_de_analysis[, qval_colnames], 1, 
+                    function(x){paste(getTimepoint(qval_colnames[which(x<0.05)]),collapse=",")})
+signifCombos<-signifCombos[signifCombos!=""]
+tabCombos<-table(signifCombos)
+
+
+#PLOT!: Gene Expression of top10 overtime. 
+head(hour_de_analysis)
+
+exampleGenes<-names(signifCombos[signifCombos=="4,12,48"][1:10])
+plot_splines_data(moaninModel, 
+                  subset_data=exampleGenes,
+                  colors=ann_colours$Test,
+                  smooth=TRUE,
+                  ylim = c(-10000, 10000))
+
+head(hour_de_analysis)
+
+################################################################################
+#The paper continues to do analysis between different conditions, as this data #
+#only contains infected or mock, this isn't possible.                          #
+################################################################################
+
+################################################################################
+############################# FOLD CHANGE ANALYSIS #############################
+################################################################################
+
+
+
+
+
 
 
 
