@@ -54,16 +54,23 @@ colnames(target_data) #Checking samples are column names
 head(target_data) #Checking the data imported correctly
 
 # Remove the data which have no controls
-vals <- c(4,12,48) #List of values to subset from
+vals <- c(4) #List of values to subset from
 target_data <- target_data[target_data$Condition %in% vals, ] #Removing Bad Data from Targets
-counts_data <- counts_data[, colnames(counts_data) %in% target_data$Sample] #Removing bad data from Counts
+target_data <- data.frame(target_data, row.names = 3) #Setting sample names as the rownames
+counts_data <- counts_data[, colnames(counts_data) %in% row.names(target_data)] #Removing bad data from Counts
+
+
+counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
+counts_data<- counts_data[, counts_data_order]
+
+
 
 
 ###################
 ## FACTOR LEVELS ## - Infected vs Mock
 ###################
 
-target_data$Test <- factor(target_data$Test) #Setting Treatments as a factor argument
+target$Test <- factor(target$Test) #Setting Treatments as a factor argument
 target_data$Condition <- factor(target_data$Condition) #Setting Sequencing method as a factor argument
 
 #############################
@@ -73,7 +80,7 @@ target_data$Condition <- factor(target_data$Condition) #Setting Sequencing metho
 DEG <- DESeq2::DESeqDataSetFromMatrix(countData = counts_data, 
                                       #Adding Counts Data, 2:8 removes column 1 with row names in. 
                                       colData = target_data, #Adding targets data
-                                      design = ~Condition + Test) #Factors for Comparison
+                                      design = ~Test) #Factors for Comparison
 #If we're looking at a multi-factor analysis, we want to input our primary factor should be inputted last.
 
 #######################
@@ -95,6 +102,7 @@ DEG$Test <- factor(DEG$Test, levels = c("mock", "infected"))
 DEG <- DESeq2::DESeq(DEG) #Perform the Analysis
 results_DEG <- DESeq2::results(DEG) #Coalating the results into a dataframe
 results_DEG #Printing the results into the console
+summary(results_DEG$padj)
 
 #Need to change the DESeq object into a dataframe
 results_DEG <- as.data.frame(results_DEG) # Produces and R dataframe
@@ -193,12 +201,12 @@ pheatmap(zscore_sub)
 #These plots are used to see the distribution of gene expressions
 #The default alpha for MA plots is 0.1
 
-plotMA(DEG, ylim=c(-2,2)) #Setting the alpha value to 0.05
+plotMA(DEG, ylim=c(-2,2), alpha = 0.05) #Setting the alpha value to 0.05
 
 #Removing Noise
 
 resLFC <- lfcShrink(DEG, 
-                    coef = "Test_infected_vs_mock", 
+                    coef = "Test_mock_vs_infected", 
                     type = "apeglm") #This gives a ref
 
 plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
@@ -253,9 +261,9 @@ ggplot(data = results_DEG, aes(x = log2FoldChange,
              linetype = "dashed") + #Adding Horizontal line to show p-value cut off
   geom_point() + #Setting Point size
   scale_shape_manual(values = 6) +
-  scale_color_manual(values = c("#00AF99", "gray", "#bb0c00"), #Changing plot colours
+  scale_color_manual(values = c("#00A", "gray", "#bb0c00"), #Changing plot colours
                      labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
-  coord_cartesian(ylim = c(0, 5), xlim = c(-5,5)) + #Applying figure axis limits
+  coord_cartesian(ylim = c(0, 20), xlim = c(-10,10)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
   labs(color = "Regulation", # Changing the colour legend title
        x = expression("log"[2]*" Fold Change"), #Changing the x axis
