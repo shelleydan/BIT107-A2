@@ -39,27 +39,32 @@ setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/"
 ## IMPORTING DATA ##
 ####################
 
-counts_data <- read.csv("DEGdata/count_matrix.csv", #Input Counts Data
+counts_data <- read.csv("rawdata/GSE217504_host_counts_matrix.csv", #Input Counts Data
                         header = T, 
                         row.names = 1)
 
 colnames(counts_data) #Checking samples are column names
 head(counts_data) #Checking the data imported correctly
 
-target_data <- read.csv("DEGdata/design.csv", #Target meta data
-                        header = T, 
-                        row.names = 1)
+target_data <- read.delim("rawdata/targets.txt", sep = "", header = T) #Inputting the targets
+target_data <- target_data[,8:10] #Seperating out the only columns we want
+target_data$Condition <- as.factor(target_data$Condition)
 
 colnames(target_data) #Checking samples are column names
 head(target_data) #Checking the data imported correctly
+
+# Remove the data which have no controls
+vals <- c(4,12,48) #List of values to subset from
+target_data <- target_data[target_data$Condition %in% vals, ] #Removing Bad Data from Targets
+counts_data <- counts_data[, colnames(counts_data) %in% target_data$Sample] #Removing bad data from Counts
 
 
 ###################
 ## FACTOR LEVELS ## - Infected vs Mock
 ###################
 
-target_data$Treatment <- factor(target_data$Treatment) #Setting Treatments as a factor argument
-target_data$Sequencing <- factor(target_data$Sequencing) #Setting Sequencing method as a factor argument
+target_data$Test <- factor(target_data$Test) #Setting Treatments as a factor argument
+target_data$Condition <- factor(target_data$Condition) #Setting Sequencing method as a factor argument
 
 #############################
 ## CREATING A DESeq OBJECT ##
@@ -68,20 +73,20 @@ target_data$Sequencing <- factor(target_data$Sequencing) #Setting Sequencing met
 DEG <- DESeq2::DESeqDataSetFromMatrix(countData = counts_data, 
                                       #Adding Counts Data, 2:8 removes column 1 with row names in. 
                                       colData = target_data, #Adding targets data
-                                      design = ~Sequencing + Treatment) #Factors for Comparison
+                                      design = ~Condition + Test) #Factors for Comparison
 #If we're looking at a multi-factor analysis, we want to input our primary factor should be inputted last.
 
 #######################
 ## SETTING REFERENCE ##
 #######################
 
-DEG$Treatment <- factor(DEG$Treatment, levels = c("untreated", "treated")) 
+DEG$Test <- factor(DEG$Test, levels = c("mock", "infected")) 
 #The first level in the list is what becomes the base level, which the other levels will be compared to. We want this to be the control/mock group
 
 ## GENE FILTERING ## - double check if this is done with Sarah's
-keep <- rowSums(counts(DEG)) >= 1 #Give an expression with readcounts more than 1 will be stored here. 
+#keep <- rowSums(counts(DEG)) >= 1 #Give an expression with readcounts more than 1 will be stored here. 
 #This number should be justified in writing!
-DEG <- DEG[keep,] #Selecting genes with more than 1 read. 
+#DEG <- DEG[keep,] #Selecting genes with more than 1 read. 
 
 ##############
 ## ANALYSIS ##
@@ -93,14 +98,6 @@ results_DEG #Printing the results into the console
 
 #Need to change the DESeq object into a dataframe
 results_DEG <- as.data.frame(results_DEG) # Produces and R dataframe
-
-##################
-## DATA CLEANUP ##
-##################
-
-#Those that would be 0 are denoted by 'NA'
-#results_DEG <- subset(results_DEG, padj != 0) #Removing any padj values with 0
-
 
 ########################################
 ## SAVING THE RAW-COUNTS AND FILTERED ##
@@ -132,7 +129,7 @@ vst <- DESeq2::vst(DEG, blind = F)
 
 # Generating the PCA Plot
 DESeq2::plotPCA(vst, 
-                intgroup=c("Sequencing", "Treatment")) #Applying layers like found above.
+                intgroup= "Test") #Applying layers like found above.
 
 #LOOK AT PCA WITH GGPLOT
 
@@ -165,7 +162,8 @@ topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
 
 rld <- rlog(DEG, blind = F) #Performling a log transformation
 
-anno_info <- as.data.frame(colData(DEG)[,c("Sequencing", "Treatment")]) #Setting Annotation Levels
+anno_info <- as.data.frame(colData(DEG)[, c("Condition", "Test")]) #Setting Annotation Levels
+anno_info$Condition <- as.character(anno_info$Condition) #Changing Condition from continuous to ordinal
 
 pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_rows = T, #Adds column tree-clustering
@@ -195,12 +193,12 @@ pheatmap(zscore_sub)
 #These plots are used to see the distribution of gene expressions
 #The default alpha for MA plots is 0.1
 
-plotMA(DEG, ylim=c(-2,2), alpha = 0.05) #Setting the alpha value to 0.05
+plotMA(DEG, ylim=c(-2,2)) #Setting the alpha value to 0.05
 
 #Removing Noise
 
 resLFC <- lfcShrink(DEG, 
-                    coef = "Treatment_treated_vs_untreated", 
+                    coef = "Test_infected_vs_mock", 
                     type = "apeglm") #This gives a ref
 
 plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
@@ -208,21 +206,6 @@ plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
 ## MA Plot with ggplot 2
 colnames(results_DEG)
 
-ggplot(data=resLFC, aes(x=baseMean, y=log2FoldChange, colour=diffexpressed)) + 
-  geom_point(alpha=0.4, size=1.8) + 
-  geom_hline(aes(yintercept = 0), colour = "black", linewidth = 1.2) +
-  ylim(c(min(results_DEG$log2FoldChange), max(results_DEG$log2FoldChange))) + 
-  scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
-                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
-  xlab("Mean expression") + 
-  ylab("Log2 Fold Change") + 
-  theme(axis.title.x = element_text(face = "bold", size = 15),
-        axis.text.x = element_text(face = "bold", size = 12)) +
-  theme(axis.title.y = element_text(face = "bold", size = 15),
-        axis.text.y = element_text(face = "bold", size = 12)) +
-  theme(legend.title = element_text(face = "bold", size = 15)) +
-  theme(legend.text = element_text(size = 14))
-dev.off()
 
 ###########################
 ## FILTERING THE RESULTS ## - For Volcano Plot
@@ -230,15 +213,15 @@ dev.off()
 
 #Setting a column for the Volcano plot
 results_DEG$diffexpressed <- "NO"
-results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$padj < 0.05] <- "UP"
-results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$padj < 0.05] <- "DOWN"
+results_DEG$diffexpressed[results_DEG$log2FoldChange > 1 & results_DEG$pvalue < 0.05] <- "UP"
+results_DEG$diffexpressed[results_DEG$log2FoldChange < -1 & results_DEG$pvalue < 0.05] <- "DOWN"
 
 #####################################
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 #####################################
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
-top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
+top10DEGs <- results_DEG[order(results_DEG$pvalue), ][1:10,]
 results_DEG$difflabel <- ifelse(row.names(results_DEG) %in% row.names(top10DEGs), row.names(results_DEG), NA)
 summary(results_DEG$difflabel)
 
@@ -259,7 +242,7 @@ theme_set(theme_classic(base_size = 15) +
 
 #Volcano Plot with ggplot2
 ggplot(data = results_DEG, aes(x = log2FoldChange, 
-                               y = -log10(padj), 
+                               y = -log10(pvalue), 
                                col = diffexpressed, 
                                label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
@@ -270,9 +253,9 @@ ggplot(data = results_DEG, aes(x = log2FoldChange,
              linetype = "dashed") + #Adding Horizontal line to show p-value cut off
   geom_point() + #Setting Point size
   scale_shape_manual(values = 6) +
-  scale_color_manual(values = c("#00AFBB", "gray", "#bb0c00"), #Changing plot colours
+  scale_color_manual(values = c("#00AF99", "gray", "#bb0c00"), #Changing plot colours
                      labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
-  coord_cartesian(ylim = c(0, 200), xlim = c(-5,5)) + #Applying figure axis limits
+  coord_cartesian(ylim = c(0, 5), xlim = c(-5,5)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
   labs(color = "Regulation", # Changing the colour legend title
        x = expression("log"[2]*" Fold Change"), #Changing the x axis
