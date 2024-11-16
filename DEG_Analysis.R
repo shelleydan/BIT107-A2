@@ -6,9 +6,7 @@
 # Batut et al - https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html
 # Cristofides - https://github.com/ecologysarah?tab=repositories
 
-################################################################################
-## LIBRARY ##
-################################################################################
+## LIBRARY ---------------------------------------------------------------------
 
 install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
 
@@ -30,8 +28,7 @@ library(ggrepel)
 library(ggpubr)
 
 
-######################## SETTING GGPLOT2 DOCUMENT THEME ########################
-
+## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
 #Setting the theme for standardization
 theme_set(theme_classic(base_size = 15) +
@@ -50,16 +47,12 @@ theme_set(theme_classic(base_size = 15) +
               legend.title=element_blank()
             ))
 
-################################################################################
-## DIRECTORY SETTING ##
-#######################
+## SETTING THE WORKING DIRECTORY -----------------------------------------------
 
 setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" 
 #Site for all DEG data (inputs and outputs)
 
-####################
-## IMPORTING DATA ##
-################################################################################
+## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
 
 #READ IN COUNTS DATA
 counts_data <- read.csv("rawdata/GSE217504_host_counts_matrix.csv",
@@ -94,9 +87,7 @@ rm(counts_data)
 rm(target_data)
 rm(counts_data_order)
 
-################################################################################
-## FACTOR LEVELS ##
-################################################################################
+## ASSIGNING FACTOR LEVELS -----------------------------------------------------
 
 #FACTOR LEVELS FOR 4HRS
 target_data_4$Test <- factor(target_data_4$Test) 
@@ -110,9 +101,7 @@ target_data_12$Condition <- factor(target_data_12$Condition)
 target_data_48$Test <- factor(target_data_48$Test) 
 target_data_48$Condition <- factor(target_data_48$Condition) 
 
-################################################################################
-## CREATING A DESeq MATRIX ##
-################################################################################
+## CREATING DESEQ2 MATRICIES ---------------------------------------------------
 
 #If we're looking at a multi-factor analysis, we want to input our primary factor should be inputted last.
 
@@ -141,9 +130,7 @@ DEG_48$Test <- factor(DEG_48$Test, levels = c("mock", "infected"))
 #This number should be justified in writing!
 #DEG <- DEG[keep,] #Selecting genes with more than 1 read. 
 
-################################################################################
-## PERFORMING THE ANALYSIS ##
-################################################################################
+## PERFORMING DESEQ2 ANALYSIS --------------------------------------------------
 
 #4HRS
 DEG_4 <- DESeq2::DESeq(DEG_4) #Perform the Analysis
@@ -163,22 +150,15 @@ results_DEG_48 <- DESeq2::results(DEG_48) #Coalating the results into a datafram
 summary(results_DEG_48$padj)
 results_DEG_48 <- as.data.frame(results_DEG_48) # Produces and R dataframe
 
-################################################################################
-## SAVING THE RAW-COUNTS AND FILTERED ##
-################################################################################
+## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
+
 
 #Output of the non-filtered DESeq2 results
 write.csv(results_DEG_4, "output_data/raw_DEG_results_4.csv") 
 write.csv(results_DEG_12, "output_data/raw_DEG_results_12.csv")
 write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
 
-################################################################################
-###### PRETTY FIGURES ######
-################################################################################
-
-################################################################################
-## DISPERSION PLOT ##
-################################################################################
+## DISPERSION PLOT -------------------------------------------------------------
 
 #We expect that when a gene's read count increases the dispersion of that same gene decreases
 par(mfrow=c(2,2))
@@ -198,9 +178,7 @@ plotDispEsts(DEG_48,
              xlab = "Mean of Normalised Counts")
 
 par(mfrow=c(1,1))
-################################################################################
-## PRINCIPLE COMPONENT ANALYSIS ##
-################################################################################
+## PRINCIPLE COMPONENT ANALYSIS ------------------------------------------------
 
 #4HRS
 # Variance stabilisation transformation
@@ -226,9 +204,7 @@ vst_48 <- DESeq2::vst(DEG_48, blind = F)
 DESeq2::plotPCA(vst_48, 
                 intgroup= "Test") #Applying layers like found above.
 
-################################################################################
-## HEATMAPS ##
-################################################################################
+## HEATMAPS --------------------------------------------------------------------
 
 #This used pheatmaps to analyse some gene expression clusting.
 
@@ -279,9 +255,7 @@ zscore_sub <- zscore_all[top10DEGs_names,] #Subsetting for the top 10 genes
 
 pheatmap(zscore_sub)
 
-################################################################################
-## MA PLOT ## - Gene Expression vs log2FoldChange
-################################################################################
+## MA PLOT ---------------------------------------------------------------------
 
 #These plots are used to see the distribution of gene expressions
 #The default alpha for MA plots is 0.1
@@ -301,7 +275,7 @@ colnames(results_DEG)
 
 par(mfrow=c(2,2))
 
-#################### VOLCANO PLOT OF DIFFERENTIATION AT 4HRS ###################
+## VOLCANO PLOT 4HRS -----------------------------------------------------------
 
 ## FILTERING THE RESULTS ## - For Volcano Plot
 #Setting a column for the Volcano plot
@@ -339,7 +313,7 @@ VP4 <- ggplot(data = results_DEG_4, aes(x = log2FoldChange,
   ggtitle("Timestamp: 4hrs") + # Setting a Figure Title
   geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
 
-#################### VOLCANO PLOT OF DIFFERENTIATION AT 12HRS ###################
+## VOLCANO PLOT 12HRS ----------------------------------------------------------
 
 ## FILTERING THE RESULTS ## - For Volcano Plot
 #Setting a column for the Volcano plot
@@ -377,7 +351,7 @@ VP12 <- ggplot(data = results_DEG_12, aes(x = log2FoldChange,
   ggtitle("Timestamp: 12hrs") + # Setting a Figure Title
   geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
 
-#################### VOLCANO PLOT OF DIFFERENTIATION AT 48HRS ###################
+## VOLCANO PLOT 48HRS ----------------------------------------------------------
 
 ## FILTERING THE RESULTS ## - For Volcano Plot
 #Setting a column for the Volcano plot
@@ -416,7 +390,7 @@ VP48 <- ggplot(data = results_DEG_48, aes(x = log2FoldChange,
   geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
 
 
-#PLOT 3X VOLCANO PLOTS IN ONE WINDOW
+## PLOTTING ALL VOLCANO PLOTS IN ONE WINDOW ------------------------------------
 ggarrange(VP4, VP12, VP48,
           labels = c("A", "B", "C"),
           ncol = 2, 
@@ -427,3 +401,6 @@ ggarrange(VP4, VP12, VP48,
 
  
               
+
+
+
