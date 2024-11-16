@@ -418,10 +418,12 @@ ggarrange(VP4, VP12, VP48,
           ncol = 2, 
           nrow = 2,
           common.legend = TRUE, 
-          legend = "bottom")
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
 
 #Save the above figure
-ggsave("figures/Volcano_Plot_4_12_48.png",
+ggsave("4_figures/Volcano_Plot_4_12_48.png",
        height = 30,
        width = 30,
        units = "cm",
