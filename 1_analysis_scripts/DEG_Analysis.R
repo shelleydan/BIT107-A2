@@ -55,12 +55,12 @@ setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/"
 ## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
 
 #READ IN COUNTS DATA
-counts_data <- read.csv("rawdata/GSE217504_host_counts_matrix.csv",
+counts_data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv",
                         header = T, 
                         row.names = 1)
 
 #READ IN AND EXTRACT TARGETS DATA
-target_data <- read.delim("rawdata/targets.txt", 
+target_data <- read.delim("2_rawdata/targets.txt", 
                           sep = "", 
                           header = T) #Inputting the targets.
 target_data <- target_data[,8:10] #Separating out the necessary columns.

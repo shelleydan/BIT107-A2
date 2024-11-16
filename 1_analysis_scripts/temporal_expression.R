@@ -49,10 +49,10 @@ meta <- read.delim("rawdata/targets.txt",
                           sep = "", 
                           header = T) #Inputting the targets
 meta <- meta[,8:10] #Seperating out the only columns we want
-meta$Test <- as.factor(meta$Test)
+meta$Test <- as.factor(meta$Test) #maybe not needed CHECK
 
 # Remove the data which have no controls
-vals <- c(4, 12, 48) # Taking only the timepoints that have controls and tests
+vals <- c(4) # Taking only the timepoints that have controls and tests
 meta <- meta[meta$Condition %in% vals, ] #Removing Bad Data from Targets
 meta <- data.frame(meta, row.names = 3) #Setting sample names as the rownames
 meta$Test[meta$Test == 'infected'] <- 'I'
@@ -94,7 +94,7 @@ ann_markers <- list(
   Replicate = rep_marker
 )
 
-meta$Test <- factor(meta$Test, levels(meta$Test)[c(2,1)])
+meta$Test <- factor(meta$Test, levels(meta$Test)[c(1,2)])
 #2 is Mock, 1 is infected
 
 ################################################################################
@@ -134,8 +134,7 @@ head(hour_de_analysis)
 
 #top10DEGs are the top 10 DEGs in the 4hr analysis determined on DEG_Analysis.R
 
-exampleGenes<-names(signifCombos[signifCombos=="4,12,48"][row.names(top10DEGs)])
-exampleGenes <- row.names(top10DEGs)
+exampleGenes<-names(signifCombos[signifCombos=="4,12,48"]["ACE2"])
 plot_splines_data(moaninModel, 
                   subset_data=exampleGenes,
                   colors=ann_colours$Test,
@@ -149,7 +148,14 @@ head(hour_de_analysis)
 #only contains infected or mock, this isn't possible.                          #
 ################################################################################
 
+timecourse_contrasts <- "M-I"
 
+DE_results = DE_timecourse( moaninModel, 
+                            "M-I", 
+                            use_voom_weights=FALSE)
+summary(DE_results)
+
+?DE_timecourse
 ################################################################################
 ########################### KEGG ANALYSIS OVER-TIME ############################
 ################################################################################
