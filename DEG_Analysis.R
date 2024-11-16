@@ -72,6 +72,7 @@ target_data <- data.frame(target_data, row.names = 3) #Setting sample names as t
 target_data_4 <- target_data[target_data$Condition %in% 4, ] #Targets for 4hrs
 target_data_12 <- target_data[target_data$Condition %in% 12, ] #Targets for 12hrs
 target_data_48 <- target_data[target_data$Condition %in% 48, ] #Tagrets for 48hrs
+target_data_TEMP <- target_data[target_data$Condition %in% c(4,12,48), ] #Tagrets for TEMPORAL
 
 #ORDER THE COUNT DATA (DESeq2 requires).
 counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
@@ -81,6 +82,7 @@ counts_data<- counts_data[, counts_data_order]
 counts_data_4 <- counts_data[, colnames(counts_data) %in% row.names(target_data_4)] #Counts for 4hrs
 counts_data_12 <- counts_data[, colnames(counts_data) %in% row.names(target_data_12)] #Counts for 12hrs
 counts_data_48 <- counts_data[, colnames(counts_data) %in% row.names(target_data_48)] #Counts for 48hrs
+counts_data_TEMP <- counts_data[, colnames(counts_data) %in% row.names(target_data_TEMP)] #Counts for 48hrs
 
 #TIDYING THE ENVIRONMENT
 rm(counts_data)
@@ -100,6 +102,10 @@ target_data_12$Condition <- factor(target_data_12$Condition)
 #FACTOR LEVELS FOR 48HRS
 target_data_48$Test <- factor(target_data_48$Test) 
 target_data_48$Condition <- factor(target_data_48$Condition) 
+
+#FACTOR LEVELS FOR TEMPORAL
+target_data_TEMP$Test <- factor(target_data_TEMP$Test) 
+target_data_TEMP$Condition <- factor(target_data_TEMP$Condition)
 
 ## CREATING DESEQ2 MATRICIES ---------------------------------------------------
 
@@ -125,10 +131,11 @@ DEG_48 <- DESeqDataSetFromMatrix(countData = counts_data_48,
                                  design = ~Test) #Factors for Comparison
 DEG_48$Test <- factor(DEG_48$Test, levels = c("mock", "infected")) 
 
-## GENE FILTERING ## - double check if this is done with Sarah's
-#keep <- rowSums(counts(DEG)) >= 1 #Give an expression with readcounts more than 1 will be stored here. 
-#This number should be justified in writing!
-#DEG <- DEG[keep,] #Selecting genes with more than 1 read. 
+#TEMPORAL
+DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
+                                   colData = target_data_TEMP, #Adding targets data
+                                   design = ~Test + Condition) #Factors for Comparison
+DEG_TEMP$Test <- factor(DEG_TEMP$Test, levels = c("mock", "infected"))
 
 ## PERFORMING DESEQ2 ANALYSIS --------------------------------------------------
 
@@ -149,6 +156,12 @@ DEG_48 <- DESeq2::DESeq(DEG_48) #Perform the Analysis
 results_DEG_48 <- DESeq2::results(DEG_48) #Coalating the results into a dataframe
 summary(results_DEG_48$padj)
 results_DEG_48 <- as.data.frame(results_DEG_48) # Produces and R dataframe
+
+#ACROSS TIME
+DEG_TEMP <- DESeq2::DESeq(DEG_TEMP) #Perform the Analysis
+results_DEG_TEMP <- DESeq2::results(DEG_TEMP) #Coalating the results into a dataframe
+summary(results_DEG_TEMP$padj)
+results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
 
 ## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
 
@@ -203,6 +216,15 @@ vst_48 <- DESeq2::vst(DEG_48, blind = F)
 # Generating the PCA Plot
 DESeq2::plotPCA(vst_48, 
                 intgroup= "Test") #Applying layers like found above.
+
+#TEMPORAL
+# Variance stabilisation transformation
+vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
+
+# Generating the PCA Plot
+DESeq2::plotPCA(vst_TEMP, 
+                intgroup= c("Condition", "Test")) #Applying layers like found above.
+
 
 ## HEATMAPS --------------------------------------------------------------------
 
@@ -292,9 +314,9 @@ summary(results_DEG_4$difflabel)
 
 #Volcano Plot with ggplot2
 VP4 <- ggplot(data = results_DEG_4, aes(x = log2FoldChange, 
-                               y = -log10(pvalue), 
-                               col = diffexpressed, 
-                               label = difflabel)) +
+                                        y = -log10(pvalue), 
+                                        col = diffexpressed, 
+                                        label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
              col = "gray", 
              linetype = "dashed") + #Adding vertical lines to show fold change cut off
@@ -311,7 +333,7 @@ VP4 <- ggplot(data = results_DEG_4, aes(x = log2FoldChange,
   labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
        y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
   ggtitle("Timestamp: 4hrs") + # Setting a Figure Title
-  geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
+  geom_text_repel(max.overlaps = 2000, size=5) #Adding labels which we express in ggplot line 1
 
 ## VOLCANO PLOT 12HRS ----------------------------------------------------------
 
@@ -330,9 +352,9 @@ summary(results_DEG_12$difflabel)
 
 #Volcano Plot with ggplot2
 VP12 <- ggplot(data = results_DEG_12, aes(x = log2FoldChange, 
-                               y = -log10(pvalue), 
-                               col = diffexpressed, 
-                               label = difflabel)) +
+                                          y = -log10(pvalue), 
+                                          col = diffexpressed, 
+                                          label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
              col = "gray", 
              linetype = "dashed") + #Adding vertical lines to show fold change cut off
@@ -349,7 +371,7 @@ VP12 <- ggplot(data = results_DEG_12, aes(x = log2FoldChange,
   labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
        y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
   ggtitle("Timestamp: 12hrs") + # Setting a Figure Title
-  geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
+  geom_text_repel(max.overlaps = 2000, size=5) #Adding labels which we express in ggplot line 1
 
 ## VOLCANO PLOT 48HRS ----------------------------------------------------------
 
@@ -368,9 +390,9 @@ summary(results_DEG_48$difflabel)
 
 #Volcano Plot with ggplot2
 VP48 <- ggplot(data = results_DEG_48, aes(x = log2FoldChange, 
-                               y = -log10(pvalue), 
-                               col = diffexpressed, 
-                               label = difflabel)) +
+                                          y = -log10(pvalue), 
+                                          col = diffexpressed, 
+                                          label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
              col = "gray", 
              linetype = "dashed") + #Adding vertical lines to show fold change cut off
@@ -384,10 +406,10 @@ VP48 <- ggplot(data = results_DEG_48, aes(x = log2FoldChange,
   coord_cartesian(ylim = c(0, 150), xlim = c(-10,10)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
   labs( # Changing the colour legend title
-       x = expression("log"[2]*" Fold Change"), #Changing the x axis
-       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+    x = expression("log"[2]*" Fold Change"), #Changing the x axis
+    y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
   ggtitle("Timestamp: 48hrs") + # Setting a Figure Title
-  geom_text_repel(max.overlaps = 2000) #Adding labels which we express in ggplot line 1
+  geom_text_repel(max.overlaps = 2000, size=5) #Adding labels which we express in ggplot line 1
 
 
 ## PLOTTING ALL VOLCANO PLOTS IN ONE WINDOW ------------------------------------
@@ -398,9 +420,14 @@ ggarrange(VP4, VP12, VP48,
           common.legend = TRUE, 
           legend = "bottom")
 
+#Save the above figure
+ggsave("figures/Volcano_Plot_4_12_48.png",
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
 
- 
-              
+
 
 
 
