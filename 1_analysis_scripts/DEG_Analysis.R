@@ -1,8 +1,8 @@
 ################################################################################
-############ DIFFERENTIAL EXPRESSED GENES ############ 
+######################### DIFFERENTIAL EXPRESSED GENES ######################### 
 ################################################################################
 
-## SCRIPT REFERENCES ##
+## REFERENCES ##
 # Batut et al - https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html
 # Cristofides - https://github.com/ecologysarah?tab=repositories
 
@@ -63,6 +63,7 @@ counts_data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv",
 target_data <- read.delim("2_rawdata/targets.txt", 
                           sep = "", 
                           header = T) #Inputting the targets.
+
 target_data <- target_data[,8:10] #Separating out the necessary columns.
 target_data$Condition <- as.factor(target_data$Condition) #Setting 'Condition' (AKA Time) to factors.
 
@@ -73,6 +74,11 @@ target_data_4 <- target_data[target_data$Condition %in% 4, ] #Targets for 4hrs
 target_data_12 <- target_data[target_data$Condition %in% 12, ] #Targets for 12hrs
 target_data_48 <- target_data[target_data$Condition %in% 48, ] #Tagrets for 48hrs
 target_data_TEMP <- target_data[target_data$Condition %in% c(4,12,48), ] #Tagrets for TEMPORAL
+target_data_TEMP$replicate <- c(1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3)
+names(target_data_TEMP)[names(target_data_TEMP) == 'Test'] <- 'group'
+names(target_data_TEMP)[names(target_data_TEMP) == 'Condition'] <- 'timepoint'
+names(target_data_TEMP)[names(target_data_TEMP) == 'Sample'] <- 'sample'
+
 
 #ORDER THE COUNT DATA (DESeq2 requires).
 counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
@@ -84,10 +90,39 @@ counts_data_12 <- counts_data[, colnames(counts_data) %in% row.names(target_data
 counts_data_48 <- counts_data[, colnames(counts_data) %in% row.names(target_data_48)] #Counts for 48hrs
 counts_data_TEMP <- counts_data[, colnames(counts_data) %in% row.names(target_data_TEMP)] #Counts for 48hrs
 
+write.csv(counts_data_TEMP, "2_rawdata/raw_counts_TS")
+
 #TIDYING THE ENVIRONMENT
 rm(counts_data)
 rm(target_data)
 rm(counts_data_order)
+
+## DIVIDING COUNTS -------------------------------------------------------------
+
+target_data_TEMP <- as.factor(target_data_TEMP)
+write.csv(target_data_TEMP, "2_rawdata/sample_file.csv", row.names = F)
+
+new_test <- read.csv(file = "2_rawdata/sample_file.csv")
+new_test$replicate <- c("infected_1","infected_2","infected_3",
+                        "infected_1","infected_2","infected_3",
+                        "infected_1","infected_2","infected_3",
+                        "mock_1","mock_2","mock_3",
+                        "mock_1","mock_2","mock_3",
+                        "mock_1","mock_2","mock_3")
+new_test$replicate <- as.factor(new_test$replicate)
+
+write.csv(new_test, "2_rawdata/sample_file.csv", row.names = F)
+
+rows <- rownames(counts_data_TEMP)
+
+for (i in ids){
+  dfname <- paste0("2_rawdata/raw_counts_TS/",i,".counts")
+  dfsubset <- data.frame(counts_data_TEMP[,i])
+  dfsubset <- cbind(rows, dfsubset)
+  names(dfsubset) <- NULL
+  write.table(dfsubset, dfname, row.names = F, quote = F, sep = " ")
+}
+
 
 ## ASSIGNING FACTOR LEVELS -----------------------------------------------------
 
@@ -433,3 +468,40 @@ ggsave("4_figures/Volcano_Plot_4_12_48.png",
 
 
 
+
+## COMPARISON OF MOCKS ONLY
+
+# Seperating Mocks out of the TEMP data
+
+mocks_target <- target_data_TEMP[target_data_TEMP$group == 'mock',]
+
+mock_counts <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(mocks_target)] #Counts for Mocks
+
+#FACTOR LEVELS FOR MOCKS
+mocks_target$timepoint <- factor(mocks_target$timepoint)
+
+#MOCK
+DEG_MOCK <- DESeqDataSetFromMatrix(countData = mock_counts, 
+                                 colData = mocks_target, #Adding targets data
+                                 design = ~timepoint) #Factors for Comparison
+DEG_MOCK$timepoint <- factor(DEG_MOCK$timepoint, levels = c(4,12,48)) 
+
+#MOCK ANALYSIS
+DEG_MOCK <- DESeq2::DESeq(DEG_MOCK) #Perform the Analysis
+results_DEG_MOCK <- DESeq2::results(DEG_MOCK) #Coalating the results into a dataframe
+summary(results_DEG_MOCK$padj)
+results_DEG_MOCK <- as.data.frame(results_DEG_MOCK) # Produces and R dataframe
+
+#MOCK DISPERSION
+plotDispEsts(DEG_MOCK, 
+             ylab = "Dispersion",
+             xlab = "Mean of Normalised Counts") #This is run on the Analysis Data
+
+#MOCK PCA
+#4HRS
+# Variance stabilisation transformation
+vst_MOCK <- DESeq2::vst(DEG_MOCK, blind = F)
+
+# Generating the PCA Plot
+DESeq2::plotPCA(vst_MOCK, 
+                intgroup= "timepoint") #Applying layers like found above.
