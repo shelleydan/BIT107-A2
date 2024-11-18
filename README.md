@@ -10,7 +10,10 @@ The analysis provided in this git repository supports the assignments of BIT101 
 
 <h3>Visualisation of the Workflow</h3>
 
-<h3>Installation Instructions</h3>
+<h3>Installation & Running Instructions</h3>
+
+<h4>TimeSeriesAnalysis - TiSA</h4>
+**Note:** Performing this analysis on the assignment dataset will take time (~3hrs on my desktop (running an i7 & 32GB RAM)). 
 
 <h3>Bug Reporting</h3>
 
