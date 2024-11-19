@@ -1,0 +1,7 @@
+"","group","timepoint"
+"SKA03_36","infected","48"
+"SKA03_38","infected","48"
+"SKA03_39","infected","48"
+"SKA03_56","mock","48"
+"SKA03_58","mock","48"
+"SKA03_59","mock","48"

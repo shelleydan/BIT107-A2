@@ -13,7 +13,7 @@ install.packages("BiocManager") #Some Packages are now built under Bioconductor 
 #Bioconductor Package Installs
 BiocManager::install("DESeq2") #Downloads DESeq2 from Bioconductor
 BiocManager::install("Rsamtools") #Downloads SAMTools from Bioconductor
-BiocManager::install("apeglm")
+BiocManager::install("apeglm") #Downloads apeglm from Bioconductor
 
 #Library Loading
 library(pheatmap)
@@ -26,7 +26,9 @@ library(RColorBrewer)
 library(ggplot2)
 library(ggrepel)
 library(ggpubr)
-
+library(tidyverse)  # data manipulation
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering visualization
 
 ## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
@@ -67,17 +69,19 @@ target_data <- read.delim("2_rawdata/targets.txt",
 target_data <- target_data[,8:10] #Separating out the necessary columns.
 target_data$Condition <- as.factor(target_data$Condition) #Setting 'Condition' (AKA Time) to factors.
 
+names(target_data)[names(target_data) == 'Test'] <- 'group'
+names(target_data)[names(target_data) == 'Condition'] <- 'timepoint'
+names(target_data)[names(target_data) == 'Sample'] <- 'sample'
+
 #SUBSET THE TARGETS DATA (4,12,48 hrs which all have controls)
 target_data <- data.frame(target_data, row.names = 3) #Setting sample names as the rownames
 
-target_data_4 <- target_data[target_data$Condition %in% 4, ] #Targets for 4hrs
-target_data_12 <- target_data[target_data$Condition %in% 12, ] #Targets for 12hrs
-target_data_48 <- target_data[target_data$Condition %in% 48, ] #Tagrets for 48hrs
-target_data_TEMP <- target_data[target_data$Condition %in% c(4,12,48), ] #Tagrets for TEMPORAL
-target_data_TEMP$replicate <- c(1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3)
-names(target_data_TEMP)[names(target_data_TEMP) == 'Test'] <- 'group'
-names(target_data_TEMP)[names(target_data_TEMP) == 'Condition'] <- 'timepoint'
-names(target_data_TEMP)[names(target_data_TEMP) == 'Sample'] <- 'sample'
+target_data_4 <- target_data[target_data$timepoint %in% 4, ] #Targets for 4hrs
+target_data_12 <- target_data[target_data$timepoint %in% 12, ] #Targets for 12hrs
+target_data_48 <- target_data[target_data$timepoint %in% 48, ] #Tagrets for 48hrs
+target_data_TEMP <- target_data[target_data$timepoint %in% c(4,12,48), ] #Tagrets for TEMPORAL
+#target_data_TEMP$replicate <- c(1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3)
+
 
 
 #ORDER THE COUNT DATA (DESeq2 requires).
@@ -90,12 +94,22 @@ counts_data_12 <- counts_data[, colnames(counts_data) %in% row.names(target_data
 counts_data_48 <- counts_data[, colnames(counts_data) %in% row.names(target_data_48)] #Counts for 48hrs
 counts_data_TEMP <- counts_data[, colnames(counts_data) %in% row.names(target_data_TEMP)] #Counts for 48hrs
 
-write.csv(counts_data_TEMP, "2_rawdata/raw_counts_TS")
-
 #TIDYING THE ENVIRONMENT
 rm(counts_data)
 rm(target_data)
 rm(counts_data_order)
+
+#SAVING COUNTS FOR EXTERNAL ANALYSIS
+write.csv(counts_data_TEMP, "2_rawdata/1_counts/TEMP_counts.txt")
+write.csv(counts_data_4, "2_rawdata/1_counts/4HRS_counts.txt")
+write.csv(counts_data_12, "2_rawdata/1_counts/12HRS_counts.txt")
+write.csv(counts_data_48, "2_rawdata/1_counts/48HRS_counts.txt")
+
+#SAVING TARGETS FOR EXTERNAL ANALYSIS
+write.csv(target_data_TEMP, "2_rawdata/2_targets/TEMP_targets.txt")
+write.csv(target_data_4, "2_rawdata/2_targets/4HRS_targets.txt")
+write.csv(target_data_12, "2_rawdata/2_targets/12HRS_targets.txt")
+write.csv(target_data_48, "2_rawdata/2_targets/48HRS_targets.txt")
 
 ## DIVIDING COUNTS -------------------------------------------------------------
 
@@ -139,8 +153,8 @@ target_data_48$Test <- factor(target_data_48$Test)
 target_data_48$Condition <- factor(target_data_48$Condition) 
 
 #FACTOR LEVELS FOR TEMPORAL
-target_data_TEMP$Test <- factor(target_data_TEMP$Test) 
-target_data_TEMP$Condition <- factor(target_data_TEMP$Condition)
+target_data_TEMP$group <- factor(target_data_TEMP$group) 
+target_data_TEMP$timepoint <- factor(target_data_TEMP$timepoint)
 
 ## CREATING DESEQ2 MATRICIES ---------------------------------------------------
 
@@ -169,8 +183,8 @@ DEG_48$Test <- factor(DEG_48$Test, levels = c("mock", "infected"))
 #TEMPORAL
 DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
                                    colData = target_data_TEMP, #Adding targets data
-                                   design = ~Test + Condition) #Factors for Comparison
-DEG_TEMP$Test <- factor(DEG_TEMP$Test, levels = c("mock", "infected"))
+                                   design = ~group + timepoint) #Factors for Comparison
+DEG_TEMP$group <- factor(DEG_TEMP$group, levels = c("mock", "infected"))
 
 ## PERFORMING DESEQ2 ANALYSIS --------------------------------------------------
 
@@ -200,11 +214,30 @@ results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
 
 ## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
 
-
 #Output of the non-filtered DESeq2 results
 write.csv(results_DEG_4, "output_data/raw_DEG_results_4.csv") 
 write.csv(results_DEG_12, "output_data/raw_DEG_results_12.csv")
 write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
+
+## TEMPORAL HCA ANALYSIS -------------------------------------------------------
+
+counts_TEMP <- t(counts_data_TEMP)
+
+HCA_TEMP <- scale(counts_TEMP)
+head(HCA_TEMP)
+
+# Dissimilarity matrix
+dist_TEMP <- dist(HCA_TEMP[,1:20000], method = "euclidean")
+
+
+
+# Hierarchical clustering using Complete Linkage
+hc1 <- hclust(dist_TEMP, method = "complete" )
+?hclust
+
+# Plot the obtained dendrogram
+plot(hc1, cex = 0.8, hang = -1)
+rect.hclust(hc1, k = 4, border = 2:5)
 
 ## DISPERSION PLOT -------------------------------------------------------------
 
