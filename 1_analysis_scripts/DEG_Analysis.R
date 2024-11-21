@@ -22,6 +22,7 @@ library(tidyverse)
 library(Rsamtools)
 library(apeglm)
 library(DESeq2)
+library(dendextend)
 library(RColorBrewer)
 library(ggplot2)
 library(ggrepel)
@@ -29,6 +30,7 @@ library(ggpubr)
 library(tidyverse)  # data manipulation
 library(cluster)    # clustering algorithms
 library(factoextra) # clustering visualization
+library(ggdendro)
 
 ## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
@@ -80,9 +82,6 @@ target_data_4 <- target_data[target_data$timepoint %in% 4, ] #Targets for 4hrs
 target_data_12 <- target_data[target_data$timepoint %in% 12, ] #Targets for 12hrs
 target_data_48 <- target_data[target_data$timepoint %in% 48, ] #Tagrets for 48hrs
 target_data_TEMP <- target_data[target_data$timepoint %in% c(4,12,48), ] #Tagrets for TEMPORAL
-#target_data_TEMP$replicate <- c(1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3)
-
-
 
 #ORDER THE COUNT DATA (DESeq2 requires).
 counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
@@ -111,46 +110,19 @@ write.csv(target_data_4, "2_rawdata/2_targets/4HRS_targets.txt")
 write.csv(target_data_12, "2_rawdata/2_targets/12HRS_targets.txt")
 write.csv(target_data_48, "2_rawdata/2_targets/48HRS_targets.txt")
 
-## DIVIDING COUNTS -------------------------------------------------------------
-
-target_data_TEMP <- as.factor(target_data_TEMP)
-write.csv(target_data_TEMP, "2_rawdata/sample_file.csv", row.names = F)
-
-new_test <- read.csv(file = "2_rawdata/sample_file.csv")
-new_test$replicate <- c("infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3")
-new_test$replicate <- as.factor(new_test$replicate)
-
-write.csv(new_test, "2_rawdata/sample_file.csv", row.names = F)
-
-rows <- rownames(counts_data_TEMP)
-
-for (i in ids){
-  dfname <- paste0("2_rawdata/raw_counts_TS/",i,".counts")
-  dfsubset <- data.frame(counts_data_TEMP[,i])
-  dfsubset <- cbind(rows, dfsubset)
-  names(dfsubset) <- NULL
-  write.table(dfsubset, dfname, row.names = F, quote = F, sep = " ")
-}
-
-
 ## ASSIGNING FACTOR LEVELS -----------------------------------------------------
 
 #FACTOR LEVELS FOR 4HRS
-target_data_4$Test <- factor(target_data_4$Test) 
-target_data_4$Condition <- factor(target_data_4$Condition) 
+target_data_4$group <- factor(target_data_4$group) 
+target_data_4$timepoint <- factor(target_data_4$timepoint) 
 
 #FACTOR LEVELS FOR 12HRS
-target_data_12$Test <- factor(target_data_12$Test) 
-target_data_12$Condition <- factor(target_data_12$Condition) 
+target_data_12$group <- factor(target_data_12$group) 
+target_data_12$timepoint <- factor(target_data_12$timepoint) 
 
 #FACTOR LEVELS FOR 48HRS
-target_data_48$Test <- factor(target_data_48$Test) 
-target_data_48$Condition <- factor(target_data_48$Condition) 
+target_data_48$group <- factor(target_data_48$group) 
+target_data_48$timepoint <- factor(target_data_48$timepoint) 
 
 #FACTOR LEVELS FOR TEMPORAL
 target_data_TEMP$group <- factor(target_data_TEMP$group) 
@@ -165,20 +137,20 @@ target_data_TEMP$timepoint <- factor(target_data_TEMP$timepoint)
 #4HRS 
 DEG_4 <- DESeqDataSetFromMatrix(countData = counts_data_4, 
                                 colData = target_data_4, #Adding targets data
-                                design = ~Test) #Factors for Comparison
-DEG_4$Test <- factor(DEG_4$Test, levels = c("mock", "infected")) 
+                                design = ~group) #Factors for Comparison
+DEG_4$group <- factor(DEG_4$group, levels = c("mock", "infected")) 
 
 #12HRS
 DEG_12 <- DESeqDataSetFromMatrix(countData = counts_data_12, 
                                  colData = target_data_12, #Adding targets data
-                                 design = ~Test) #Factors for Comparison
-DEG_12$Test <- factor(DEG_12$Test, levels = c("mock", "infected")) 
+                                 design = ~group) #Factors for Comparison
+DEG_12$group <- factor(DEG_12$group, levels = c("mock", "infected")) 
 
 #48HRS
 DEG_48 <- DESeqDataSetFromMatrix(countData = counts_data_48, 
                                  colData = target_data_48, #Adding targets data
-                                 design = ~Test) #Factors for Comparison
-DEG_48$Test <- factor(DEG_48$Test, levels = c("mock", "infected")) 
+                                 design = ~group) #Factors for Comparison
+DEG_48$group <- factor(DEG_48$group, levels = c("mock", "infected")) 
 
 #TEMPORAL
 DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
@@ -219,25 +191,62 @@ write.csv(results_DEG_4, "output_data/raw_DEG_results_4.csv")
 write.csv(results_DEG_12, "output_data/raw_DEG_results_12.csv")
 write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
 
-## TEMPORAL HCA ANALYSIS -------------------------------------------------------
+## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
 
-counts_TEMP <- t(counts_data_TEMP)
+counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
 HCA_TEMP <- scale(counts_TEMP)
 head(HCA_TEMP)
 
-# Dissimilarity matrix
+# Dissimilarity matrix - There is little difference between using 10000 or 20000 genes. 
 dist_TEMP <- dist(HCA_TEMP[,1:20000], method = "euclidean")
-
-
 
 # Hierarchical clustering using Complete Linkage
 hc1 <- hclust(dist_TEMP, method = "complete" )
-?hclust
 
-# Plot the obtained dendrogram
-plot(hc1, cex = 0.8, hang = -1)
-rect.hclust(hc1, k = 4, border = 2:5)
+hc1 <- as.dendrogram(hc1)
+
+plot(hc1)
+
+i=0
+colLab<<-function(n){
+  if(is.leaf(n)){
+    
+    #I take the current attributes
+    a=attributes(n)
+    
+    #I deduce the line in the original data, and so the treatment and the specie.
+    ligne=match(attributes(n)$label,row.names(target_data_TEMP))
+    group=target_data_TEMP[ligne,1]; #change column
+    if(group=="mock"){col_group="#6495ED"};if(group=="infected"){col_group="#cf035c"}
+    timepoint=target_data_TEMP[ligne,2]; #change column
+    if(timepoint=="4"){col_timepoint="#FFCC33"};if(timepoint=="12"){col_timepoint="#adb2fb"};if(timepoint=="48"){col_timepoint="limegreen"}
+    
+    #Modification of leaf attribute
+    attr(n,"nodePar")<-c(a$nodePar,list(cex=1.5,
+                                        lab.cex=1,
+                                        pch=20,
+                                        col=col_group,
+                                        lab.col=col_timepoint,
+                                        lab.font=2,
+                                        lab.cex=2))
+  }
+  return(n)
+}
+
+
+# Finally I just have to apply this to my dendrogram
+hc1_dend <- dendrapply(hc1, colLab)
+
+# And the plot
+plot(hc1_dend, ylim = c(0,400))
+legend(4, 400,
+       legend = c("Infected" , "Mock" , "4HRS" , "12HRS" , "48HRS"), 
+       col = c("#cf035c", "#6495ED" , "#FFCC33" , "#adb2fb" , "limegreen"), 
+       pch = c(20,20,15,15,15), bty = "n",  pt.cex = 2, cex = 1 , 
+       text.col = "black", horiz = TRUE, inset = c(0, 0.1))
+
+
 
 ## DISPERSION PLOT -------------------------------------------------------------
 
