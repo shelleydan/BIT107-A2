@@ -28,3 +28,9 @@ for (i in ids){
   names(dfsubset) <- NULL
   write.table(dfsubset, dfname, row.names = F, quote = F, sep = "\t")
 }
+
+# Now we should have inside of 4_TS_Data/...
+#       * A sample_file.csv - this contains the metadata and is COMMA separated
+#       * A file called raw_counts_TS with all our SAMPLEID.counts files inside and are TAB separated
+#
+# These files can now be copied and used within the TiSA pipeline (https://github.com/shelleydan/TimeSeriesAnalysis)
