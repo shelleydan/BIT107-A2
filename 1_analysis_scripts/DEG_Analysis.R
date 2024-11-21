@@ -206,8 +206,7 @@ hc1 <- hclust(dist_TEMP, method = "complete" )
 
 hc1 <- as.dendrogram(hc1)
 
-plot(hc1)
-
+#Next segment is a function to apply colours to the dendrogram depending on the metadata
 i=0
 colLab<<-function(n){
   if(is.leaf(n)){
@@ -215,14 +214,17 @@ colLab<<-function(n){
     #I take the current attributes
     a=attributes(n)
     
-    #I deduce the line in the original data, and so the treatment and the specie.
-    ligne=match(attributes(n)$label,row.names(target_data_TEMP))
-    group=target_data_TEMP[ligne,1]; #change column
-    if(group=="mock"){col_group="#6495ED"};if(group=="infected"){col_group="#cf035c"}
-    timepoint=target_data_TEMP[ligne,2]; #change column
-    if(timepoint=="4"){col_timepoint="#FFCC33"};if(timepoint=="12"){col_timepoint="#adb2fb"};if(timepoint=="48"){col_timepoint="limegreen"}
+    # Setting Criteria for Customisations
+    name=match(attributes(n)$label,row.names(target_data_TEMP))
+    group=target_data_TEMP[name,1]; #Looking at the group of the samples
+    if(group=="mock"){col_group="#6495ED"};
+    if(group=="infected"){col_group="#cf035c"}
+    timepoint=target_data_TEMP[name,2]; #Looking at the time of the samples
+    if(timepoint=="4"){col_timepoint="#FFCC33"};
+    if(timepoint=="12"){col_timepoint="#adb2fb"};
+    if(timepoint=="48"){col_timepoint="limegreen"}
     
-    #Modification of leaf attribute
+    # Customising Nodes
     attr(n,"nodePar")<-c(a$nodePar,list(cex=1.5,
                                         lab.cex=1,
                                         pch=20,
@@ -234,9 +236,13 @@ colLab<<-function(n){
   return(n)
 }
 
-
 # Finally I just have to apply this to my dendrogram
 hc1_dend <- dendrapply(hc1, colLab)
+
+# Saving the next HCA Plot
+png(file="4_figures/HCA_mock_vs_infected.png",
+    width=600, 
+    height=400)
 
 # And the plot
 plot(hc1_dend, ylim = c(0,400))
@@ -245,6 +251,12 @@ legend(4, 400,
        col = c("#cf035c", "#6495ED" , "#FFCC33" , "#adb2fb" , "limegreen"), 
        pch = c(20,20,15,15,15), bty = "n",  pt.cex = 2, cex = 1 , 
        text.col = "black", horiz = TRUE, inset = c(0, 0.1))
+
+dev.off() # To finalise and save the plot
+
+## PCA ANALYSIS OF GROUP VS TIMEPOINT ------------------------------------------
+
+
 
 
 
