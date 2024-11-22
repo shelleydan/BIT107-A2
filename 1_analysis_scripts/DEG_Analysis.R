@@ -31,6 +31,7 @@ library(tidyverse)  # data manipulation
 library(cluster)    # clustering algorithms
 library(factoextra) # clustering visualization
 library(ggdendro)
+library(plotly)
 
 ## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
@@ -53,7 +54,7 @@ theme_set(theme_classic(base_size = 15) +
 
 ## SETTING THE WORKING DIRECTORY -----------------------------------------------
 
-setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" #DONT THINK THIS IS NECESSARY
+setwd("~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/") #DONT THINK THIS IS NECESSARY
 #Site for all DEG data (inputs and outputs)
 
 ## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
@@ -197,66 +198,53 @@ write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
 counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
 HCA_TEMP <- scale(counts_TEMP)
-head(HCA_TEMP)
 
 # Dissimilarity matrix - There is little difference between using 10000 or 20000 genes. 
 dist_TEMP <- dist(HCA_TEMP[,1:20000], method = "euclidean")
 
 # Hierarchical clustering using Complete Linkage
 hc1 <- hclust(dist_TEMP, method = "complete" )
+hc1 <- as.dendrogram(hc1)
+hc1 <- dendro_data(hc1) # Ready to Plot
 
-p <- ggdendrogram(hc, rotate = FALSE, size = 2)
+order <- hc1$labels$label
+hca_targets <- target_data_TEMP[order,]
+hc1$labels$timepoint <- hca_targets$timepoint
+hc1$labels$group <- hca_targets$group
 
-hc1 <- ggdendrogram(hc1, rotate = F, size = 2)
+cols <- c("4.infected"="#f04546","12.infected"="#3591d1","48.infected"="#62c76b","4.mock"="#f04546","12.mock"="#3591d1","48.mock"="#62c76b")
 
-ggplotly(hc1)
-#Next segment is a function to apply colours to the dendrogram depending on the metadata
-i=0
-colLab<<-function(n){
-  if(is.leaf(n)){
-    
-    #I take the current attributes
-    a=attributes(n)
-    
-    # Setting Criteria for Customisations
-    name=match(attributes(n)$label,row.names(target_data_TEMP))
-    group=target_data_TEMP[name,1]; #Looking at the group of the samples
-    if(group=="mock"){col_group="#6495ED"};
-    if(group=="infected"){col_group="#cf035c"}
-    timepoint=target_data_TEMP[name,2]; #Looking at the time of the samples
-    if(timepoint=="4"){col_timepoint="#FFCC33"};
-    if(timepoint=="12"){col_timepoint="#adb2fb"};
-    if(timepoint=="48"){col_timepoint="limegreen"}
-    
-    # Customising Nodes
-    attr(n,"nodePar")<-c(a$nodePar,list(cex=1.5,
-                                        lab.cex=1,
-                                        pch=20,
-                                        col=col_group,
-                                        lab.col=col_timepoint,
-                                        lab.font=2,
-                                        lab.cex=2))
-  }
-  return(n)
-}
+cols <- interaction(hc1$labels$timepoint, hc1$labels$group)
 
-# Finally I just have to apply this to my dendrogram
-hc1_dend <- dendrapply(hc1, colLab)
+ggplot(segment(hc1)) +
+  guides(color = guide_legend(override.aes=list(shape = 18))) +
+  geom_segment(aes(x=x, 
+                   y=y, 
+                   xend=xend, 
+                   yend=yend)) +
+  geom_text(data=label(hc1),
+            show.legend = T,
+            aes(label=label, 
+                x=x, 
+                y=0, 
+                color=cols,
+                angle = 90,
+                vjust = 1.5,
+                hjust = 0,
+                fontface=2)) +
+  labs(x = "Samples",
+       y = "Distance") +
+  theme(legend.position = "top")
 
-# Saving the next HCA Plot
-png(file="4_figures/HCA_mock_vs_infected.png",
-    width=100, 
-    height=100)
+legend(1, 95, legend=c("Line 1", "Line 2"),
+       col=c("red", "blue"), lty=1:2, cex=0.8)
 
-# And the plot
-plot(hc1_dend, ylim = c(0,400))
-legend(4, 400,
-       legend = c("Infected" , "Mock" , "4HRS" , "12HRS" , "48HRS"), 
-       col = c("#cf035c", "#6495ED" , "#FFCC33" , "#adb2fb" , "limegreen"), 
-       pch = c(20,20,15,15,15), bty = "n",  pt.cex = 2, cex = 1 , 
-       text.col = "black", horiz = TRUE, inset = c(0, 0.1))
+ggsave("4_figures/HCA.png",
+       height = 20,
+       width = 20,
+       units = "cm",
+       dpi = 500)
 
-dev.off() # To finalise and save the plot
 
 ## DISPERSION PLOT -------------------------------------------------------------
 
@@ -310,8 +298,8 @@ vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
 
 # Generating the PCA Plot
 TEMPData <- plotPCA(vst_TEMP, 
-                  intgroup = c("group", "timepoint"),
-                  returnData = T)
+                    intgroup = c("group", "timepoint"),
+                    returnData = T)
 
 TEMPData$group.1 #Some reason the infected/mock is stored as group.1 instead and group is a combination of both factor levels. 
 
@@ -552,8 +540,8 @@ mocks_target$timepoint <- factor(mocks_target$timepoint)
 
 #MOCK
 DEG_MOCK <- DESeqDataSetFromMatrix(countData = mock_counts, 
-                                 colData = mocks_target, #Adding targets data
-                                 design = ~timepoint) #Factors for Comparison
+                                   colData = mocks_target, #Adding targets data
+                                   design = ~timepoint) #Factors for Comparison
 DEG_MOCK$timepoint <- factor(DEG_MOCK$timepoint, levels = c(4,12,48)) 
 
 #MOCK ANALYSIS
