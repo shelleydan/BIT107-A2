@@ -205,8 +205,11 @@ dist_TEMP <- dist(HCA_TEMP[,1:20000], method = "euclidean")
 # Hierarchical clustering using Complete Linkage
 hc1 <- hclust(dist_TEMP, method = "complete" )
 
-hc1 <- as.dendrogram(hc1)
+p <- ggdendrogram(hc, rotate = FALSE, size = 2)
 
+hc1 <- ggdendrogram(hc1, rotate = F, size = 2)
+
+ggplotly(hc1)
 #Next segment is a function to apply colours to the dendrogram depending on the metadata
 i=0
 colLab<<-function(n){
