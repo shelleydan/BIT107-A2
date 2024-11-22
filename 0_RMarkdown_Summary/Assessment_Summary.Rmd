@@ -1,0 +1,31 @@
+---
+title: "Assessment_Summary"
+author: "Dan S"
+date: "2024-11-22"
+output: 
+  rmdformats::material:
+   self_contained: true
+   thumbnails: true
+   lightbox: true
+   gallery: false
+   highlight: kate
+   use_bookdown: true
+   number_sections: true
+   smooth_scrolling: false
+editor_options:
+  css: ADD A STYLE HERE 
+  markdown:
+    wrap: 72
+---
+<body style="background-color:white;">
+
+# Individual Timepoint Analysis
+
+# KEGG Clustering Analysis
+
+# Moanin Model
+
+# TimeSeriesAnalysis
+
+# Regression Analysis
+
