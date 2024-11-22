@@ -53,7 +53,7 @@ theme_set(theme_classic(base_size = 15) +
 
 ## SETTING THE WORKING DIRECTORY -----------------------------------------------
 
-setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" 
+setwd="~/BIT107-A2-LPT-SAVE/BIT107-A2/DEGdata/" #DONT THINK THIS IS NECESSARY
 #Site for all DEG data (inputs and outputs)
 
 ## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
@@ -155,8 +155,9 @@ DEG_48$group <- factor(DEG_48$group, levels = c("mock", "infected"))
 #TEMPORAL
 DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
                                    colData = target_data_TEMP, #Adding targets data
-                                   design = ~group + timepoint) #Factors for Comparison
+                                   design = ~ group + timepoint + group:timepoint) #Factors for Comparison
 DEG_TEMP$group <- factor(DEG_TEMP$group, levels = c("mock", "infected"))
+DEG_TEMP$timepoint <- factor(DEG_TEMP$timepoint, levels = c(4,12,48))
 
 ## PERFORMING DESEQ2 ANALYSIS --------------------------------------------------
 
@@ -241,8 +242,8 @@ hc1_dend <- dendrapply(hc1, colLab)
 
 # Saving the next HCA Plot
 png(file="4_figures/HCA_mock_vs_infected.png",
-    width=600, 
-    height=400)
+    width=100, 
+    height=100)
 
 # And the plot
 plot(hc1_dend, ylim = c(0,400))
@@ -253,12 +254,6 @@ legend(4, 400,
        text.col = "black", horiz = TRUE, inset = c(0, 0.1))
 
 dev.off() # To finalise and save the plot
-
-## PCA ANALYSIS OF GROUP VS TIMEPOINT ------------------------------------------
-
-
-
-
 
 ## DISPERSION PLOT -------------------------------------------------------------
 
@@ -311,8 +306,26 @@ DESeq2::plotPCA(vst_48,
 vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
 
 # Generating the PCA Plot
-DESeq2::plotPCA(vst_TEMP, 
-                intgroup= c("Condition", "Test")) #Applying layers like found above.
+TEMPData <- plotPCA(vst_TEMP, 
+                  intgroup = c("group", "timepoint"),
+                  returnData = T)
+
+TEMPData$group.1 #Some reason the infected/mock is stored as group.1 instead and group is a combination of both factor levels. 
+
+percentVar <- round(100 * attr(TEMPData, "percentVar"))
+PCA_ALL <- ggplot(TEMPData, aes(PC1, PC2, color=group.1, shape=timepoint)) +
+  geom_point(size=5) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + 
+  theme(aspect.ratio=1,
+        legend.position="top",
+        legend.box.background = element_rect(colour = "black"))
+
+
+ggsave("4_figures/PCA_ALL.png", PCA_ALL, width = 10, height = 10, units = "in")
+
+#Applying layers like found above.
 
 
 ## HEATMAPS --------------------------------------------------------------------
