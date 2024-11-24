@@ -246,6 +246,132 @@ ggsave("4_figures/HCA.png",
        dpi = 500)
 
 
+## MOCK DEG COMPARISON 4hrs vs 12hrs -------------------------------------------
+MOCK_DEG_TARGET <- target_data_TEMP[target_data_TEMP$timepoint %in% c(4,12), ] #Targets for 4hrs
+MOCK_DEG_TARGET <- MOCK_DEG_TARGET[MOCK_DEG_TARGET$group %in% "mock", ] #Targets for 12hrs
+
+MOCK_DATA <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_DEG_TARGET)]
+
+#Performing Analysis w/ DESeq
+
+DEG_MOCK <- DESeqDataSetFromMatrix(countData = MOCK_DATA, 
+                                colData = MOCK_DEG_TARGET, #Adding targets data
+                                design = ~timepoint) #Factors for Comparison
+DEG_MOCK$group <- factor(DEG_MOCK$group, levels = c(4,12)) 
+
+DEG_MOCK <- DESeq2::DESeq(DEG_MOCK) #Perform the Analysis
+results_DEG_MOCK <- DESeq2::results(DEG_MOCK) #Coalating the results into a dataframe
+summary(results_DEG_MOCK$padj)
+results_DEG_MOCK <- as.data.frame(results_DEG_MOCK) # Produces and R dataframe
+
+#Volcano 4hrs vs 12hrs MOCK
+#Setting a column for the Volcano plot
+results_DEG_MOCK$diffexpressed <- "NO"
+results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange > 1 & results_DEG_MOCK$pvalue < 0.05] <- "UP"
+results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange < -1 & results_DEG_MOCK$pvalue < 0.05] <- "DOWN"
+
+## VOLCANO PLOT OF DIFFERENTIATION ##
+
+#Extracting GeneIDs from the row.names without needing for a new GeneID column
+top10DEGs_4 <- results_DEG_MOCK[order(results_DEG_MOCK$padj), ][1:10,]
+results_DEG_MOCK$difflabel <- ifelse(row.names(results_DEG_MOCK) %in% row.names(top10DEGs_4), row.names(results_DEG_MOCK), NA)
+summary(results_DEG_MOCK$difflabel)
+
+#Volcano Plot with ggplot2
+plot_4_12 <- ggplot(data = results_DEG_MOCK, aes(x = log2FoldChange, 
+                                        y = -log10(pvalue), 
+                                        col = diffexpressed, 
+                                        label = difflabel)) +
+  geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
+             col = "gray", 
+             linetype = "dashed") + #Adding vertical lines to show fold change cut off
+  geom_hline(yintercept = c(-log10(0.05)), 
+             col = "gray", 
+             linetype = "dashed") + #Adding Horizontal line to show p-value cut off
+  geom_point(shape=19) + #Setting Point size
+  guides(color = guide_legend(override.aes = list(size = 3))) +
+  #scale_shape_manual(values = 6) +
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  coord_cartesian(ylim = c(0, 250), xlim = c(-10,10)) + #Applying figure axis limits
+  scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
+  labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
+       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+  ggtitle("4Hrs vs 12Hrs") + # Setting a Figure Title
+  geom_text_repel(max.overlaps = 2000, size=5, show.legend = F) #Adding labels which we express in ggplot line 1
+
+## MOCK DEG COMPARISON 12hrs vs 48hrs ------------------------------------------
+MOCK_DEG_TARGET1 <- target_data_TEMP[target_data_TEMP$timepoint %in% c(12,48), ] #Targets for 4hrs
+MOCK_DEG_TARGET1 <- MOCK_DEG_TARGET1[MOCK_DEG_TARGET1$group %in% "mock", ] #Targets for 12hrs
+
+MOCK_DATA1 <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_DEG_TARGET1)]
+
+#Performing Analysis w/ DESeq
+rm(DEG_MOCK1)
+DEG_MOCK1 <- DESeqDataSetFromMatrix(countData = MOCK_DATA1, 
+                                   colData = MOCK_DEG_TARGET1, #Adding targets data
+                                   design = ~timepoint) #Factors for Comparison
+DEG_MOCK1$timepoint <- factor(DEG_MOCK1$timepoint, levels = c(12,48)) 
+
+DEG_MOCK1 <- DESeq2::DESeq(DEG_MOCK1) #Perform the Analysis
+results_DEG_MOCK1 <- DESeq2::results(DEG_MOCK1) #Coalating the results into a dataframe
+summary(results_DEG_MOCK1$padj)
+results_DEG_MOCK1 <- as.data.frame(results_DEG_MOCK1) # Produces and R dataframe
+
+#Volcano 4hrs vs 12hrs MOCK
+#Setting a column for the Volcano plot
+results_DEG_MOCK1$diffexpressed <- "NO"
+results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange > 1 & results_DEG_MOCK1$padj < 0.05] <- "UP"
+results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange < -1 & results_DEG_MOCK1$padj < 0.05] <- "DOWN"
+
+## VOLCANO PLOT OF DIFFERENTIATION ##
+
+#Extracting GeneIDs from the row.names without needing for a new GeneID column
+top10DEGs_mock1 <- results_DEG_MOCK1[order(results_DEG_MOCK1$padj), ][1:10,]
+results_DEG_MOCK1$difflabel <- ifelse(row.names(results_DEG_MOCK1) %in% row.names(top10DEGs_mock1), row.names(results_DEG_MOCK), NA)
+summary(results_DEG_MOCK1$difflabel)
+
+#Volcano Plot with ggplot2
+plot_12_48 <- ggplot(data = results_DEG_MOCK1, aes(x = log2FoldChange, 
+                                                 y = -log10(pvalue), 
+                                                 col = diffexpressed, 
+                                                 label = difflabel)) +
+  geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
+             col = "gray", 
+             linetype = "dashed") + #Adding vertical lines to show fold change cut off
+  geom_hline(yintercept = c(-log10(0.05)), 
+             col = "gray", 
+             linetype = "dashed") + #Adding Horizontal line to show p-value cut off
+  geom_point(shape=19) + #Setting Point size
+  guides(color = guide_legend(override.aes = list(size = 3))) +
+  #scale_shape_manual(values = 6) +
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  coord_cartesian(ylim = c(0, 250), xlim = c(-10,10)) + #Applying figure axis limits
+  scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
+  labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
+       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+  ggtitle("12Hrs vs 48Hrs") + # Setting a Figure Title
+  geom_text_repel(max.overlaps = 2000, size=5, show.legend = F) #Adding labels which we express in ggplot line 1
+
+plot_12_48
+
+ggarrange(plot_4_12, plot_12_48,
+          labels = c("A", "B"),
+          ncol = 2, 
+          nrow = 1,
+          common.legend = TRUE, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+
+#Save the above figure
+ggsave("4_figures/Volcano_Plot_Comparing_Mocks.png",
+       height = 15,
+       width = 30,
+       units = "cm",
+       dpi = 500)
+
 ## DISPERSION PLOT -------------------------------------------------------------
 
 #We expect that when a gene's read count increases the dispersion of that same gene decreases
@@ -419,7 +545,7 @@ VP4 <- ggplot(data = results_DEG_4, aes(x = log2FoldChange,
   geom_point(shape=19) + #Setting Point size
   guides(color = guide_legend(override.aes = list(size = 3))) +
   #scale_shape_manual(values = 6) +
-  scale_color_manual(values = c("#00A", "gray", "#bb0c00"), #Changing plot colours
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
                      labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
   coord_cartesian(ylim = c(0, 30), xlim = c(-10,10)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
@@ -457,7 +583,7 @@ VP12 <- ggplot(data = results_DEG_12, aes(x = log2FoldChange,
   geom_point(shape=19) + #Setting Point size
   guides(color = guide_legend(override.aes = list(size = 3))) +
   #scale_shape_manual(values = 6) +
-  scale_color_manual(values = c("#00A", "gray", "#bb0c00"), #Changing plot colours
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
                      labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
   coord_cartesian(ylim = c(0, 30), xlim = c(-10,10)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
@@ -495,7 +621,7 @@ VP48 <- ggplot(data = results_DEG_48, aes(x = log2FoldChange,
   geom_point(shape=19) + #Setting Point size
   guides(color = guide_legend(override.aes = list(size = 3))) +
   #scale_shape_manual(values = 5) +
-  scale_color_manual(values = c("#00A", "gray", "#bb0c00")) + #Changing plot colours
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00")) + #Changing plot colours
   coord_cartesian(ylim = c(0, 150), xlim = c(-10,10)) + #Applying figure axis limits
   scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
   labs( # Changing the colour legend title
