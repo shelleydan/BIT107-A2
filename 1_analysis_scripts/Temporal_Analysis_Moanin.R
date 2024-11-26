@@ -1,19 +1,13 @@
 
 ################################################################################
-########################## TEMPORTAL RNA-seq ANALYSIS ##########################
+########################### TEMPORTAL RNA-Seq Moanin ###########################
 ################################################################################
 
 ## REFERENCES ##
 #Varoquaux, N. and Purdom, E. 2020. A pipeline to analyse time-course gene expression data. 
 #Available at: https://f1000research.com/articles/9-1447 [Accessed: 12 November 2024].
 
-#KEGG Analysis
-# https://www.youtube.com/watch?v=SMBF4DyRiuo
-
-
-################################################################################
-############################# LIBRARY INSTALL/LOAD #############################
-################################################################################
+## LIBRARY INSTALL/LOAD --------------------------------------------------------
 
 install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
 library(BiocManager)
@@ -36,9 +30,28 @@ library(BiocWorkflowTools)
 library(NMF)
 library(ggfortify)
 
-################################################################################
-############################# DATA INPUT & CLEANING ############################
-################################################################################
+save_pheatmap <- function(x, filename, width=12, height=12){
+  stopifnot(!missing(x))
+  stopifnot(!missing(filename))
+  if(grepl(".png",filename)){
+    png(filename, width=width, height=height, units = "in", res=300)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else if(grepl(".pdf",filename)){
+    pdf(filename, width=width, height=height)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else{
+    print("Filename did not contain '.png' or '.pdf'")
+  }
+}
+
+## DATA INPUT & CLEANING -------------------------------------------------------
+
 #NOTE!: Start with a Fresh Environment
 
 data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv", #Input Counts Data
@@ -69,9 +82,7 @@ data <- data[, data_order] #Apply the reordering
 #Checking Data
 summary(data)
 
-################################################################################
-################ COLOUR CODING FOR WHOLE SCRIPT STANDARDISATION ################
-################################################################################
+## COLOUR CODING FOR WHOLE SCRIPT STANDARDISATION ------------------------------
 
 #Defining Colours
 test_colours <- c("mock" = "Blue",
@@ -97,9 +108,8 @@ ann_markers <- list(
 meta$Test <- factor(meta$Test, levels(meta$Test)[c(1,2)])
 #2 is Mock, 1 is infected
 
-################################################################################
-############################## TEMPORAL MODELLING ##############################
-################################################################################
+## Temporal Modelling ----------------------------------------------------------
+
 moaninModel <- create_moanin_model(data=data, 
                                     meta=meta,
                                     group_variable = "Test",
@@ -134,14 +144,20 @@ head(hour_de_analysis)
 
 #top10DEGs are the top 10 DEGs in the 4hr analysis determined on DEG_Analysis.R
 
-exampleGenes<-names(signifCombos[signifCombos=="4,12,48"][1:8])
-plot_splines_data(moaninModel, 
-                  subset_data=exampleGenes,
+GeneList <- c("LOC112268133", "CLIC4", "NDNF", "MGLL", "CTH", "ACE2", "ACE", "TMPRSS2")
+
+png(filename="4_figures/MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
+
+MoaninPlot <- plot_splines_data(moaninModel, 
+                  subset_data=GeneList,
                   colors=ann_colours$Test,
                   smooth=TRUE,
                   ylim = c(-10000, 10000),
                   ylab = "Time (hrs)",
                   xlab = "Counts")
+
+dev.off()
+save_pheatmap(MoaninPlot, '4_figures/MoaninModel.png', 30, 30)
 
 head(hour_de_analysis)
 
@@ -150,32 +166,6 @@ head(hour_de_analysis)
 #only contains infected or mock, this isn't possible.                          #
 ################################################################################
 
-timecourse_contrasts <- "M-I"
-
-DE_results = DE_timecourse( moaninModel, 
-                            "M-I", 
-                            use_voom_weights=FALSE)
-summary(DE_results)
-
-?DE_timecourse
-################################################################################
-########################### KEGG ANALYSIS OVER-TIME ############################
-################################################################################
-
-#1. Filtering genes
-# Then rank by fisher's p-value and take max the number of genes of interest
-# Filter out q-values for the pvalues table
-fishers_pval = pvalues_fisher_method(pvalues)
-qvalues = apply(pvalues, 2, p.adjust)
-fishers_qval = p.adjust(fishers_pval)
-
-genes_to_keep = row.names(
-  log_fold_change_max[
-    (rowSums(log_fold_change_max > 2) > 0) &
-      (fishers_qval < 0.05), ])
-# Keep the data corresponding to the genes of interest in another variable.
-# by subsetting the `moanin_model`, which contains the data.
-de_moanin_model = moanin_model[genes_to_keep,]
 
 
 
