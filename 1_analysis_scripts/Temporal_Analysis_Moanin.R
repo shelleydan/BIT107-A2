@@ -41,18 +41,18 @@ library(ggfortify)
 ################################################################################
 #NOTE!: Start with a Fresh Environment
 
-data <- read.csv("rawdata/GSE217504_host_counts_matrix.csv", #Input Counts Data
+data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv", #Input Counts Data
                         header = T, 
                         row.names = 1)
 
-meta <- read.delim("rawdata/targets.txt", 
+meta <- read.delim("2_rawdata/targets.txt", 
                           sep = "", 
                           header = T) #Inputting the targets
 meta <- meta[,8:10] #Seperating out the only columns we want
 meta$Test <- as.factor(meta$Test) #maybe not needed CHECK
 
 # Remove the data which have no controls
-vals <- c(4) # Taking only the timepoints that have controls and tests
+vals <- c(4, 12, 48) # Taking only the timepoints that have controls and tests
 meta <- meta[meta$Condition %in% vals, ] #Removing Bad Data from Targets
 meta <- data.frame(meta, row.names = 3) #Setting sample names as the rownames
 meta$Test[meta$Test == 'infected'] <- 'I'
@@ -74,8 +74,8 @@ summary(data)
 ################################################################################
 
 #Defining Colours
-test_colours <- c("M" = "Blue",
-                  "I" = "Red")
+test_colours <- c("mock" = "Blue",
+                  "infected" = "Red")
 
 condition_colours <- c("4" = "Blue",
                        "12" = "Purple",
@@ -108,7 +108,7 @@ moaninModel <- create_moanin_model(data=data,
 show(moaninModel) # Gives a summary of the produced model
 
 #Defining groups to contrasts for analysis
-contrasts <- create_timepoints_contrasts(moaninModel, "M", "I") 
+contrasts <- create_timepoints_contrasts(moaninModel, "mock", "infected") 
 #These contrasts output all the groups for comparison for all the timepoints, e.g. mock.4hrs_vs_infected.4hrs
 
 hour_de_analysis <- DE_timepoints(moaninModel, contrasts, use_voom_weights = T) #Set vooms to F for microarray data
@@ -134,12 +134,14 @@ head(hour_de_analysis)
 
 #top10DEGs are the top 10 DEGs in the 4hr analysis determined on DEG_Analysis.R
 
-exampleGenes<-names(signifCombos[signifCombos=="4,12,48"]["ACE2"])
+exampleGenes<-names(signifCombos[signifCombos=="4,12,48"][1:8])
 plot_splines_data(moaninModel, 
                   subset_data=exampleGenes,
                   colors=ann_colours$Test,
                   smooth=TRUE,
-                  ylim = c(-10000, 10000))
+                  ylim = c(-10000, 10000),
+                  ylab = "Time (hrs)",
+                  xlab = "Counts")
 
 head(hour_de_analysis)
 

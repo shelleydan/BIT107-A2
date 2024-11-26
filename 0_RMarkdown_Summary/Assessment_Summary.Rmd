@@ -1,31 +1,68 @@
 ---
-title: "Assessment_Summary"
-author: "Dan S"
+title: "Manipulate and Survive: SARS-CoV2 mediated survival through manipulation of the host cell transcriptional activity. "
+subtitle: "Assessment_Summary"
+author: "Dan R Shelley"
 date: "2024-11-22"
 output: 
-  rmdformats::material:
+ rmdformats::robobook:
+   title: true
    self_contained: true
    thumbnails: true
    lightbox: true
-   gallery: false
-   highlight: kate
-   use_bookdown: true
+   gallery: true
+   highlight: tango
+   use_bookdown: false
    number_sections: true
-   smooth_scrolling: false
-editor_options:
-  css: ADD A STYLE HERE 
-  markdown:
-    wrap: 72
+   num_depth: 2
+   smooth_scrolling: true
+
+
 ---
+
 <body style="background-color:white;">
+
+# Abstract & Introduction
+In early 2020, the World Health Organisation (WHO) announced a global pandemic caused by the novel severe acute respiratory syndrome coronavirus 2 (SARS-CoV2), and is suspected to have a zoonotic origin with first detection of the virus particle in Chinese animal markets in late 2019 (WHO, 2024). 
+
+Infectivity Cycle – 
+
+The attachment of the SARS-CoV2 spike protein to the angiotensin-converting enzyme 2 (ACE2) is the first stage of the virus particles life cycle, followed by proteolytic cleavage of the spike protein by the serine protease TMPRSS2 and cellular internalisation (Wyler et al., 2021; Hoffman et al., 2020).  The spike protein of SARS-CoV2 is a highly glycosylated molecule which over the course of the pandemic has acquired numerous mutations with the ability to influence transmissibility and infectivity, but simultaneously allowed for global evolutionary mapping (Li et al., 2020). These mutations to the spike protein aim to improve the binding affinity to ACE2 which is a known host receptor to mediate SARS-CoV2 entry (Lekto et al., 2020; Harvey et al., 2021). This is accomplished by mutations in the receptor-binding domain (RBD) of the spike protein, a noteworthy mutation which increases binding affinity is N439K, which simultaneously is known to reduce the activity of some monoclonal antibodies (Harvey et al., 2021). 
+
+Summary of Paper Transcriptomics – 
+
+SARS-CoV2 targets and infects multiple systems of the host, including respiratory, cardiovascular, urinary and gastrointestinal, where upon infection, is known to manipulate the host transcriptome (Sun et al., 2021).  A study by Jain et al (2020) performed shotgun transcriptome sequencing on RNA acquired from nasopharyngeal swabs of SARS-CoV2 infected patients. Jain et al (2020) highlighted significantly increased expression of interferon/interleukin genes such as IFIH1, IFI44, IFIT1 and IL10; highlighting cytokine and immune-related responses. Along with these, Beyerstedt et al (2021) expresses the important role of ACE2 in SARS-CoV2 pathogenicity; where ACE2 and Angiotensin-II become imbalanced upon infection which trigger the activation of the renin-angiotensin-aldosterone system (where ACE2 is a key negative regulator (Banu et al., 2020; Ni et al., 2020)).  Furthermore, Banu et al (2020) confers that ACE2 expression is downregulated in cells infected by SARS-CoV2, where several studies have subsequently reported that this imbalance between ACE2 and Angiotensin-II leads to severe organ injury (Ni et al., 2020; Kebu et al., 2005; Golwacka et al., 2010). 
+
+Data from Paper plus summary - 
+
+This paper makes use of published transcriptomics data produced by Adam et al (2020), focusing on overtime analysis of SARS-CoV2 influence on Caco-2 (human colorectal adenocarcinoma) cells. RNA-seq was performed on Caco-2 cells infected with SARS-CoV2 at a multiplicity of infection of 5, with RNA extracted at timepoints 1, 2, 4, 7, 12, 24, and 48 hours-post-infection (hpi). However, controls/mocks exist only for 4, 12 and 48 hpi; these and their equivalent infected cell data will be used in the analysis (Adam et al., 2023). This paper aims to firstly, identify and analyse differentially expressed genes (DEGs) at each independent timepoint and secondly, investigate temporal changes in DEGs via three different analytical techniques. 
+
 
 # Individual Timepoint Analysis
 
+Some Example Code:
+```{r}
+setwd('~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/')
+TS_target <- read.delim("~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/2_rawdata/2_targets/TEMP_targets.txt", sep = ",")
+names(TS_target)[names(TS_target) == 'X'] <- 'samples'
+
+TS_target$replicate <- c("infected_1","infected_2","infected_3",
+                        "infected_1","infected_2","infected_3",
+                        "infected_1","infected_2","infected_3",
+                        "mock_1","mock_2","mock_3",
+                        "mock_1","mock_2","mock_3",
+                        "mock_1","mock_2","mock_3")
+TS_target$replicate <- as.factor(TS_target$replicate)
+```
+
+
 # KEGG Clustering Analysis
 
-# Moanin Model
+# Temporal Analysis Models
 
-# TimeSeriesAnalysis
+## Moanin Model
 
-# Regression Analysis
+## TimeSeriesAnalysis
+
+## Regression Analysis
+
 
