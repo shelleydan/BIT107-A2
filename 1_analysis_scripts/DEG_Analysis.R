@@ -216,28 +216,28 @@ cols <- c("4.infected"="#f04546","12.infected"="#3591d1","48.infected"="#62c76b"
 
 cols <- interaction(hc1$labels$timepoint, hc1$labels$group)
 
-ggplot(segment(hc1)) +
-  guides(color = guide_legend(override.aes=list(shape = 18))) +
-  geom_segment(aes(x=x, 
-                   y=y, 
-                   xend=xend, 
-                   yend=yend)) +
-  geom_text(data=label(hc1),
+ggplot(segment(hc1)) + 
+  geom_text(data = label(hc1),
             show.legend = T,
-            aes(label=label, 
-                x=x, 
-                y=0, 
-                color=cols,
+            aes(label = label, 
+                x = x, 
+                y = 0, 
+                color = cols, 
                 angle = 90,
                 vjust = 1.5,
                 hjust = 0,
-                fontface=2)) +
+                fontface = 2)) +
+  guides(colour = guide_legend(title="Condition", 
+                               override.aes=list(alpha=1, shape=19, size=5))) +
+  geom_segment(show.legend = F,
+               colour = "gray",
+               aes(x = x, 
+                   y = y,
+                   xend = xend, 
+                   yend = yend)) +
   labs(x = "Samples",
        y = "Distance") +
   theme(legend.position = "top")
-
-legend(1, 95, legend=c("Line 1", "Line 2"),
-       col=c("red", "blue"), lty=1:2, cex=0.8)
 
 ggsave("4_figures/HCA.png",
        height = 20,
