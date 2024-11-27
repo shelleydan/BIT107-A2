@@ -194,7 +194,6 @@ write.csv(results_DEG_12, "output_data/raw_DEG_results_12.csv")
 write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
 
 ## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
-
 counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
 HCA_TEMP <- scale(counts_TEMP)
@@ -216,7 +215,7 @@ cols <- c("4.infected"="#f04546","12.infected"="#3591d1","48.infected"="#62c76b"
 
 cols <- interaction(hc1$labels$timepoint, hc1$labels$group)
 
-ggplot(segment(hc1)) + 
+ggHCA <- ggplot(segment(hc1)) + 
   geom_text(data = label(hc1),
             show.legend = T,
             aes(label = label, 
@@ -237,7 +236,10 @@ ggplot(segment(hc1)) +
                    yend = yend)) +
   labs(x = "Samples",
        y = "Distance") +
-  theme(legend.position = "top")
+  theme(aspect.ratio=1,
+        legend.position="bottom",
+        legend.box.background = element_rect(colour = "black"))
+ggHCA
 
 ggsave("4_figures/HCA.png",
        height = 20,
@@ -245,6 +247,47 @@ ggsave("4_figures/HCA.png",
        units = "cm",
        dpi = 500)
 
+## PCA of All Samples ----------------------------------------------------------
+
+#TEMPORAL
+# Variance stabilisation transformation
+vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
+
+# Generating the PCA Plot
+TEMPData <- plotPCA(vst_TEMP, 
+                    intgroup = c("group", "timepoint"),
+                    returnData = T)
+
+TEMPData$group.1 #Some reason the infected/mock is stored as group.1 instead and group is a combination of both factor levels. 
+
+percentVar <- round(100 * attr(TEMPData, "percentVar"))
+ggPCA <- ggplot(TEMPData, aes(PC1, PC2, color=group.1, shape=timepoint)) +
+  geom_point(size=5) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + 
+  theme(aspect.ratio=1,
+        legend.position="top",
+        legend.box.background = element_rect(colour = "black"))
+
+
+ggsave("4_figures/PCA_ALL.png", PCA_ALL, width = 10, height = 10, units = "in")
+
+ggarrange(ggHCA, ggPCA,
+          labels = c("A", "B"),
+          ncol = 2, 
+          nrow = 1,
+          common.legend = F, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+
+#Save the above figure
+ggsave("4_figures/Figure_1_HCA_PCA_all_samples.png",
+       height = 20,
+       width = 40,
+       units = "cm",
+       dpi = 500)
 
 ## MOCK DEG COMPARISON 4hrs vs 12hrs -------------------------------------------
 MOCK_DEG_TARGET <- target_data_TEMP[target_data_TEMP$timepoint %in% c(4,12), ] #Targets for 4hrs
@@ -417,33 +460,6 @@ vst_48 <- DESeq2::vst(DEG_48, blind = F)
 # Generating the PCA Plot
 DESeq2::plotPCA(vst_48, 
                 intgroup= "Test") #Applying layers like found above.
-
-#TEMPORAL
-# Variance stabilisation transformation
-vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
-
-# Generating the PCA Plot
-TEMPData <- plotPCA(vst_TEMP, 
-                    intgroup = c("group", "timepoint"),
-                    returnData = T)
-
-TEMPData$group.1 #Some reason the infected/mock is stored as group.1 instead and group is a combination of both factor levels. 
-
-percentVar <- round(100 * attr(TEMPData, "percentVar"))
-PCA_ALL <- ggplot(TEMPData, aes(PC1, PC2, color=group.1, shape=timepoint)) +
-  geom_point(size=5) +
-  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
-  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
-  coord_fixed() + 
-  theme(aspect.ratio=1,
-        legend.position="top",
-        legend.box.background = element_rect(colour = "black"))
-
-
-ggsave("4_figures/PCA_ALL.png", PCA_ALL, width = 10, height = 10, units = "in")
-
-#Applying layers like found above.
-
 
 ## HEATMAPS --------------------------------------------------------------------
 
