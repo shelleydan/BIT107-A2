@@ -3,8 +3,9 @@
 
 ## Reference -------------------------------------------------------------------
 
+# Start Fresh
 rm(list = ls(all.names = T))
-gc()
+
 ## Library --------------------------------------------------------------------
 
 library(tidyverse)
@@ -22,6 +23,7 @@ output <- '3_output_data/2_pathway_analysis/'
 
 ## Functions -------------------------------------------------------------------
 
+#DID WE USE THIS?
 matrix_to_list <- function(pws){
   pws.l <- list()
   for (pw in colnames(pws)) {
@@ -75,14 +77,6 @@ names(DEG48df)[names(DEG48df) == 'V5'] <- 'diffexpressed'
 DEG48df <- DEG48df[DEG48df$diffexpressed == 'UP'| DEG48df$diffexpressed == 'DOWN',]
 deg_results_list_48 <- split(DEG48df, DEG48df$diffexpressed)
 
-
-#MIGHT NOIT NEED THESE
-# Using these values of 'UP' & 'DOWN', we subset the data.
-
-deg_results_list_4 <- split(DEG4_Sig, DEG4_Sig$diffexpressed)
-deg_results_list_12 <- split(DEG12_Sig, DEG12_Sig$diffexpressed)
-deg_results_list_48 <- split(DEG48_Sig, DEG48_Sig$diffexpressed)
-
 ## Aquiring Reference Genes ---------------------------------------------------
 
 # Gene sets can be downloaded here: https://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
@@ -114,13 +108,13 @@ rm(pwl2)
 # We look for profiles enriched in both our up regulated and down regulated. 
 
 # Settings
-name_of_comparison <- 'mock_vs_infected_4hrs' # for our filename
+name_of_comparison <- 'mock_vs_infected' # for our filename
 
 background_genes <- 'reactome' # for our filename
 
 bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
 
-up_or_down <- 'UP' # Set this to UP or DOWN
+up_or_down <- 'DOWN' # Set this to UP or DOWN
 
 padj_cutoff <- 0.05 # p-adjusted threshold.
 
@@ -180,14 +174,14 @@ res_df48 <- res_df48 %>% mutate(minuslog10padj = -log10(p.adjust),
 
 
 # Subset the pathways by (i) padj value, (ii) Gene count
-target_pws <- unique(res_df4$ID[res_df4$p.adjust < padj_cutoff & res_df4$Count > genecount_cutoff])
-res_df4 <- res_df4[res_df4$ID %in% target_pws,]
+target_pws4 <- unique(res_df4$ID[res_df4$p.adjust < padj_cutoff & res_df4$Count > genecount_cutoff])
+res_df4 <- res_df4[res_df4$ID %in% target_pws4,]
 
-target_pws <- unique(res_df12$ID[res_df12$p.adjust < padj_cutoff & res_df12$Count > genecount_cutoff])
-res_df12 <- res_df12[res_df12$ID %in% target_pws,]
+target_pws12 <- unique(res_df12$ID[res_df12$p.adjust < padj_cutoff & res_df12$Count > genecount_cutoff])
+res_df12 <- res_df12[res_df12$ID %in% target_pws12,]
 
-target_pws <- unique(res_df48$ID[res_df48$p.adjust < padj_cutoff & res_df48$Count > genecount_cutoff])
-res_df48 <- res_df48[res_df48$ID %in% target_pws,]
+target_pws48 <- unique(res_df48$ID[res_df48$p.adjust < padj_cutoff & res_df48$Count > genecount_cutoff])
+res_df48 <- res_df48[res_df48$ID %in% target_pws48,]
 
 # HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
 
@@ -322,7 +316,7 @@ class(enrichres48) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 p4.1 <- barplot(enrichres4, showCategory = 20)
 
-p4.1 <- dotplot(enrichres4, showCategory = 15)
+p4.2 <- dotplot(enrichres4, showCategory = 15)
 
 p4.3 <- enrichplot::cnetplot(enrichres4)
 
@@ -334,7 +328,9 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_4hrs_', up_or_down, '.png',
+file4.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_4hrs_', up_or_down, '.png')
+
+ggsave(file4.1,
        height = 30,
        width = 30,
        units = "cm",
@@ -355,7 +351,9 @@ ggarrange(p4.4, p4.5,
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_4hrs_', up_or_down, '.png',
+file4.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_4hrs_', up_or_down, '.png')
+
+ggsave(file4.2,
        height = 30,
        width = 30,
        units = "cm",
@@ -365,7 +363,7 @@ ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_4hrs_', up_or_down, '.png',
 
 p12.1 <- barplot(enrichres12, showCategory = 20)
 
-p12.1 <- dotplot(enrichres12, showCategory = 15)
+p12.2 <- dotplot(enrichres12, showCategory = 15)
 
 p12.3 <- enrichplot::cnetplot(enrichres12)
 
@@ -377,7 +375,9 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_12hrs_', up_or_down, '.png',
+file12.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_12hrs_', up_or_down, '.png')
+
+ggsave(file12.1,
        height = 30,
        width = 30,
        units = "cm",
@@ -398,7 +398,9 @@ ggarrange(p12.4, p12.5,
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_12hrs_', up_or_down, '.png',
+file12.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_12hrs_', up_or_down, '.png')
+
+ggsave(file12.2,
        height = 30,
        width = 30,
        units = "cm",
@@ -408,7 +410,7 @@ ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_12hrs_', up_or_down, '.png',
 
 p48.1 <- barplot(enrichres48, showCategory = 20)
 
-p48.1 <- dotplot(enrichres48, showCategory = 15)
+p48.2 <- dotplot(enrichres48, showCategory = 15)
 
 p48.3 <- enrichplot::cnetplot(enrichres48)
 
@@ -420,9 +422,11 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_48hrs_', up_or_down, '.png',
-       height = 30,
-       width = 30,
+file48.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_48hrs_', up_or_down, '.png')
+
+ggsave(file48.1,
+       height = 40,
+       width = 40,
        units = "cm",
        dpi = 500)
 
@@ -441,7 +445,9 @@ ggarrange(p48.4, p48.5,
   bgcolor("White") +
   border("White")
 
-ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_48hrs_', up_or_down, '.png',
+file48.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_48hrs_', up_or_down, '.png')
+
+ggsave(file48.2,
        height = 30,
        width = 30,
        units = "cm",
