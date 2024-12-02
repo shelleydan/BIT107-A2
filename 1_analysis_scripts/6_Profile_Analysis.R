@@ -16,22 +16,92 @@ library(DOSE)
 library(enrichplot)
 library(ggupset)
 
+# Functions -------------------------------------------------------------------
 
+# Function: Adjacency matrix to list
+matrix_to_list <- function(pws){
+  pws.l <- list()
+  for (pw in colnames(pws)) {
+    pws.l[[pw]] <- rownames(pws)[as.logical(pws[, pw])]
+  }
+  return(pws.l)
+}
 
+## Using the Enricher Function in Cluster Profiler ----------------------------
 
+# Loading in our data (4HRS)
+DEG4 <- read.csv("3_output_data/raw_DEG_results_4.csv", 
+                 header = T)
+names(DEG4)[names(DEG4) == 'X'] <- 'gene_symbol'
+DEG4_Sig <- DEG4[DEG4$diffexpressed == 'UP'| DEG4$diffexpressed == 'DOWN',]
 
+# Loading in our data (12HRS)
+DEG12 <- read.csv("3_output_data/raw_DEG_results_12.csv", 
+                 header = T)
+names(DEG12)[names(DEG12) == 'X'] <- 'gene_symbol'
+DEG12_Sig <- DEG12[DEG12$diffexpressed == 'UP'| DEG12$diffexpressed == 'DOWN',]
 
+# Loading in our data (48HRS)
+DEG48 <- read.csv("3_output_data/raw_DEG_results_48.csv", 
+                 header = T)
+names(DEG48)[names(DEG48) == 'X'] <- 'gene_symbol'
+DEG48_Sig <- DEG48[DEG48$diffexpressed == 'UP'| DEG48$diffexpressed == 'DOWN',]
 
+# Note: In the tutorial they use this step to add values of 'UP' and 'DOWN', but for plotting in DESeq2 I already performed this. 
 
+# Using these values of 'UP' & 'DOWN', we subset the data.
 
+DEG4_res_list <- split(DEG4_Sig, DEG4_Sig$diffexpressed)
+DEG12_res_list <- split(DEG12_Sig, DEG12_Sig$diffexpressed)
+DEG48_res_list <- split(DEG48_Sig, DEG48_Sig$diffexpressed)
 
+## Aquiring Reference Genes ---------------------------------------------------
 
+# Gene sets can be downloaded here: https://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
+# Gene Sets used in this analysis are found in '5_Gene_Sets'
+DEG_Genes <- DEG4$gene_symbol #All time points have the same total genes
 
+gmt_files <- list.files(path = '5_Gene_Lists/', 
+                        pattern = '.gmt', 
+                        full.names = T)
 
+for (file in gmt_files) {
+  pwl2 <- read.gmt(file)
+  pwl2 <- pwl2[pwl2$gene %in% DEG_Genes,]
+  filename <- paste(gsub('c.\\.', '', gsub('.v2024.1.*$', '', file)), '.RDS', sep = '')
+  saveRDS(pwl2, filename)
+}
 
+## Environment Housekeeping ---------------------------------------------------
+rm(DEG4)
+rm(DEG12)
+rm(DEG48)
+rm(DEG4_Sig)
+rm(DEG12_Sig)
+rm(DEG48_Sig)
 
+## Performing Cluster Analysis ------------------------------------------------
+# We look for profiles enriched in both our up regulated and down regulated. 
 
+# Settings
+gene_path <- '5_Gene_Lists/'
+output <- '3_output_data/2_pathway_analysis/'
+name_of_comparison <- 'mockvsinfected' # for our filename
+background_genes <- 'reactome' # for our filename
+bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+padj_cutoff <- 0.05 # p-adjusted threshold.
+genecount_cutoff <- 5 # minimum number of genes in the pathway.
+filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
 
+if(background_genes == 'KEGG'){
+  bg_genes <- readRDS(paste0(bg_path, 'kegg.RDS'))
+} else if(background_genes == 'reactome'){
+  bg_genes <- readRDS(paste0(bg_path, 'reactome.RDS'))
+} else if(background_genes == 'go.bp'){
+  bg_genes <- readRDS(paste0(bg_path, 'go.bp.RDS'))
+} else {
+  stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
+}
 
 
 
