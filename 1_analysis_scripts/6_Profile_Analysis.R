@@ -408,9 +408,9 @@ ggsave(file12.2,
 
 ## 48HRS PLOTS -----------------------------------------------------------------
 
-p48.1 <- barplot(enrichres48, showCategory = 20)
+p48.1 <- barplot(enrichres48, showCategory = 10)
 
-p48.2 <- dotplot(enrichres48, showCategory = 15)
+p48.2 <- dotplot(enrichres48, showCategory = 10)
 
 p48.3 <- enrichplot::cnetplot(enrichres48)
 
