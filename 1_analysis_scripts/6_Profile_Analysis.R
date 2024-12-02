@@ -3,9 +3,8 @@
 
 ## Reference -------------------------------------------------------------------
 
-# https://github.com/ACSoupir/Bioinformatics_YouTube.git
-
-
+rm(list = ls(all.names = T))
+gc()
 ## Library --------------------------------------------------------------------
 
 library(tidyverse)
@@ -15,10 +14,16 @@ library(org.Hs.eg.db)
 library(DOSE)
 library(enrichplot)
 library(ggupset)
+library(ggpubr)
+
+## Setting Path Variables ------------------------------------------------------
+gene_path <- '5_Gene_Lists/'
+output <- '3_output_data/2_pathway_analysis/'
+
+
 
 # Functions -------------------------------------------------------------------
 
-# Function: Adjacency matrix to list
 matrix_to_list <- function(pws){
   pws.l <- list()
   for (pw in colnames(pws)) {
@@ -33,7 +38,15 @@ matrix_to_list <- function(pws){
 DEG4 <- read.csv("3_output_data/raw_DEG_results_4.csv", 
                  header = T)
 names(DEG4)[names(DEG4) == 'X'] <- 'gene_symbol'
-DEG4_Sig <- DEG4[DEG4$diffexpressed == 'UP',] #| DEG4$diffexpressed == 'DOWN',]
+DEG4df <- as.data.frame(cbind(DEG4$gene_symbol, DEG4$pvalue, DEG4$padj, DEG4$log2FoldChange, DEG4$diffexpressed))
+names(DEG4df)[names(DEG4df) == 'V1'] <- 'gene_symbol'
+names(DEG4df)[names(DEG4df) == 'V2'] <- 'pval'
+names(DEG4df)[names(DEG4df) == 'V3'] <- 'padj'
+names(DEG4df)[names(DEG4df) == 'V4'] <- 'log2fc'
+names(DEG4df)[names(DEG4df) == 'V5'] <- 'diffexpressed'
+
+DEG4df <- DEG4df[DEG4df$diffexpressed == 'UP'| DEG4df$diffexpressed == 'DOWN',]
+deg_results_list <- split(DEG4df, DEG4df$diffexpressed)
 
 # Loading in our data (12HRS)
 DEG12 <- read.csv("3_output_data/raw_DEG_results_12.csv", 
@@ -59,12 +72,14 @@ DEG48_res_list <- split(DEG48_Sig, DEG48_Sig$diffexpressed)
 
 # Gene sets can be downloaded here: https://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
 # Gene Sets used in this analysis are found in '5_Gene_Sets'
+# These need to be the whole number of genes used in the experiement - the 46863 in this assingment
 DEG_Genes <- DEG4$gene_symbol #All time points have the same total genes
 
 gmt_files <- list.files(path = '5_Gene_Lists/', 
                         pattern = '.gmt', 
                         full.names = T)
 
+# Reads in the gmt file and filters for our genes and makes a new subset
 for (file in gmt_files) {
   pwl2 <- read.gmt(file)
   pwl2 <- pwl2[pwl2$gene %in% DEG_Genes,]
@@ -76,19 +91,27 @@ for (file in gmt_files) {
 rm(DEG4_Sig)
 rm(DEG12_Sig)
 rm(DEG48_Sig)
+rm(DEG12)
+rm(DEG48)
+rm(file)
+rm(filename_gs)
+rm(gmt_files)
+rm(pwl2)
 
 ## Filtering Gene Sets (REACTOME, KEGG, GO) ------------------------------------
 # We look for profiles enriched in both our up regulated and down regulated. 
 
 # Settings
-gene_path <- '5_Gene_Lists/'
-output <- '3_output_data/2_pathway_analysis/'
+name_of_comparison <- 'mock_vs_infected_4hrs' # for our filename
 
-name_of_comparison <- 'mockvsinfected' # for our filename
 background_genes <- 'reactome' # for our filename
+
 bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+
 padj_cutoff <- 0.05 # p-adjusted threshold.
+
 genecount_cutoff <- 5 # minimum number of genes in the pathway.
+
 filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
 
 if(background_genes == 'KEGG'){
@@ -103,27 +126,60 @@ if(background_genes == 'KEGG'){
 
 ## Performing Cluster Analysis -------------------------------------------------
 
-DEG4_res <- lapply(names(DEG4_res_list),
-                   function(x) enricher(gene = DEG4_res_list[[x]]$gene_symbol,
+res <- lapply(names(deg_results_list),
+                    function(x) enricher(gene = deg_results_list[[x]]$gene_symbol,
                    TERM2GENE = bg_genes))
 
-names(DEG4_res) <- names(DEG4_res_list) # Apply the UP and DOWN tags
+names(res) <- names(deg_results_list) # Apply the UP and DOWN tags
 
-DEG4_df_res <- lapply(names(DEG4_res), function(x) rbind(DEG4_res[[x]]@result))
-names(DEG4_df_res) <- names(DEG4_res)
-DEG4_df_res <- do.call(rbind,DEG4_df_res)
+res_df <- lapply(names(res), function(x) rbind(res[[x]]@result))
+names(res_df) <- names(res) # Apply the UP and DOWN tags
+res_df <- do.call(rbind, res_df)
+
+res_df <- res_df %>% mutate(minuslog10padj = -log10(p.adjust),
+                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                 rownames(res_df)))
+
 
 # Subset the pathways by (i) padj value, (ii) Gene count
+target_pws <- unique(res_df$ID[res_df$p.adjust < padj_cutoff & res_df$Count > genecount_cutoff])
 
-target_pws <- unique(DEG4_df_res$ID[DEG4_df_res$p.adjust < padj_cutoff & DEG4_df_res$Count > genecount_cutoff])
+res_df <- res_df[res_df$ID %in% target_pws,]
 
-DEG4_df_res <- DEG4_df_res[DEG4_df_res$ID %in% target_pws,]
+# Moving Onward from here, use res_df
+
+# Select only upregulated genes in Severe
+res_df <- res_df %>% filter(diffexpressed == 'UP') %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_df) <- res_df$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_df$Description <- gsub('(H|h)iv', 'HIV', 
+                           gsub('pd 1', 'PD-1',
+                                gsub('ecm', 'ECM', 
+                                     gsub('(I|i)nterleukin', 'IL', 
+                                          gsub('(R|r)na', 'RNA', 
+                                               gsub('(D|d)na', 'DNA',
+                                                    gsub(' i ', ' I ', 
+                                                         gsub('(A|a)tp ', 'ATP ', 
+                                                              gsub('(N|n)adh ', 'NADH ', 
+                                                                   gsub('(N|n)ad ', 'NAD ',
+                                                                        gsub('t cell', 'T cell',
+                                                                             gsub('b cell', 'B cell',
+                                                                                  gsub('built from .*', ' (...)',
+                                                                                       gsub('mhc', 'MHC',
+                                                                                            gsub('mhc class i', 'MHC I', 
+                                                                                                 gsub('mhc class ii', 'MHC II', 
+                                                                                                      stringr::str_to_sentence(
+                                                                                                        gsub('_', ' ',  
+                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df$Description)))))))))))))))))))
+
 
 ## ENRICHMENT ------------------------------------------------------------------
 
 enrichres <- new("enrichResult",
                  readable = FALSE,
-                 result = DEG4_df_res,
+                 result = res_df,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  qvalueCutoff = 0.2,
@@ -139,15 +195,15 @@ class(enrichres)
 ## VISUALISATION ---------------------------------------------------------------
 
 p1 <- barplot(enrichres, showCategory = 20)
+
 p2 <- mutate(enrichres, qscore = -log(p.adjust, base = 10)) %>% 
   barplot(x = "qscore")
-p3 <- dotplot(enrichres, showCategory = 15) + ggtitle("Mock vs Infected")
 
-enrichres_eid <- setReadable(enrichres, 'org.Hs.eg.db', 'SYMBOL')
-p4 <- cnetplot(enrichres)
+p3 <- dotplot(enrichres, showCategory = 15)
 
-?cnetplot
+p4 <- enrichplot::cnetplot(enrichres)
 
+heatplot(enrichres, showCategory = 5)
 
 enrichres2 <- pairwise_termsim(enrichres)
 
@@ -157,212 +213,17 @@ emapplot(enrichres2)
 
 upsetplot(enrichres)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#OLD METHOD
-
-
-## Library Prep ----------------------------------------------------------------
-BiocManager::install("pathview")
-BiocManager::install("gage")
-BiocManager::install("gageData")
-BiocManager::install("org.Hs.eg.db")
-BiocManager::install("clusterProfiler")
-BiocManager::install("GOplot")
-library(pathview)
-library(gage)
-library(gageData)
-
-
-library(biomartr)
-
-library(AnnotationDbi)
-library(clusterProfiler)
-library(org.Hs.eg.db)
-library(GOplot)
-
-## Importing GO Database -------------------------------------------------------
-
-go<-read.csv("2_rawdata/5_GO_Data/go_map.csv")
-fullgo<-c(as.list(GOTERM),as.list(GOOBSOLETE))
-
-## Importing DEG Data ----------------------------------------------------------
-
-DEG4 <- read.csv("3_output_data/raw_DEG_results_4.csv", 
-                 header = T, row.names = 1)
-
-DEG12 <- read.csv("3_output_data/raw_DEG_results_12.csv", 
-                  header = T, row.names = 1)
-
-DEG48 <- read.csv("3_output_data/raw_DEG_results_48.csv", 
-                  header = T, row.names = 1)
-
-## Filtering Data for Only Significant -----------------------------------------
-
-DEG4_Sig_up <- rownames(DEG4[DEG4$diffexpressed == 'UP',])
-DEG4_Sig_down <- rownames(DEG4[DEG4$diffexpressed == 'DOWN',])
-DEG12_Sig_up <- rownames(DEG12[DEG12$diffexpressed == 'UP',])
-DEG12_Sig_down <- rownames(DEG12[DEG12$diffexpressed == 'DOWN',])
-DEG48_Sig <- DEG48[DEG48$diffexpressed == 'UP'| DEG48$diffexpressed == 'DOWN',]
-DEG48_Sig_d<- DEG48[DEG48$diffexpressed == 'DOWN',]
-
-rm(DEG4, DEG12, DEG48) # Remove un-filtered data frame
-
-## GO Analysis 4HRS ------------------------------------------------------------
-
-GO_4UP_res <- enrichGO(gene = DEG4_Sig_up, 
-                       OrgDb = "org.Hs.eg.db",
-                       keyType = 'SYMBOL',
-                       ont = "BP")
-GO4UP <- plot(barplot(GO_4UP_res, showCategory = 20))
-
-GO_4DOWN_res <- enrichGO(gene = DEG4_Sig_down, 
-                         OrgDb = "org.Hs.eg.db",
-                         keyType = 'SYMBOL',
-                         ont = "BP")
-GO4DOWN <- plot(barplot(GO_4DOWN_res, showCategory = 20))
-
-## GO Analysis 12HRS -----------------------------------------------------------
-
-GO_12UP_res <- enrichGO(gene = DEG12_Sig_up, 
-                        OrgDb = "org.Hs.eg.db",
-                        keyType = 'SYMBOL',
-                        ont = "BP")
-GO12UP <- plot(barplot(GO_12UP_res, showCategory = 20))
-
-GO_12DOWN_res <- enrichGO(gene = DEG12_Sig_down, 
-                          OrgDb = "org.Hs.eg.db",
-                          keyType = 'SYMBOL',
-                          ont = "BP")
-GO12DOWN <- plot(barplot(GO_12DOWN_res, showCategory = 20))
-
-## GO Analysis 48HRS -----------------------------------------------------------
-
-GO_48UP_res <- enrichGO(gene = DEG48_Sig_up, 
-                        OrgDb = "org.Hs.eg.db",
-                        keyType = 'SYMBOL',
-                        ont = "BP")
-GO48UP <- plot(barplot(GO_48UP_res, showCategory = 20))
-
-GO_48DOWN_res <- enrichGO(gene = DEG48_Sig_down, 
-                          OrgDb = "org.Hs.eg.db",
-                          keyType = 'SYMBOL',
-                          ont = "BP")
-head(GO48DOWN)
-
-GO48DOWN <- plot(barplot(GO_48DOWN_res, showCategory = 20))
-GO48DOWN
-
-data(EC)
-head(EC$david)
-
-testdata <- circle_dat(GO48DOWN, DEG48_Sig_d)
-
-list <- as.data.frame(rownames(DEG48_Sig))
-print(list)
-
-EC$genelist
-
-GOBubble(testdata, labels = 3)
-
-
-
-
-
-
-
-
-
-
-## Producing an Array ----------------------------------------------------------
-foldChange_4 <- DEG4_Sig$log2FoldChange
-names(foldChange_4) <- symbols4$ENTREZID
-head(foldChange_4)
-
-foldChange_12 <- DEG12_Sig$log2FoldChange
-names(foldChange_12) <- symbols12$ENTREZID
-head(foldChange_12)
-
-foldChange_48 <- DEG48_Sig$log2FoldChange
-names(foldChange_48) <- symbols48$ENTREZID
-head(foldChange_48)
-
-
-## Bringing Gage Database ------------------------------------------------------
-
-#The data for Homo sapiens.
-data(go.sets.hs)
-data(go.subs.hs)
-
-## Analyzing only Biological Properties First ----------------------------------
-
-#Pulling only BP
-gobpsets <- go.sets.hs[go.subs.hs$BP]
-
-#4HRS
-gobpDEG4 <- gage(exprs = foldChange_4,
-                 gsets =  gobpsets, 
-                 same.dir = T)
-view(gobpDEG4)
-
-#12HRS
-gobpDEG12 <- gage(exprs = foldChange_12,
-                  gsets =  gobpsets, 
-                  same.dir = T)
-view(gobpDEG12)
-
-#48HRS
-gobpDEG48 <- gage(exprs = foldChange_48,
-                  gsets =  gobpsets, 
-                  same.dir = T)
-view(gobpDEG4)
-
-## KEGG Analysis ---------------------------------------------------------------
-
-#Preparing for Analysis
-data(kegg.sets.hs)
-
-rm(keggRes4)
-head(foldChange_4)
-keggRes4 <- gage(exprs = foldChange_4, 
-                 gsets = kegg.sets.hs, 
-                 same.dir = T)
-view(keggRes4$greater) # Note there's a lot of NAs but I think that might make sense
-
-## Plotting Pathways -----------------------------------------------------------
-keggRes4Pathways <- data.frame(id = rownames(keggRes4$greater), keggRes4$greater) %>%
-  tibble::as_tibble() %>%
-  filter(row_number() <= 2) %>% #Selecting the top 2 Pathways
-  .$id %>%
-  as.character()
-keggRes4Pathways
-
-keggRes4IDs <- substr(keggRes4Pathways, start = 1, stop = 8) #Extracting IDs
-keggRes4IDs
-
-## Plotting Pathways
-
-tmp = sapply(keggRes4IDs, function(pid) pathview(gene.data = foldChange_4, pathway.id = pid, species = 'hsa'))
-
-
-
-
-
+ggarrange(p1, p3,
+          labels = c("A", "B"),
+          ncol = 2, 
+          nrow = 1,
+          common.legend = TRUE, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+
+ggsave("4_figures/emaplot4hr.png",
+       height = 15,
+       width = 30,
+       units = "cm",
+       dpi = 500)
