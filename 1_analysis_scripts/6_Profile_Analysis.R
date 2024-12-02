@@ -20,9 +20,7 @@ library(ggpubr)
 gene_path <- '5_Gene_Lists/'
 output <- '3_output_data/2_pathway_analysis/'
 
-
-
-# Functions -------------------------------------------------------------------
+## Functions -------------------------------------------------------------------
 
 matrix_to_list <- function(pws){
   pws.l <- list()
@@ -32,9 +30,8 @@ matrix_to_list <- function(pws){
   return(pws.l)
 }
 
-## Using the Enricher Function in Cluster Profiler ----------------------------
+## Loading in our data (4HRS) --------------------------------------------------
 
-# Loading in our data (4HRS)
 DEG4 <- read.csv("3_output_data/raw_DEG_results_4.csv", 
                  header = T)
 names(DEG4)[names(DEG4) == 'X'] <- 'gene_symbol'
@@ -46,27 +43,45 @@ names(DEG4df)[names(DEG4df) == 'V4'] <- 'log2fc'
 names(DEG4df)[names(DEG4df) == 'V5'] <- 'diffexpressed'
 
 DEG4df <- DEG4df[DEG4df$diffexpressed == 'UP'| DEG4df$diffexpressed == 'DOWN',]
-deg_results_list <- split(DEG4df, DEG4df$diffexpressed)
+deg_results_list_4 <- split(DEG4df, DEG4df$diffexpressed)
 
-# Loading in our data (12HRS)
+## Loading in our data (12HRS) -------------------------------------------------
+
 DEG12 <- read.csv("3_output_data/raw_DEG_results_12.csv", 
-                 header = T)
+                  header = T)
 names(DEG12)[names(DEG12) == 'X'] <- 'gene_symbol'
-DEG12_Sig <- DEG12[DEG12$diffexpressed == 'UP'| DEG12$diffexpressed == 'DOWN',]
+DEG12df <- as.data.frame(cbind(DEG12$gene_symbol, DEG12$pvalue, DEG12$padj, DEG12$log2FoldChange, DEG12$diffexpressed))
+names(DEG12df)[names(DEG12df) == 'V1'] <- 'gene_symbol'
+names(DEG12df)[names(DEG12df) == 'V2'] <- 'pval'
+names(DEG12df)[names(DEG12df) == 'V3'] <- 'padj'
+names(DEG12df)[names(DEG12df) == 'V4'] <- 'log2fc'
+names(DEG12df)[names(DEG12df) == 'V5'] <- 'diffexpressed'
 
-# Loading in our data (48HRS)
+DEG12df <- DEG12df[DEG12df$diffexpressed == 'UP'| DEG12df$diffexpressed == 'DOWN',]
+deg_results_list_12 <- split(DEG12df, DEG12df$diffexpressed)
+
+## Loading in our data (48HRS) -------------------------------------------------
+
 DEG48 <- read.csv("3_output_data/raw_DEG_results_48.csv", 
-                 header = T)
+                  header = T)
 names(DEG48)[names(DEG48) == 'X'] <- 'gene_symbol'
-DEG48_Sig <- DEG48[DEG48$diffexpressed == 'UP'| DEG48$diffexpressed == 'DOWN',]
+DEG48df <- as.data.frame(cbind(DEG48$gene_symbol, DEG48$pvalue, DEG48$padj, DEG48$log2FoldChange, DEG48$diffexpressed))
+names(DEG48df)[names(DEG48df) == 'V1'] <- 'gene_symbol'
+names(DEG48df)[names(DEG48df) == 'V2'] <- 'pval'
+names(DEG48df)[names(DEG48df) == 'V3'] <- 'padj'
+names(DEG48df)[names(DEG48df) == 'V4'] <- 'log2fc'
+names(DEG48df)[names(DEG48df) == 'V5'] <- 'diffexpressed'
 
-# Note: In the tutorial they use this step to add values of 'UP' and 'DOWN', but for plotting in DESeq2 I already performed this. 
+DEG48df <- DEG48df[DEG48df$diffexpressed == 'UP'| DEG48df$diffexpressed == 'DOWN',]
+deg_results_list_48 <- split(DEG48df, DEG48df$diffexpressed)
 
+
+#MIGHT NOIT NEED THESE
 # Using these values of 'UP' & 'DOWN', we subset the data.
 
-DEG4_res_list <- split(DEG4_Sig, DEG4_Sig$diffexpressed)
-DEG12_res_list <- split(DEG12_Sig, DEG12_Sig$diffexpressed)
-DEG48_res_list <- split(DEG48_Sig, DEG48_Sig$diffexpressed)
+deg_results_list_4 <- split(DEG4_Sig, DEG4_Sig$diffexpressed)
+deg_results_list_12 <- split(DEG12_Sig, DEG12_Sig$diffexpressed)
+deg_results_list_48 <- split(DEG48_Sig, DEG48_Sig$diffexpressed)
 
 ## Aquiring Reference Genes ---------------------------------------------------
 
@@ -88,9 +103,6 @@ for (file in gmt_files) {
 }
 
 ## Environment Housekeeping ----------------------------------------------------
-rm(DEG4_Sig)
-rm(DEG12_Sig)
-rm(DEG48_Sig)
 rm(DEG12)
 rm(DEG48)
 rm(file)
@@ -108,6 +120,8 @@ background_genes <- 'reactome' # for our filename
 
 bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
 
+up_or_down <- 'UP' # Set this to UP or DOWN
+
 padj_cutoff <- 0.05 # p-adjusted threshold.
 
 genecount_cutoff <- 5 # minimum number of genes in the pathway.
@@ -124,37 +138,65 @@ if(background_genes == 'KEGG'){
   stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
 }
 
-## Performing Cluster Analysis -------------------------------------------------
+## Performing Cluster Analysis (AUTO) ------------------------------------------
 
-res <- lapply(names(deg_results_list),
-                    function(x) enricher(gene = deg_results_list[[x]]$gene_symbol,
-                   TERM2GENE = bg_genes))
+res4 <- lapply(names(deg_results_list_4),
+               function(x) enricher(gene = deg_results_list_4[[x]]$gene_symbol,
+                                    TERM2GENE = bg_genes))
+res12 <- lapply(names(deg_results_list_12),
+               function(x) enricher(gene = deg_results_list_12[[x]]$gene_symbol,
+                                    TERM2GENE = bg_genes))
+res48 <- lapply(names(deg_results_list_48),
+               function(x) enricher(gene = deg_results_list_48[[x]]$gene_symbol,
+                                    TERM2GENE = bg_genes))
 
-names(res) <- names(deg_results_list) # Apply the UP and DOWN tags
+names(res4) <- names(deg_results_list_4) # Apply the UP and DOWN tags
+names(res12) <- names(deg_results_list_12) # Apply the UP and DOWN tags
+names(res48) <- names(deg_results_list_48) # Apply the UP and DOWN tags
 
-res_df <- lapply(names(res), function(x) rbind(res[[x]]@result))
-names(res_df) <- names(res) # Apply the UP and DOWN tags
-res_df <- do.call(rbind, res_df)
+res_df4 <- lapply(names(res4), function(x) rbind(res4[[x]]@result))
+names(res_df4) <- names(res4) # Apply the UP and DOWN tags
+res_df4 <- do.call(rbind, res_df4)
 
-res_df <- res_df %>% mutate(minuslog10padj = -log10(p.adjust),
+res_df12 <- lapply(names(res12), function(x) rbind(res12[[x]]@result))
+names(res_df12) <- names(res12) # Apply the UP and DOWN tags
+res_df12 <- do.call(rbind, res_df12)
+
+res_df48 <- lapply(names(res48), function(x) rbind(res48[[x]]@result))
+names(res_df48) <- names(res48) # Apply the UP and DOWN tags
+res_df48 <- do.call(rbind, res_df48)
+
+res_df4 <- res_df4 %>% mutate(minuslog10padj = -log10(p.adjust),
                             diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
-                                                 rownames(res_df)))
+                                                 rownames(res_df4)))
+
+res_df12 <- res_df12 %>% mutate(minuslog10padj = -log10(p.adjust),
+                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                 rownames(res_df12)))
+
+res_df48 <- res_df48 %>% mutate(minuslog10padj = -log10(p.adjust),
+                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                 rownames(res_df48)))
 
 
 # Subset the pathways by (i) padj value, (ii) Gene count
-target_pws <- unique(res_df$ID[res_df$p.adjust < padj_cutoff & res_df$Count > genecount_cutoff])
+target_pws <- unique(res_df4$ID[res_df4$p.adjust < padj_cutoff & res_df4$Count > genecount_cutoff])
+res_df4 <- res_df4[res_df4$ID %in% target_pws,]
 
-res_df <- res_df[res_df$ID %in% target_pws,]
+target_pws <- unique(res_df12$ID[res_df12$p.adjust < padj_cutoff & res_df12$Count > genecount_cutoff])
+res_df12 <- res_df12[res_df12$ID %in% target_pws,]
 
-# Moving Onward from here, use res_df
+target_pws <- unique(res_df48$ID[res_df48$p.adjust < padj_cutoff & res_df48$Count > genecount_cutoff])
+res_df48 <- res_df48[res_df48$ID %in% target_pws,]
 
-# Select only upregulated genes in Severe
-res_df <- res_df %>% filter(diffexpressed == 'UP') %>% 
+# HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
+
+res_df4 <- res_df4 %>% filter(diffexpressed == up_or_down) %>% 
   dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
-rownames(res_df) <- res_df$ID
+rownames(res_df4) <- res_df4$ID
 
 # For visualisation purposes, let's shorten the pathway names
-res_df$Description <- gsub('(H|h)iv', 'HIV', 
+res_df4$Description <- gsub('(H|h)iv', 'HIV', 
                            gsub('pd 1', 'PD-1',
                                 gsub('ecm', 'ECM', 
                                      gsub('(I|i)nterleukin', 'IL', 
@@ -172,14 +214,64 @@ res_df$Description <- gsub('(H|h)iv', 'HIV',
                                                                                                  gsub('mhc class ii', 'MHC II', 
                                                                                                       stringr::str_to_sentence(
                                                                                                         gsub('_', ' ',  
-                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df$Description)))))))))))))))))))
+                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df4$Description)))))))))))))))))))
+
+res_df12 <- res_df12 %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_df12) <- res_df12$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_df12$Description <- gsub('(H|h)iv', 'HIV', 
+                           gsub('pd 1', 'PD-1',
+                                gsub('ecm', 'ECM', 
+                                     gsub('(I|i)nterleukin', 'IL', 
+                                          gsub('(R|r)na', 'RNA', 
+                                               gsub('(D|d)na', 'DNA',
+                                                    gsub(' i ', ' I ', 
+                                                         gsub('(A|a)tp ', 'ATP ', 
+                                                              gsub('(N|n)adh ', 'NADH ', 
+                                                                   gsub('(N|n)ad ', 'NAD ',
+                                                                        gsub('t cell', 'T cell',
+                                                                             gsub('b cell', 'B cell',
+                                                                                  gsub('built from .*', ' (...)',
+                                                                                       gsub('mhc', 'MHC',
+                                                                                            gsub('mhc class i', 'MHC I', 
+                                                                                                 gsub('mhc class ii', 'MHC II', 
+                                                                                                      stringr::str_to_sentence(
+                                                                                                        gsub('_', ' ',  
+                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df12$Description)))))))))))))))))))
+
+res_df48 <- res_df48 %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_df48) <- res_df48$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_df48$Description <- gsub('(H|h)iv', 'HIV', 
+                           gsub('pd 1', 'PD-1',
+                                gsub('ecm', 'ECM', 
+                                     gsub('(I|i)nterleukin', 'IL', 
+                                          gsub('(R|r)na', 'RNA', 
+                                               gsub('(D|d)na', 'DNA',
+                                                    gsub(' i ', ' I ', 
+                                                         gsub('(A|a)tp ', 'ATP ', 
+                                                              gsub('(N|n)adh ', 'NADH ', 
+                                                                   gsub('(N|n)ad ', 'NAD ',
+                                                                        gsub('t cell', 'T cell',
+                                                                             gsub('b cell', 'B cell',
+                                                                                  gsub('built from .*', ' (...)',
+                                                                                       gsub('mhc', 'MHC',
+                                                                                            gsub('mhc class i', 'MHC I', 
+                                                                                                 gsub('mhc class ii', 'MHC II', 
+                                                                                                      stringr::str_to_sentence(
+                                                                                                        gsub('_', ' ',  
+                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df48$Description)))))))))))))))))))
 
 
-## ENRICHMENT ------------------------------------------------------------------
+## ENRICHMENT ANALYSIS
 
-enrichres <- new("enrichResult",
+enrichres4 <- new("enrichResult",
                  readable = FALSE,
-                 result = res_df,
+                 result = res_df4,
                  pvalueCutoff = 0.05,
                  pAdjustMethod = "BH",
                  qvalueCutoff = 0.2,
@@ -190,40 +282,167 @@ enrichres <- new("enrichResult",
                  universe = unique(bg_genes$gene),
                  gene2Symbol = character(0),
                  geneSets = bg_genes)
-class(enrichres)
+class(enrichres4) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+enrichres12 <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_df12,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEG4$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+class(enrichres12) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+enrichres48 <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_df48,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEG4$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+class(enrichres48) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 ## VISUALISATION ---------------------------------------------------------------
 
-p1 <- barplot(enrichres, showCategory = 20)
+# This process will automaticall produce figures (arranges) for all options above
 
-p2 <- mutate(enrichres, qscore = -log(p.adjust, base = 10)) %>% 
-  barplot(x = "qscore")
+## 4HRS PLOTS ------------------------------------------------------------------
 
-p3 <- dotplot(enrichres, showCategory = 15)
+p4.1 <- barplot(enrichres4, showCategory = 20)
 
-p4 <- enrichplot::cnetplot(enrichres)
+p4.1 <- dotplot(enrichres4, showCategory = 15)
 
-heatplot(enrichres, showCategory = 5)
+p4.3 <- enrichplot::cnetplot(enrichres4)
 
-enrichres2 <- pairwise_termsim(enrichres)
+ggarrange(
+  p4.3,
+  ggarrange(p4.1, p4.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
 
-treeplot(enrichres2)
+ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_4hrs_', up_or_down, '.png',
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
 
-emapplot(enrichres2)
+enrichres4.2 <- pairwise_termsim(enrichres4)
 
-upsetplot(enrichres)
+p4.4 <- emapplot(enrichres4.2)
 
-ggarrange(p1, p3,
+p4.5 <- upsetplot(enrichres4)
+
+ggarrange(p4.4, p4.5,
           labels = c("A", "B"),
-          ncol = 2, 
-          nrow = 1,
-          common.legend = TRUE, 
+          ncol = 1, 
+          nrow = 2,
+          common.legend = F, 
           legend = "bottom") + 
   bgcolor("White") +
   border("White")
 
-ggsave("4_figures/emaplot4hr.png",
-       height = 15,
+ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_4hrs_', up_or_down, '.png',
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
+
+## 12HRS PLOTS -----------------------------------------------------------------
+
+p12.1 <- barplot(enrichres12, showCategory = 20)
+
+p12.1 <- dotplot(enrichres12, showCategory = 15)
+
+p12.3 <- enrichplot::cnetplot(enrichres12)
+
+ggarrange(
+  p12.3,
+  ggarrange(p12.1, p12.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
+
+ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_12hrs_', up_or_down, '.png',
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
+
+enrichres12.2 <- pairwise_termsim(enrichres12)
+
+p12.4 <- emapplot(enrichres12.2)
+
+p12.5 <- upsetplot(enrichres12)
+
+ggarrange(p12.4, p12.5,
+          labels = c("A", "B"),
+          ncol = 1, 
+          nrow = 2,
+          common.legend = F, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+
+ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_12hrs_', up_or_down, '.png',
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
+
+## 48HRS PLOTS -----------------------------------------------------------------
+
+p48.1 <- barplot(enrichres48, showCategory = 20)
+
+p48.1 <- dotplot(enrichres48, showCategory = 15)
+
+p48.3 <- enrichplot::cnetplot(enrichres48)
+
+ggarrange(
+  p48.3,
+  ggarrange(p48.1, p48.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
+
+ggsave('4_figures/PATHWAY_ENRICHMENT/3_plot_48hrs_', up_or_down, '.png',
+       height = 30,
+       width = 30,
+       units = "cm",
+       dpi = 500)
+
+enrichres48.2 <- pairwise_termsim(enrichres48)
+
+p48.4 <- emapplot(enrichres48.2)
+
+p48.5 <- upsetplot(enrichres48)
+
+ggarrange(p48.4, p48.5,
+          labels = c("A", "B"),
+          ncol = 1, 
+          nrow = 2,
+          common.legend = F, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+
+ggsave('4_figures/PATHWAY_ENRICHMENT/2_plot_48hrs_', up_or_down, '.png',
+       height = 30,
        width = 30,
        units = "cm",
        dpi = 500)
