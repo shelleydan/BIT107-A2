@@ -32,6 +32,7 @@ library(cluster)    # clustering algorithms
 library(factoextra) # clustering visualization
 library(ggdendro)
 library(plotly)
+library(ggplotify)
 
 ## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
@@ -52,10 +53,6 @@ theme_set(theme_classic(base_size = 15) +
               legend.title=element_blank()
             ))
 
-## SETTING THE WORKING DIRECTORY -----------------------------------------------
-
-setwd("~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/") #DONT THINK THIS IS NECESSARY
-#Site for all DEG data (inputs and outputs)
 
 ## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
 
@@ -189,9 +186,10 @@ results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
 ## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
 
 #Output of the non-filtered DESeq2 results
-write.csv(results_DEG_4, "output_data/raw_DEG_results_4.csv") 
-write.csv(results_DEG_12, "output_data/raw_DEG_results_12.csv")
-write.csv(results_DEG_48, "output_data/raw_DEG_results_48.csv")
+write.csv(results_DEG_4, "3_output_data/raw_DEG_results_4.csv") 
+write.csv(results_DEG_12, "3_output_data/raw_DEG_results_12.csv")
+write.csv(results_DEG_48, "3_output_data/raw_DEG_results_48.csv")
+write.csv(results_DEG_TEMP, "3_output_data/raw_DEG_results_TEMPORAL.csv")
 
 ## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
 counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
@@ -239,13 +237,8 @@ ggHCA <- ggplot(segment(hc1)) +
   theme(aspect.ratio=1,
         legend.position="bottom",
         legend.box.background = element_rect(colour = "black"))
-ggHCA
 
-ggsave("4_figures/HCA.png",
-       height = 20,
-       width = 20,
-       units = "cm",
-       dpi = 500)
+ggHCA # This will be arranges later with the PCA in one plot
 
 ## PCA of All Samples ----------------------------------------------------------
 
@@ -270,24 +263,7 @@ ggPCA <- ggplot(TEMPData, aes(PC1, PC2, color=group.1, shape=timepoint)) +
         legend.position="top",
         legend.box.background = element_rect(colour = "black"))
 
-
-ggsave("4_figures/PCA_ALL.png", PCA_ALL, width = 10, height = 10, units = "in")
-
-ggarrange(ggHCA, ggPCA,
-          labels = c("A", "B"),
-          ncol = 2, 
-          nrow = 1,
-          common.legend = F, 
-          legend = "bottom") + 
-  bgcolor("White") +
-  border("White")
-
-#Save the above figure
-ggsave("4_figures/Figure_1_HCA_PCA_all_samples.png",
-       height = 20,
-       width = 40,
-       units = "cm",
-       dpi = 500)
+ggPCA # This will be arranged/viewd later
 
 ## MOCK DEG COMPARISON 4hrs vs 12hrs -------------------------------------------
 MOCK_DEG_TARGET <- target_data_TEMP[target_data_TEMP$timepoint %in% c(4,12), ] #Targets for 4hrs
@@ -350,7 +326,6 @@ MOCK_DEG_TARGET1 <- MOCK_DEG_TARGET1[MOCK_DEG_TARGET1$group %in% "mock", ] #Targ
 MOCK_DATA1 <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_DEG_TARGET1)]
 
 #Performing Analysis w/ DESeq
-rm(DEG_MOCK1)
 DEG_MOCK1 <- DESeqDataSetFromMatrix(countData = MOCK_DATA1, 
                                    colData = MOCK_DEG_TARGET1, #Adding targets data
                                    design = ~timepoint) #Factors for Comparison
@@ -399,30 +374,35 @@ plot_12_48 <- ggplot(data = results_DEG_MOCK1, aes(x = log2FoldChange,
 
 plot_12_48
 
-ggarrange(plot_4_12, plot_12_48,
-          labels = c("A", "B"),
+ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
+          labels = c("A", "B", "C", "D"),
           ncol = 2, 
-          nrow = 1,
-          common.legend = TRUE, 
+          nrow = 2,
+          common.legend = F, 
           legend = "bottom") + 
   bgcolor("White") +
   border("White")
 
 #Save the above figure
-ggsave("4_figures/Volcano_Plot_Comparing_Mocks.png",
-       height = 15,
-       width = 30,
+ggsave("4_figures/SAMPLE COMPARISONS/Figure_1_HCA_PCA_VP.png",
+       height = 40,
+       width = 40,
        units = "cm",
        dpi = 500)
 
 ## DISPERSION PLOT -------------------------------------------------------------
 
 #We expect that when a gene's read count increases the dispersion of that same gene decreases
+
+# These plots are for review only and are not included in the final text. 
+
 par(mfrow=c(2,2))
 #4HRS
 plotDispEsts(DEG_4, 
              ylab = "Dispersion",
-             xlab = "Mean of Normalised Counts") #This is run on the Analysis Data
+             xlab = "Mean of Normalised Counts",
+             title.main = "Test") #This is run on the Analysis Data
+?plotDispEsts
 
 #12HRS
 plotDispEsts(DEG_12, 
@@ -435,61 +415,22 @@ plotDispEsts(DEG_48,
              xlab = "Mean of Normalised Counts")
 
 par(mfrow=c(1,1))
-## PRINCIPLE COMPONENT ANALYSIS ------------------------------------------------
-
-#4HRS
-# Variance stabilisation transformation
-vst_4 <- DESeq2::vst(DEG_4, blind = F)
-
-# Generating the PCA Plot
-DESeq2::plotPCA(vst_4, 
-                intgroup= "Test") #Applying layers like found above.
-
-#12HRS
-# Variance stabilisation transformation
-vst_12 <- DESeq2::vst(DEG_12, blind = F)
-
-# Generating the PCA Plot
-DESeq2::plotPCA(vst_12, 
-                intgroup= "Test") #Applying layers like found above.
-
-#48HRS
-# Variance stabilisation transformation
-vst_48 <- DESeq2::vst(DEG_48, blind = F)
-
-# Generating the PCA Plot
-DESeq2::plotPCA(vst_48, 
-                intgroup= "Test") #Applying layers like found above.
 
 ## HEATMAPS --------------------------------------------------------------------
 
 #This used pheatmaps to analyse some gene expression clusting.
 
-# Sample-to-sample distance matrix (normalised counts)
-
-sampleDist <- dist(t(assay(vst)))
-sampleDistMatrix <- as.matrix(sampleDist) # Generate a matrix
-colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colours and range of those. 
-
-#Generating the Heatmap
-pheatmap(sampleDistMatrix, #Matrix input
-         clustering_distance_rows = sampleDist,
-         clustering_distance_cols = sampleDist,
-         color = colours) #as defined above
-
-#This heatmap colours show the different between the samples. So the darkest blue shows no difference (e.g. when the same samples are plotted against eachother)
-
 # Log transformed normalised counts (using top 10 genes)
 
 DEG_padj_orders <- results_DEG[order(results_DEG$padj),] #Ascending order of padj values
 
-topDEGs <- results_DEG[order(results_DEG$padj), ][1:10,] #Selecting the top 10
+topDEGs <- results_DEG_TEMP[order(results_DEG_TEMP$padj), ][1:10,] #Selecting the top 10
 topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
 
-rld <- rlog(DEG, blind = F) #Performling a log transformation
+rld <- rlog(DEG_TEMP, blind = F) #Performling a log transformation
 
-anno_info <- as.data.frame(colData(DEG)[, c("Condition", "Test")]) #Setting Annotation Levels
-anno_info$Condition <- as.character(anno_info$Condition) #Changing Condition from continuous to ordinal
+anno_info <- as.data.frame(colData(DEG_TEMP)[, c("timepoint", "group")]) #Setting Annotation Levels
+anno_info$timepoint <- as.character(anno_info$timepoint) #Changing Condition from continuous to ordinal
 
 pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_rows = T, #Adds column tree-clustering
@@ -497,40 +438,38 @@ pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_cols = T, #Adds rows tree-clustering
          annotation_col = anno_info) 
 
-# Z-Scores with top 10 genes
+# Sample-to-sample distance matrix (normalised counts)
 
-z_calc <- function(x) { #Function for calculating z-scores
-  ((x - mean(x)) / sd(x))
-}
+sampleDist <- dist(t(assay(vst_TEMP)))
 
-top10DEGs <- results_DEG[order(results_DEG$padj), ][1:10,]
-top10DEGs_names <- row.names(top10DEGs)
+sampleDistMatrix <- as.matrix(sampleDist) # Generate a matrix
+colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colours and range of those. 
 
-normal_counts <- counts(DEG, normalized = T) #Normalising the counts
-zscore_all <- t(apply(normal_counts, 1, z_calc)) #Z-scores for all genes
-zscore_sub <- zscore_all[top10DEGs_names,] #Subsetting for the top 10 genes
+#Generating the Heatmap
+pheatmap(sampleDistMatrix, #Matrix input
+         clustering_distance_rows = sampleDist,
+         clustering_distance_cols = sampleDist,
+         color = colours,
+         annotation_col = anno_info) #as defined above
 
-pheatmap(zscore_sub)
+#This heatmap colours show the different between the samples. So the darkest blue shows no difference (e.g. when the same samples are plotted against eachother)
 
 ## MA PLOT ---------------------------------------------------------------------
 
 #These plots are used to see the distribution of gene expressions
 #The default alpha for MA plots is 0.1
 
-plotMA(DEG, ylim=c(-2,2), alpha = 0.05) #Setting the alpha value to 0.05
+plotMA(DEG_TEMP, ylim=c(-2,2), alpha = 0.05) #Setting the alpha value to 0.05
 
 #Removing Noise
 
-resLFC <- lfcShrink(DEG, 
-                    coef = "Test_mock_vs_infected", 
+DEG_TEMP$group
+
+resLFC <- lfcShrink(DEG_TEMP, 
+                    coef = "group_infected_vs_mock", 
                     type = "apeglm") #This gives a ref
 
-plotMA(resLFC, ylim=c(-2,2), alpha = 0.05)
-
-## MA Plot with ggplot 2
-colnames(results_DEG)
-
-par(mfrow=c(2,2))
+plotMA(resLFC, ylim=c(-3,3), alpha = 0.05)
 
 ## VOLCANO PLOT 4HRS -----------------------------------------------------------
 
@@ -644,64 +583,25 @@ VP48 <- ggplot(data = results_DEG_48, aes(x = log2FoldChange,
     x = expression("log"[2]*" Fold Change"), #Changing the x axis
     y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
   ggtitle("Timestamp: 48hrs") + # Setting a Figure Title
-  geom_text_repel(max.overlaps = 2000, size=5) #Adding labels which we express in ggplot line 1
-
+  geom_text_repel(max.overlaps = 2000, size=5) #Adding labels which we express in ggplot line 
 
 ## PLOTTING ALL VOLCANO PLOTS IN ONE WINDOW ------------------------------------
-ggarrange(VP4, VP12, VP48,
+
+legendVP <- get_legend(VP12)
+legendVP <- as.ggplot(legendVP)
+
+ggarrange(VP4, VP12, VP48, legendVP,
           labels = c("A", "B", "C"),
           ncol = 2, 
           nrow = 2,
-          common.legend = TRUE, 
-          legend = "bottom") + 
+          common.legend = T, 
+          legend = "none") + 
   bgcolor("White") +
   border("White")
 
 #Save the above figure
-ggsave("4_figures/Volcano_Plot_4_12_48.png",
+ggsave("4_figures/DEG/Figure_2_VP_4_12_48.png",
        height = 30,
        width = 30,
        units = "cm",
        dpi = 500)
-
-
-
-
-
-
-## COMPARISON OF MOCKS ONLY
-
-# Seperating Mocks out of the TEMP data
-
-mocks_target <- target_data_TEMP[target_data_TEMP$group == 'mock',]
-
-mock_counts <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(mocks_target)] #Counts for Mocks
-
-#FACTOR LEVELS FOR MOCKS
-mocks_target$timepoint <- factor(mocks_target$timepoint)
-
-#MOCK
-DEG_MOCK <- DESeqDataSetFromMatrix(countData = mock_counts, 
-                                   colData = mocks_target, #Adding targets data
-                                   design = ~timepoint) #Factors for Comparison
-DEG_MOCK$timepoint <- factor(DEG_MOCK$timepoint, levels = c(4,12,48)) 
-
-#MOCK ANALYSIS
-DEG_MOCK <- DESeq2::DESeq(DEG_MOCK) #Perform the Analysis
-results_DEG_MOCK <- DESeq2::results(DEG_MOCK) #Coalating the results into a dataframe
-summary(results_DEG_MOCK$padj)
-results_DEG_MOCK <- as.data.frame(results_DEG_MOCK) # Produces and R dataframe
-
-#MOCK DISPERSION
-plotDispEsts(DEG_MOCK, 
-             ylab = "Dispersion",
-             xlab = "Mean of Normalised Counts") #This is run on the Analysis Data
-
-#MOCK PCA
-#4HRS
-# Variance stabilisation transformation
-vst_MOCK <- DESeq2::vst(DEG_MOCK, blind = F)
-
-# Generating the PCA Plot
-DESeq2::plotPCA(vst_MOCK, 
-                intgroup= "timepoint") #Applying layers like found above.
