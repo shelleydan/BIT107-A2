@@ -16,7 +16,6 @@ BiocManager::install("timecoursedata")
 BiocManager::install("moanin")
 BiocManager::install("topGO")
 BiocManager::install("biomaRt")
-BiocManager::install("KEGGprofile") #This was removed from Bioconductor - Another method will be used
 BiocManager::install("BiocWorkflowTools")
 install.packages("NMF")
 install.packages("ggfortify")
@@ -25,7 +24,6 @@ library(timecoursedata)
 library(moanin)
 library(topGO)
 library(biomaRt)
-library(KEGGprofile)
 library(BiocWorkflowTools)
 library(NMF)
 library(ggfortify)
@@ -68,8 +66,6 @@ meta$Test <- as.factor(meta$Test) #maybe not needed CHECK
 vals <- c(4, 12, 48) # Taking only the timepoints that have controls and tests
 meta <- meta[meta$Condition %in% vals, ] #Removing Bad Data from Targets
 meta <- data.frame(meta, row.names = 3) #Setting sample names as the rownames
-meta$Test[meta$Test == 'infected'] <- 'I'
-meta$Test[meta$Test == 'mock'] <- 'M'
 meta$Replicate <- c(1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3) #Manually adding replicate numbers
 str(meta)
 
@@ -146,7 +142,7 @@ head(hour_de_analysis)
 
 GeneList <- c("LOC112268133", "CLIC4", "NDNF", "MGLL", "CTH", "ACE2", "ACE", "TMPRSS2")
 
-png(filename="4_figures/MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
+png(filename="4_figures/TEMPORAL_ANALYSIS/Figure_4_MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
 
 MoaninPlot <- plot_splines_data(moaninModel, 
                   subset_data=GeneList,
@@ -157,9 +153,6 @@ MoaninPlot <- plot_splines_data(moaninModel,
                   xlab = "Counts")
 
 dev.off()
-save_pheatmap(MoaninPlot, '4_figures/MoaninModel.png', 30, 30)
-
-head(hour_de_analysis)
 
 ################################################################################
 #The paper continues to do analysis between different conditions, as this data #
