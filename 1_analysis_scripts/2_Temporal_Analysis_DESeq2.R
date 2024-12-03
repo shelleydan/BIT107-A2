@@ -7,13 +7,8 @@
 
 ## Library ---------------------------------------------------------------------
 
-BiocManager::install("fission")
-library("fission")
 library("DESeq2")
 library("pheatmap")
-data("fission")
-
-head(fission)
 
 ## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
 
@@ -58,6 +53,14 @@ save_pheatmap <- function(x, filename, width=12, height=12){
   }
 }
 
+## READING IN DATA -------------------------------------------------------------
+
+rm(list = ls(all.names = T))
+
+counts_data_TEMP <- read.csv('2_rawdata/1_counts/TEMP_counts.txt', header = T, row.names = 1)
+target_data_TEMP <- read.csv('2_rawdata/2_targets/TEMP_targets.txt', header = T, row.names = 1, stringsAsFactors = T)
+
+target_data_TEMP$timepoint <- as.factor(target_data_TEMP$timepoint)
 
 ## Overall Gene Count Trajectory -----------------------------------------------
 
@@ -93,41 +96,8 @@ ggplot(fiss,
        color = "Group")
   scale_y_log10()
 
-ggsave("4_figures/Temp_DESeq_Counts.png",
+ggsave("4_figures/TEMPORAL_ANALYSIS/Figure_3_Temp_DESeq_Counts.png",
        height = 20,
        width = 20,
        units = "cm",
        dpi = 500)
-
-## Statistical Testing
-
-resultsNames(ddsTC)
-res12 <- results(ddsTC, name="groupinfected.timepoint12", test="Wald")
-res12[which.min(res12$padj),] # Greatest DEG at 12hrs
-
-res48 <- results(ddsTC, name="groupinfected.timepoint48", test="Wald")
-res48[which.min(res48$padj),] # Greatest DEG at 48hrs
-
-## Further Analysis
-
-betas <- coef(ddsTC)
-colnames(betas)
-
-#Note for this comparison, 4hrs is being used as the baseline.
-
-topGenes <- head(order(resTC$padj),30)
-mat <- betas[topGenes, -c(1,2)]
-thr <- 3 
-mat[mat < -thr] <- -thr
-mat[mat > thr] <- thr
-map <- pheatmap(mat, breaks=seq(from=-thr, 
-                         to=thr, 
-                         length=101),
-         cluster_col=FALSE)
-
-#Heatmap width and height best at 10
-save_pheatmap(map, "4_figures/Temp_Heatmap.png", 10, 10)
-
-
-
-
