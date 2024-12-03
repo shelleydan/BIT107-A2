@@ -426,7 +426,6 @@ plotDispEsts(DEG_4,
              ylab = "Dispersion",
              xlab = "Mean of Normalised Counts",
              title.main = "Test") #This is run on the Analysis Data
-?plotDispEsts
 
 #12HRS
 plotDispEsts(DEG_12, 
@@ -476,7 +475,7 @@ pheat2 <- pheatmap(sampleDistMatrix, #Matrix input
          color = colours,
          annotation_col = anno_info) #as defined above
 
-save_pheatmap(pheat1, '4_figures/Figure_2_top_10_gene_heatmap.png', width = 7.5, height = 7.5)
+save_pheatmap(pheat1, '4_figures/Figure_2_top_10_gene_heatmap.png', width = 12.5, height = 7.5)
 save_pheatmap(pheat2, '4_figures/Supplementary/Sup_Figure_1_sample_x_sample_heatmap.png', width = 12.5, height = 7.5)
 
 
@@ -628,7 +627,7 @@ ggarrange(VP4, VP12, VP48, legendVP,
   border("White")
 
 #Save the above figure
-ggsave("4_figures/Figure_2_VP_4_12_48.png",
+ggsave("4_figures/Figure_3_VP_4_12_48.png",
        height = 30,
        width = 30,
        units = "cm",
