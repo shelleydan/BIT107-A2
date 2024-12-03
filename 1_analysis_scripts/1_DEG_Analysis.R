@@ -8,12 +8,12 @@
 
 ## LIBRARY ---------------------------------------------------------------------
 
-install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
+#install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
 
 #Bioconductor Package Installs
-BiocManager::install("DESeq2") #Downloads DESeq2 from Bioconductor
-BiocManager::install("Rsamtools") #Downloads SAMTools from Bioconductor
-BiocManager::install("apeglm") #Downloads apeglm from Bioconductor
+#BiocManager::install("DESeq2") #Downloads DESeq2 from Bioconductor
+#BiocManager::install("Rsamtools") #Downloads SAMTools from Bioconductor
+#BiocManager::install("apeglm") #Downloads apeglm from Bioconductor
 
 #Library Loading
 library(pheatmap)
@@ -27,9 +27,9 @@ library(RColorBrewer)
 library(ggplot2)
 library(ggrepel)
 library(ggpubr)
-library(tidyverse)  # data manipulation
-library(cluster)    # clustering algorithms
-library(factoextra) # clustering visualization
+library(tidyverse)
+library(cluster)
+library(factoextra)
 library(ggdendro)
 library(plotly)
 library(ggplotify)
@@ -53,6 +53,30 @@ theme_set(theme_classic(base_size = 15) +
               legend.title=element_blank()
             ))
 
+
+## PHEATMAP SAVE FUNCTION ------------------------------------------------------
+
+#Credit: https://gist.github.com/mathzero/a2070a24a6b418740c44a5c023f5c01e
+
+save_pheatmap <- function(x, filename, width=12, height=12){
+  stopifnot(!missing(x))
+  stopifnot(!missing(filename))
+  if(grepl(".png",filename)){
+    png(filename, width=width, height=height, units = "in", res=300)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else if(grepl(".pdf",filename)){
+    pdf(filename, width=width, height=height)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else{
+    print("Filename did not contain '.png' or '.pdf'")
+  }
+}
 
 ## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
 
@@ -384,7 +408,7 @@ ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
   border("White")
 
 #Save the above figure
-ggsave("4_figures/SAMPLE COMPARISONS/Figure_1_HCA_PCA_VP.png",
+ggsave("4_figures/Figure_1_HCA_PCA_VP.png",
        height = 40,
        width = 40,
        units = "cm",
@@ -422,7 +446,7 @@ par(mfrow=c(1,1))
 
 # Log transformed normalised counts (using top 10 genes)
 
-DEG_padj_orders <- results_DEG[order(results_DEG$padj),] #Ascending order of padj values
+DEG_padj_orders <- results_DEG_TEMP[order(results_DEG_TEMP$padj),] #Ascending order of padj values
 
 topDEGs <- results_DEG_TEMP[order(results_DEG_TEMP$padj), ][1:10,] #Selecting the top 10
 topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
@@ -432,7 +456,7 @@ rld <- rlog(DEG_TEMP, blind = F) #Performling a log transformation
 anno_info <- as.data.frame(colData(DEG_TEMP)[, c("timepoint", "group")]) #Setting Annotation Levels
 anno_info$timepoint <- as.character(anno_info$timepoint) #Changing Condition from continuous to ordinal
 
-pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
+pheat1 <- pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
          cluster_rows = T, #Adds column tree-clustering
          show_rownames = T, 
          cluster_cols = T, #Adds rows tree-clustering
@@ -446,11 +470,15 @@ sampleDistMatrix <- as.matrix(sampleDist) # Generate a matrix
 colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colours and range of those. 
 
 #Generating the Heatmap
-pheatmap(sampleDistMatrix, #Matrix input
+pheat2 <- pheatmap(sampleDistMatrix, #Matrix input
          clustering_distance_rows = sampleDist,
          clustering_distance_cols = sampleDist,
          color = colours,
          annotation_col = anno_info) #as defined above
+
+save_pheatmap(pheat1, '4_figures/Figure_2_top_10_gene_heatmap.png', width = 7.5, height = 7.5)
+save_pheatmap(pheat2, '4_figures/Supplementary/Sup_Figure_1_sample_x_sample_heatmap.png', width = 12.5, height = 7.5)
+
 
 #This heatmap colours show the different between the samples. So the darkest blue shows no difference (e.g. when the same samples are plotted against eachother)
 
@@ -600,7 +628,7 @@ ggarrange(VP4, VP12, VP48, legendVP,
   border("White")
 
 #Save the above figure
-ggsave("4_figures/DEG/Figure_2_VP_4_12_48.png",
+ggsave("4_figures/Figure_2_VP_4_12_48.png",
        height = 30,
        width = 30,
        units = "cm",
