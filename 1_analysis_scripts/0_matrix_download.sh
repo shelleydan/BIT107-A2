@@ -20,18 +20,11 @@ GEOLINK=${GEOID::-3}nnn #Customises the ID to work with the NCBI link
 wget -O ${WORKDIR}/${GEOID}.matrix.txt.gz \
 	https://ftp.ncbi.nlm.nih.gov/geo/series/${GEOLINK}/${GEOID}/matrix/${GEOID}_series_matrix.txt.gz
 
-wget -O ${WORKDIR}/${GEOID}.counts.csv.gz \
-	https://www.ncbi.nlm.nih.gov/geo/download/?acc=${GEOID}&format=file&file=${GEOID}%5Fhost%5Fcounts%5Fmatrix%2Ecsv%2Egz
-
-#Assigned a jobid to the wget command to let the download finish before moving on
 pid0=$!
 wait $pid0
-pid1=$!
-wait $pid1
 
 #The downloaded file is zipped and is useless without unzipping first.
 gunzip ${GEOID}.matrix.txt.gz 
-gunzip ${GEOID}.counts.csv.gz
 
 #The above is all commented out to continue with the next part REMOVE THIS
 
