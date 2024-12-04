@@ -14,7 +14,7 @@ The analysis provided here, and written in the BIT101 Scientific Communication S
 
 <h3>Visualisation of the Workflow</h3>
 
-![workflow](https://github.com/user-attachments/assets/31711a91-9853-4fc1-9132-7c1dcf376f66)
+![workflow](https://github.com/user-attachments/assets/6e9523f9-6239-4203-a2d7-12e6bf09632b)
 
 <h3>Overview of Scripts and Dependancies</h3>
 
