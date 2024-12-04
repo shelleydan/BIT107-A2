@@ -55,9 +55,10 @@ resTC$symbol <- mcols(ddsTC)$symbol
 head(resTC[order(resTC$padj),], 4)
 
 fiss <- plotCounts(ddsTC, which.min(resTC$padj), 
-                  intgroup = c("group","timepoint"), 
-                  returnData = TRUE)
+                   intgroup = c("group","timepoint"), 
+                   returnData = TRUE)
 fiss$minute <- as.numeric(as.character(fiss$timepoint))
+
 
 ggplot(fiss,
        aes(x = minute, 
@@ -69,8 +70,8 @@ ggplot(fiss,
                geom="line") +
   labs(x = "Time (hrs)",
        y = "Counts",
-       color = "Group")
-  scale_y_log10()
+       color = "Group") +
+  scale_color_manual(values = c("blue", "red"))
 
 ggsave("4_figures/Figure_4_Temp_DESeq_Counts.png",
        height = 20,

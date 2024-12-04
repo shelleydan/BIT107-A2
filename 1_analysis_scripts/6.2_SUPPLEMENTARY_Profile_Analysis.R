@@ -131,11 +131,11 @@ res4 <- lapply(names(deg_results_list_4),
                function(x) enricher(gene = deg_results_list_4[[x]]$gene_symbol,
                                     TERM2GENE = bg_genes))
 res12 <- lapply(names(deg_results_list_12),
-               function(x) enricher(gene = deg_results_list_12[[x]]$gene_symbol,
-                                    TERM2GENE = bg_genes))
+                function(x) enricher(gene = deg_results_list_12[[x]]$gene_symbol,
+                                     TERM2GENE = bg_genes))
 res48 <- lapply(names(deg_results_list_48),
-               function(x) enricher(gene = deg_results_list_48[[x]]$gene_symbol,
-                                    TERM2GENE = bg_genes))
+                function(x) enricher(gene = deg_results_list_48[[x]]$gene_symbol,
+                                     TERM2GENE = bg_genes))
 
 names(res4) <- names(deg_results_list_4) # Apply the UP and DOWN tags
 names(res12) <- names(deg_results_list_12) # Apply the UP and DOWN tags
@@ -154,16 +154,16 @@ names(res_df48) <- names(res48) # Apply the UP and DOWN tags
 res_df48 <- do.call(rbind, res_df48)
 
 res_df4 <- res_df4 %>% mutate(minuslog10padj = -log10(p.adjust),
-                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
-                                                 rownames(res_df4)))
+                              diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                   rownames(res_df4)))
 
 res_df12 <- res_df12 %>% mutate(minuslog10padj = -log10(p.adjust),
-                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
-                                                 rownames(res_df12)))
+                                diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                     rownames(res_df12)))
 
 res_df48 <- res_df48 %>% mutate(minuslog10padj = -log10(p.adjust),
-                            diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
-                                                 rownames(res_df48)))
+                                diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                     rownames(res_df48)))
 
 
 # Subset the pathways by (i) padj value, (ii) Gene count
@@ -184,24 +184,24 @@ rownames(res_df4) <- res_df4$ID
 
 # For visualisation purposes, let's shorten the pathway names
 res_df4$Description <- gsub('(H|h)iv', 'HIV', 
-                           gsub('pd 1', 'PD-1',
-                                gsub('ecm', 'ECM', 
-                                     gsub('(I|i)nterleukin', 'IL', 
-                                          gsub('(R|r)na', 'RNA', 
-                                               gsub('(D|d)na', 'DNA',
-                                                    gsub(' i ', ' I ', 
-                                                         gsub('(A|a)tp ', 'ATP ', 
-                                                              gsub('(N|n)adh ', 'NADH ', 
-                                                                   gsub('(N|n)ad ', 'NAD ',
-                                                                        gsub('t cell', 'T cell',
-                                                                             gsub('b cell', 'B cell',
-                                                                                  gsub('built from .*', ' (...)',
-                                                                                       gsub('mhc', 'MHC',
-                                                                                            gsub('mhc class i', 'MHC I', 
-                                                                                                 gsub('mhc class ii', 'MHC II', 
-                                                                                                      stringr::str_to_sentence(
-                                                                                                        gsub('_', ' ',  
-                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df4$Description)))))))))))))))))))
+                            gsub('pd 1', 'PD-1',
+                                 gsub('ecm', 'ECM', 
+                                      gsub('(I|i)nterleukin', 'IL', 
+                                           gsub('(R|r)na', 'RNA', 
+                                                gsub('(D|d)na', 'DNA',
+                                                     gsub(' i ', ' I ', 
+                                                          gsub('(A|a)tp ', 'ATP ', 
+                                                               gsub('(N|n)adh ', 'NADH ', 
+                                                                    gsub('(N|n)ad ', 'NAD ',
+                                                                         gsub('t cell', 'T cell',
+                                                                              gsub('b cell', 'B cell',
+                                                                                   gsub('built from .*', ' (...)',
+                                                                                        gsub('mhc', 'MHC',
+                                                                                             gsub('mhc class i', 'MHC I', 
+                                                                                                  gsub('mhc class ii', 'MHC II', 
+                                                                                                       stringr::str_to_sentence(
+                                                                                                         gsub('_', ' ',  
+                                                                                                              gsub('GOBP_|KEGG_|REACTOME_', '', res_df4$Description)))))))))))))))))))
 
 res_df12 <- res_df12 %>% filter(diffexpressed == up_or_down) %>% 
   dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
@@ -209,24 +209,24 @@ rownames(res_df12) <- res_df12$ID
 
 # For visualisation purposes, let's shorten the pathway names
 res_df12$Description <- gsub('(H|h)iv', 'HIV', 
-                           gsub('pd 1', 'PD-1',
-                                gsub('ecm', 'ECM', 
-                                     gsub('(I|i)nterleukin', 'IL', 
-                                          gsub('(R|r)na', 'RNA', 
-                                               gsub('(D|d)na', 'DNA',
-                                                    gsub(' i ', ' I ', 
-                                                         gsub('(A|a)tp ', 'ATP ', 
-                                                              gsub('(N|n)adh ', 'NADH ', 
-                                                                   gsub('(N|n)ad ', 'NAD ',
-                                                                        gsub('t cell', 'T cell',
-                                                                             gsub('b cell', 'B cell',
-                                                                                  gsub('built from .*', ' (...)',
-                                                                                       gsub('mhc', 'MHC',
-                                                                                            gsub('mhc class i', 'MHC I', 
-                                                                                                 gsub('mhc class ii', 'MHC II', 
-                                                                                                      stringr::str_to_sentence(
-                                                                                                        gsub('_', ' ',  
-                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df12$Description)))))))))))))))))))
+                             gsub('pd 1', 'PD-1',
+                                  gsub('ecm', 'ECM', 
+                                       gsub('(I|i)nterleukin', 'IL', 
+                                            gsub('(R|r)na', 'RNA', 
+                                                 gsub('(D|d)na', 'DNA',
+                                                      gsub(' i ', ' I ', 
+                                                           gsub('(A|a)tp ', 'ATP ', 
+                                                                gsub('(N|n)adh ', 'NADH ', 
+                                                                     gsub('(N|n)ad ', 'NAD ',
+                                                                          gsub('t cell', 'T cell',
+                                                                               gsub('b cell', 'B cell',
+                                                                                    gsub('built from .*', ' (...)',
+                                                                                         gsub('mhc', 'MHC',
+                                                                                              gsub('mhc class i', 'MHC I', 
+                                                                                                   gsub('mhc class ii', 'MHC II', 
+                                                                                                        stringr::str_to_sentence(
+                                                                                                          gsub('_', ' ',  
+                                                                                                               gsub('GOBP_|KEGG_|REACTOME_', '', res_df12$Description)))))))))))))))))))
 
 res_df48 <- res_df48 %>% filter(diffexpressed == up_or_down) %>% 
   dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
@@ -234,71 +234,71 @@ rownames(res_df48) <- res_df48$ID
 
 # For visualisation purposes, let's shorten the pathway names
 res_df48$Description <- gsub('(H|h)iv', 'HIV', 
-                           gsub('pd 1', 'PD-1',
-                                gsub('ecm', 'ECM', 
-                                     gsub('(I|i)nterleukin', 'IL', 
-                                          gsub('(R|r)na', 'RNA', 
-                                               gsub('(D|d)na', 'DNA',
-                                                    gsub(' i ', ' I ', 
-                                                         gsub('(A|a)tp ', 'ATP ', 
-                                                              gsub('(N|n)adh ', 'NADH ', 
-                                                                   gsub('(N|n)ad ', 'NAD ',
-                                                                        gsub('t cell', 'T cell',
-                                                                             gsub('b cell', 'B cell',
-                                                                                  gsub('built from .*', ' (...)',
-                                                                                       gsub('mhc', 'MHC',
-                                                                                            gsub('mhc class i', 'MHC I', 
-                                                                                                 gsub('mhc class ii', 'MHC II', 
-                                                                                                      stringr::str_to_sentence(
-                                                                                                        gsub('_', ' ',  
-                                                                                                             gsub('GOBP_|KEGG_|REACTOME_', '', res_df48$Description)))))))))))))))))))
+                             gsub('pd 1', 'PD-1',
+                                  gsub('ecm', 'ECM', 
+                                       gsub('(I|i)nterleukin', 'IL', 
+                                            gsub('(R|r)na', 'RNA', 
+                                                 gsub('(D|d)na', 'DNA',
+                                                      gsub(' i ', ' I ', 
+                                                           gsub('(A|a)tp ', 'ATP ', 
+                                                                gsub('(N|n)adh ', 'NADH ', 
+                                                                     gsub('(N|n)ad ', 'NAD ',
+                                                                          gsub('t cell', 'T cell',
+                                                                               gsub('b cell', 'B cell',
+                                                                                    gsub('built from .*', ' (...)',
+                                                                                         gsub('mhc', 'MHC',
+                                                                                              gsub('mhc class i', 'MHC I', 
+                                                                                                   gsub('mhc class ii', 'MHC II', 
+                                                                                                        stringr::str_to_sentence(
+                                                                                                          gsub('_', ' ',  
+                                                                                                               gsub('GOBP_|KEGG_|REACTOME_', '', res_df48$Description)))))))))))))))))))
 
 
 ## ENRICHMENT ANALYSIS
 
 enrichres4 <- new("enrichResult",
-                 readable = FALSE,
-                 result = res_df4,
-                 pvalueCutoff = 0.05,
-                 pAdjustMethod = "BH",
-                 qvalueCutoff = 0.2,
-                 organism = "human",
-                 ontology = "UNKNOWN",
-                 gene = DEG4$gene_symbol,
-                 keytype = "UNKNOWN",
-                 universe = unique(bg_genes$gene),
-                 gene2Symbol = character(0),
-                 geneSets = bg_genes)
+                  readable = FALSE,
+                  result = res_df4,
+                  pvalueCutoff = 0.05,
+                  pAdjustMethod = "BH",
+                  qvalueCutoff = 0.2,
+                  organism = "human",
+                  ontology = "UNKNOWN",
+                  gene = DEG4$gene_symbol,
+                  keytype = "UNKNOWN",
+                  universe = unique(bg_genes$gene),
+                  gene2Symbol = character(0),
+                  geneSets = bg_genes)
 class(enrichres4) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 enrichres12 <- new("enrichResult",
-                 readable = FALSE,
-                 result = res_df12,
-                 pvalueCutoff = 0.05,
-                 pAdjustMethod = "BH",
-                 qvalueCutoff = 0.2,
-                 organism = "human",
-                 ontology = "UNKNOWN",
-                 gene = DEG4$gene_symbol,
-                 keytype = "UNKNOWN",
-                 universe = unique(bg_genes$gene),
-                 gene2Symbol = character(0),
-                 geneSets = bg_genes)
+                   readable = FALSE,
+                   result = res_df12,
+                   pvalueCutoff = 0.05,
+                   pAdjustMethod = "BH",
+                   qvalueCutoff = 0.2,
+                   organism = "human",
+                   ontology = "UNKNOWN",
+                   gene = DEG4$gene_symbol,
+                   keytype = "UNKNOWN",
+                   universe = unique(bg_genes$gene),
+                   gene2Symbol = character(0),
+                   geneSets = bg_genes)
 class(enrichres12) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 enrichres48 <- new("enrichResult",
-                 readable = FALSE,
-                 result = res_df48,
-                 pvalueCutoff = 0.05,
-                 pAdjustMethod = "BH",
-                 qvalueCutoff = 0.2,
-                 organism = "human",
-                 ontology = "UNKNOWN",
-                 gene = DEG4$gene_symbol,
-                 keytype = "UNKNOWN",
-                 universe = unique(bg_genes$gene),
-                 gene2Symbol = character(0),
-                 geneSets = bg_genes)
+                   readable = FALSE,
+                   result = res_df48,
+                   pvalueCutoff = 0.05,
+                   pAdjustMethod = "BH",
+                   qvalueCutoff = 0.2,
+                   organism = "human",
+                   ontology = "UNKNOWN",
+                   gene = DEG4$gene_symbol,
+                   keytype = "UNKNOWN",
+                   universe = unique(bg_genes$gene),
+                   gene2Symbol = character(0),
+                   geneSets = bg_genes)
 class(enrichres48) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 ## VISUALISATION ---------------------------------------------------------------

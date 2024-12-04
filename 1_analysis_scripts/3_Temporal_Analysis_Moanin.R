@@ -38,12 +38,12 @@ rm(list = ls(all.names = T))
 #NOTE!: Start with a Fresh Environment
 
 data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv", #Input Counts Data
-                        header = T, 
-                        row.names = 1)
+                 header = T, 
+                 row.names = 1)
 
 meta <- read.delim("2_rawdata/targets.txt", 
-                          sep = "", 
-                          header = T) #Inputting the targets
+                   sep = "", 
+                   header = T) #Inputting the targets
 meta <- meta[,8:10] #Seperating out the only columns we want
 meta$Test <- as.factor(meta$Test) #maybe not needed CHECK
 
@@ -92,9 +92,9 @@ meta$Test <- factor(meta$Test, levels(meta$Test)[c(1,2)])
 ## Temporal Modelling ----------------------------------------------------------
 
 moaninModel <- create_moanin_model(data=data, 
-                                    meta=meta,
-                                    group_variable = "Test",
-                                    time_variable = "Condition")
+                                   meta=meta,
+                                   group_variable = "Test",
+                                   time_variable = "Condition")
 
 show(moaninModel) # Gives a summary of the produced model
 
@@ -123,24 +123,24 @@ tabCombos<-table(signifCombos)
 #PLOT!: Gene Expression of top10 overtime. 
 head(hour_de_analysis)
 
-#top10DEGs are the top 10 DEGs in the 4hr analysis determined on DEG_Analysis.R
-
 GeneList <- c("LOC112268133", "CLIC4", "NDNF", "MGLL", "CTH", "ACE2", "ACE", "TMPRSS2")
 
 png(filename="4_figures/Figure_5_MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
 
 MoaninPlot <- plot_splines_data(moaninModel, 
-                  subset_data=GeneList,
-                  colors=ann_colours$Test,
-                  smooth=TRUE,
-                  ylim = c(-10000, 10000),
-                  yaxis = T,
-                  xaxis = T,
-                  xlab = "Time (hrs)",
-                  mar = c(3, 3, 3, 3),
-                  ylab = "Counts")
+                                subset_data=GeneList,
+                                colors=ann_colours$Test,
+                                smooth=TRUE,
+                                ylim = c(-10000, 10000),
+                                yaxis = T,
+                                xaxis = T,
+                                xlab = "Time (hrs)",
+                                mar = c(3, 3, 3, 3),
+                                ylab = "Counts")
 
 dev.off()
+
+head(moaninModel)
 
 ################################################################################
 #The paper continues to do analysis between different conditions, as this data #

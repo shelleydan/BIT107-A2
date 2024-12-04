@@ -290,8 +290,8 @@ MOCK_DATA <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_D
 #Performing Analysis w/ DESeq
 
 DEG_MOCK <- DESeqDataSetFromMatrix(countData = MOCK_DATA, 
-                                colData = MOCK_DEG_TARGET, #Adding targets data
-                                design = ~timepoint) #Factors for Comparison
+                                   colData = MOCK_DEG_TARGET, #Adding targets data
+                                   design = ~timepoint) #Factors for Comparison
 DEG_MOCK$group <- factor(DEG_MOCK$group, levels = c(4,12)) 
 
 DEG_MOCK <- DESeq2::DESeq(DEG_MOCK) #Perform the Analysis
@@ -305,6 +305,8 @@ results_DEG_MOCK$diffexpressed <- "NO"
 results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange > 1 & results_DEG_MOCK$pvalue < 0.05] <- "UP"
 results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange < -1 & results_DEG_MOCK$pvalue < 0.05] <- "DOWN"
 
+sum(results_DEG_MOCK$diffexpressed == "UP" | results_DEG_MOCK$diffexpressed == "DOWN")
+
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
@@ -314,9 +316,9 @@ summary(results_DEG_MOCK$difflabel)
 
 #Volcano Plot with ggplot2
 plot_4_12 <- ggplot(data = results_DEG_MOCK, aes(x = log2FoldChange, 
-                                        y = -log10(pvalue), 
-                                        col = diffexpressed, 
-                                        label = difflabel)) +
+                                                 y = -log10(pvalue), 
+                                                 col = diffexpressed, 
+                                                 label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
              col = "gray", 
              linetype = "dashed") + #Adding vertical lines to show fold change cut off
@@ -343,8 +345,8 @@ MOCK_DATA1 <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_
 
 #Performing Analysis w/ DESeq
 DEG_MOCK1 <- DESeqDataSetFromMatrix(countData = MOCK_DATA1, 
-                                   colData = MOCK_DEG_TARGET1, #Adding targets data
-                                   design = ~timepoint) #Factors for Comparison
+                                    colData = MOCK_DEG_TARGET1, #Adding targets data
+                                    design = ~timepoint) #Factors for Comparison
 DEG_MOCK1$timepoint <- factor(DEG_MOCK1$timepoint, levels = c(12,48)) 
 
 DEG_MOCK1 <- DESeq2::DESeq(DEG_MOCK1) #Perform the Analysis
@@ -358,6 +360,8 @@ results_DEG_MOCK1$diffexpressed <- "NO"
 results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange > 1 & results_DEG_MOCK1$padj < 0.05] <- "UP"
 results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange < -1 & results_DEG_MOCK1$padj < 0.05] <- "DOWN"
 
+sum(results_DEG_MOCK1$diffexpressed == "UP" | results_DEG_MOCK1$diffexpressed == "DOWN")
+
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
@@ -367,9 +371,9 @@ summary(results_DEG_MOCK1$difflabel)
 
 #Volcano Plot with ggplot2
 plot_12_48 <- ggplot(data = results_DEG_MOCK1, aes(x = log2FoldChange, 
-                                                 y = -log10(pvalue), 
-                                                 col = diffexpressed, 
-                                                 label = difflabel)) +
+                                                   y = -log10(pvalue), 
+                                                   col = diffexpressed, 
+                                                   label = difflabel)) +
   geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
              col = "gray", 
              linetype = "dashed") + #Adding vertical lines to show fold change cut off
@@ -448,10 +452,10 @@ anno_info <- as.data.frame(colData(DEG_TEMP)[, c("timepoint", "group")]) #Settin
 anno_info$timepoint <- as.character(anno_info$timepoint) #Changing Condition from continuous to ordinal
 
 pheat1 <- pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
-         cluster_rows = T, #Adds column tree-clustering
-         show_rownames = T, 
-         cluster_cols = T, #Adds rows tree-clustering
-         annotation_col = anno_info) 
+                   cluster_rows = T, #Adds column tree-clustering
+                   show_rownames = T, 
+                   cluster_cols = T, #Adds rows tree-clustering
+                   annotation_col = anno_info) 
 
 # Sample-to-sample distance matrix (normalised counts)
 
@@ -462,10 +466,10 @@ colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colou
 
 #Generating the Heatmap
 pheat2 <- pheatmap(sampleDistMatrix, #Matrix input
-         clustering_distance_rows = sampleDist,
-         clustering_distance_cols = sampleDist,
-         color = colours,
-         annotation_col = anno_info) #as defined above
+                   clustering_distance_rows = sampleDist,
+                   clustering_distance_cols = sampleDist,
+                   color = colours,
+                   annotation_col = anno_info) #as defined above
 
 save_pheatmap(pheat1, '4_figures/Figure_2_top_10_gene_heatmap.png', width = 12.5, height = 7.5)
 save_pheatmap(pheat2, '4_figures/Supplementary/Sup_Figure_1_sample_x_sample_heatmap.png', width = 12.5, height = 7.5)
@@ -497,6 +501,8 @@ plotMA(resLFC, ylim=c(-3,3), alpha = 0.05)
 results_DEG_4$diffexpressed <- "NO"
 results_DEG_4$diffexpressed[results_DEG_4$log2FoldChange > 1 & results_DEG_4$pvalue < 0.05] <- "UP"
 results_DEG_4$diffexpressed[results_DEG_4$log2FoldChange < -1 & results_DEG_4$pvalue < 0.05] <- "DOWN"
+
+sum(results_DEG_4$diffexpressed == "UP" | results_DEG_4$diffexpressed == "DOWN")
 
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 
@@ -536,6 +542,8 @@ results_DEG_12$diffexpressed <- "NO"
 results_DEG_12$diffexpressed[results_DEG_12$log2FoldChange > 1 & results_DEG_12$pvalue < 0.05] <- "UP"
 results_DEG_12$diffexpressed[results_DEG_12$log2FoldChange < -1 & results_DEG_12$pvalue < 0.05] <- "DOWN"
 
+sum(results_DEG_12$diffexpressed == "DOWN"| results_DEG_12$diffexpressed == "DOWN")
+
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 
 #Extracting GeneIDs from the row.names without needing for a new GeneID column
@@ -573,6 +581,8 @@ VP12 <- ggplot(data = results_DEG_12, aes(x = log2FoldChange,
 results_DEG_48$diffexpressed <- "NO"
 results_DEG_48$diffexpressed[results_DEG_48$log2FoldChange > 1 & results_DEG_48$pvalue < 0.05] <- "UP"
 results_DEG_48$diffexpressed[results_DEG_48$log2FoldChange < -1 & results_DEG_48$pvalue < 0.05] <- "DOWN"
+
+sum(results_DEG_48$diffexpressed == "UP" | results_DEG_48$diffexpressed == "DOWN")
 
 ## VOLCANO PLOT OF DIFFERENTIATION ##
 

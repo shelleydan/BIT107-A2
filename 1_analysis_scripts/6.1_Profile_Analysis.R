@@ -28,13 +28,13 @@ output <- '3_output_data/2_pathway_analysis/'
 ## Loading in our data (4HRS) --------------------------------------------------
 
 DEGTEMP <- read.csv("3_output_data/raw_DEG_results_TEMPORAL.csv", 
-                 header = T)
+                    header = T)
 names(DEGTEMP)[names(DEGTEMP) == 'X'] <- 'gene_symbol'
 DEGTEMPdf <- as.data.frame(cbind(DEGTEMP$gene_symbol, 
-                              DEGTEMP$pvalue, 
-                              DEGTEMP$padj, 
-                              DEGTEMP$log2FoldChange, 
-                              DEGTEMP$diffexpressed))
+                                 DEGTEMP$pvalue, 
+                                 DEGTEMP$padj, 
+                                 DEGTEMP$log2FoldChange, 
+                                 DEGTEMP$diffexpressed))
 names(DEGTEMPdf)[names(DEGTEMPdf) == 'V1'] <- 'gene_symbol'
 names(DEGTEMPdf)[names(DEGTEMPdf) == 'V2'] <- 'pval'
 names(DEGTEMPdf)[names(DEGTEMPdf) == 'V3'] <- 'padj'
@@ -75,11 +75,11 @@ rm(pwl2)
 ################################### SETTINGS ################################### 
 name_of_comparison <- 'mock_vs_infected' # for our filename
 
-background_genes <- 'KEGG' # Choose GO, KEGG or REACTOME
+background_genes <- 'GO' # Choose GO, KEGG or REACTOME
 
 bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
 
-up_or_down <- 'DOWN' # Set this to UP or DOWN
+up_or_down <- 'UP' # Set this to UP or DOWN
 
 padj_cutoff <- 0.05 # p-adjusted threshold.
 
@@ -100,8 +100,8 @@ if(background_genes == 'KEGG'){
 ## Performing Cluster Analysis (AUTO) ------------------------------------------
 
 resTEMP <- lapply(names(deg_results_list_TEMP),
-               function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
-                                    TERM2GENE = bg_genes))
+                  function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
+                                       TERM2GENE = bg_genes))
 
 names(resTEMP) <- names(deg_results_list_TEMP) # Apply the UP and DOWN tags
 
@@ -110,8 +110,8 @@ names(res_dfTEMP) <- names(resTEMP) # Apply the UP and DOWN tags
 res_dfTEMP <- do.call(rbind, res_dfTEMP)
 
 res_dfTEMP <- res_dfTEMP %>% mutate(minuslog10padj = -log10(p.adjust),
-                              diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
-                                                   rownames(res_dfTEMP)))
+                                    diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                         rownames(res_dfTEMP)))
 
 # Subset the pathways by (i) padj value, (ii) Gene count
 target_pws <- unique(res_dfTEMP$ID[res_dfTEMP$p.adjust < padj_cutoff & res_dfTEMP$Count > genecount_cutoff])
@@ -125,46 +125,46 @@ rownames(res_dfTEMP) <- res_dfTEMP$ID
 
 # For visualisation purposes, let's shorten the pathway names
 res_dfTEMP$Description <- gsub('(H|h)iv', 'HIV', 
-                            gsub('pd 1', 'PD-1',
-                                 gsub('ecm', 'ECM', 
-                                      gsub('(I|i)nterleukin', 'IL', 
-                                           gsub('(R|r)na', 'RNA', 
-                                                gsub('(D|d)na', 'DNA',
-                                                     gsub(' i ', ' I ', 
-                                                          gsub('(A|a)tp ', 'ATP ', 
-                                                               gsub('(N|n)adh ', 'NADH ', 
-                                                                    gsub('(N|n)ad ', 'NAD ',
-                                                                         gsub('t cell', 'T cell',
-                                                                              gsub('b cell', 'B cell',
-                                                                                   gsub('built from .*', ' (...)',
-                                                                                        gsub('mhc', 'MHC',
-                                                                                             gsub('mhc class i', 'MHC I', 
-                                                                                                  gsub('mhc class ii', 'MHC II', 
-                                                                                                       stringr::str_to_sentence(
-                                                                                                         gsub('_', ' ',  
-                                                                                                              gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
+                               gsub('pd 1', 'PD-1',
+                                    gsub('ecm', 'ECM', 
+                                         gsub('(I|i)nterleukin', 'IL', 
+                                              gsub('(R|r)na', 'RNA', 
+                                                   gsub('(D|d)na', 'DNA',
+                                                        gsub(' i ', ' I ', 
+                                                             gsub('(A|a)tp ', 'ATP ', 
+                                                                  gsub('(N|n)adh ', 'NADH ', 
+                                                                       gsub('(N|n)ad ', 'NAD ',
+                                                                            gsub('t cell', 'T cell',
+                                                                                 gsub('b cell', 'B cell',
+                                                                                      gsub('built from .*', ' (...)',
+                                                                                           gsub('mhc', 'MHC',
+                                                                                                gsub('mhc class i', 'MHC I', 
+                                                                                                     gsub('mhc class ii', 'MHC II', 
+                                                                                                          stringr::str_to_sentence(
+                                                                                                            gsub('_', ' ',  
+                                                                                                                 gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
 
 ## ENRICHMENT ANALYSIS
 
 enrichres <- new("enrichResult",
-                  readable = FALSE,
-                  result = res_dfTEMP,
-                  pvalueCutoff = 0.05,
-                  pAdjustMethod = "BH",
-                  qvalueCutoff = 0.2,
-                  organism = "human",
-                  ontology = "UNKNOWN",
-                  gene = DEGTEMP$gene_symbol,
-                  keytype = "UNKNOWN",
-                  universe = unique(bg_genes$gene),
-                  gene2Symbol = character(0),
-                  geneSets = bg_genes)
+                 readable = FALSE,
+                 result = res_dfTEMP,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEGTEMP$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
 class(enrichres) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
-
+?new
 
 ## VISUALISATION ---------------------------------------------------------------
 
-# This process will automaticall produce figures (arranges) for all options above
+# This process will automatically produce figures (arranges) for all options above
 
 ## 4HRS PLOTS ------------------------------------------------------------------
 
@@ -186,7 +186,7 @@ ggarrange(
 file4.1 <- paste0('4_figures/Figure_X_3_plot_TEMP_', up_or_down,'_',background_genes, '.png')
 
 ggsave(file4.1,
-       height = 45,
+       height = 55,
        width = 35,
        units = "cm",
        dpi = 500)

@@ -8,11 +8,11 @@ TS_target <- read.delim("2_rawdata/2_targets/TEMP_targets.txt", sep = ",")
 names(TS_target)[names(TS_target) == 'X'] <- 'sample'
 
 TS_target$replicate <- c("infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3")
+                         "infected_1","infected_2","infected_3",
+                         "infected_1","infected_2","infected_3",
+                         "mock_1","mock_2","mock_3",
+                         "mock_1","mock_2","mock_3",
+                         "mock_1","mock_2","mock_3")
 TS_target$replicate <- as.factor(TS_target$replicate)
 
 TS_target <- TS_target[ , c("sample", "group", "replicate", "timepoint")]
