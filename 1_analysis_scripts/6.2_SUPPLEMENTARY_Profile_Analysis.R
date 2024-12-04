@@ -1,4 +1,6 @@
 
+## THIS IS FOR SUPPLEMENTARY ONLY, USE 6_PROFILE_ANALYSIS.R ##
+
 ######################### KEGG Profile Analysis of DEGs ########################
 
 ## Reference -------------------------------------------------------------------
@@ -22,17 +24,6 @@ library(ggpubr)
 ## Setting Path Variables ------------------------------------------------------
 gene_path <- '5_Gene_Lists/'
 output <- '3_output_data/2_pathway_analysis/'
-
-## Functions -------------------------------------------------------------------
-
-#DID WE USE THIS?
-matrix_to_list <- function(pws){
-  pws.l <- list()
-  for (pw in colnames(pws)) {
-    pws.l[[pw]] <- rownames(pws)[as.logical(pws[, pw])]
-  }
-  return(pws.l)
-}
 
 ## Loading in our data (4HRS) --------------------------------------------------
 
@@ -109,10 +100,10 @@ rm(pwl2)
 ## Filtering Gene Sets (REACTOME, KEGG, GO) ------------------------------------
 # We look for profiles enriched in both our up regulated and down regulated. 
 
-# Settings
+################################### SETTINGS ################################### 
 name_of_comparison <- 'mock_vs_infected' # for our filename
 
-background_genes <- 'reactome' # for our filename
+background_genes <- 'GO' # for our filename
 
 bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
 
@@ -126,9 +117,9 @@ filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', backgrou
 
 if(background_genes == 'KEGG'){
   bg_genes <- readRDS(paste0(gene_path, 'kegg_legacy.RDS'))
-} else if(background_genes == 'reactome'){
+} else if(background_genes == 'REACTOME'){
   bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS'))
-} else if(background_genes == 'go.bp'){
+} else if(background_genes == 'GO'){
   bg_genes <- readRDS(paste0(gene_path, 'go.bp.RDS'))
 } else {
   stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
@@ -316,6 +307,7 @@ class(enrichres48) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
 
 ## 4HRS PLOTS ------------------------------------------------------------------
 
+#Do not run if looking at downregulated reactome
 p4.1 <- barplot(enrichres4, showCategory = 20)
 
 p4.2 <- dotplot(enrichres4, showCategory = 15)
@@ -330,7 +322,7 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-file4.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_4hrs_', up_or_down, '.png')
+file4.1 <- paste0('4_figures/Supplementary/Figure_X_3_plot_4hrs_', up_or_down, '.png')
 
 ggsave(file4.1,
        height = 30,
@@ -353,7 +345,7 @@ ggarrange(p4.4, p4.5,
   bgcolor("White") +
   border("White")
 
-file4.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_4hrs_', up_or_down, '.png')
+file4.2 <- paste0('4_figures/Supplementary/Figure_X_2_plot_4hrs_', up_or_down, '.png')
 
 ggsave(file4.2,
        height = 30,
@@ -362,6 +354,8 @@ ggsave(file4.2,
        dpi = 500)
 
 ## 12HRS PLOTS -----------------------------------------------------------------
+
+#Do not run if looking at upregulated reactome
 
 p12.1 <- barplot(enrichres12, showCategory = 20)
 
@@ -377,7 +371,7 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-file12.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_12hrs_', up_or_down, '.png')
+file12.1 <- paste0('4_figures/Supplementary/Figure_X_3_plot_12hrs_', up_or_down, '.png')
 
 ggsave(file12.1,
        height = 30,
@@ -400,7 +394,7 @@ ggarrange(p12.4, p12.5,
   bgcolor("White") +
   border("White")
 
-file12.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_12hrs_', up_or_down, '.png')
+file12.2 <- paste0('4_figures/Supplementary/Figure_X_2_plot_12hrs_', up_or_down, '.png')
 
 ggsave(file12.2,
        height = 30,
@@ -424,7 +418,7 @@ ggarrange(
   bgcolor("White") +
   border("White")
 
-file48.1 <- paste0('4_figures/PATHWAY_ENRICHMENT/3_plot_48hrs_', up_or_down, '.png')
+file48.1 <- paste0('4_figures/Supplementary/Figure_X_3_plot_48hrs_', up_or_down, '.png')
 
 ggsave(file48.1,
        height = 40,
@@ -447,7 +441,7 @@ ggarrange(p48.4, p48.5,
   bgcolor("White") +
   border("White")
 
-file48.2 <- paste0('4_figures/PATHWAY_ENRICHMENT/2_plot_48hrs_', up_or_down, '.png')
+file48.2 <- paste0('4_figures/Supplementary/Figure_X_2_plot_48hrs_', up_or_down, '.png')
 
 ggsave(file48.2,
        height = 30,

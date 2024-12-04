@@ -72,7 +72,7 @@ ggplot(fiss,
        color = "Group")
   scale_y_log10()
 
-ggsave("4_figures/Figure_3_Temp_DESeq_Counts.png",
+ggsave("4_figures/Figure_4_Temp_DESeq_Counts.png",
        height = 20,
        width = 20,
        units = "cm",

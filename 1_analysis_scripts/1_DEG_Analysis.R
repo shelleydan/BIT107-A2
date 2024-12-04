@@ -207,14 +207,6 @@ results_DEG_TEMP <- DESeq2::results(DEG_TEMP) #Coalating the results into a data
 summary(results_DEG_TEMP$padj)
 results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
 
-## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
-
-#Output of the non-filtered DESeq2 results
-write.csv(results_DEG_4, "3_output_data/raw_DEG_results_4.csv") 
-write.csv(results_DEG_12, "3_output_data/raw_DEG_results_12.csv")
-write.csv(results_DEG_48, "3_output_data/raw_DEG_results_48.csv")
-write.csv(results_DEG_TEMP, "3_output_data/raw_DEG_results_TEMPORAL.csv")
-
 ## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
 counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
@@ -632,3 +624,16 @@ ggsave("4_figures/Figure_3_VP_4_12_48.png",
        width = 30,
        units = "cm",
        dpi = 500)
+
+## SAVING THE RAW-COUNTS AND FILTERED ------------------------------------------
+
+results_DEG_TEMP$diffexpressed <- "NO"
+results_DEG_TEMP$diffexpressed[results_DEG_TEMP$log2FoldChange > 1 & results_DEG_TEMP$pvalue < 0.05] <- "UP"
+results_DEG_TEMP$diffexpressed[results_DEG_TEMP$log2FoldChange < -1 & results_DEG_TEMP$pvalue < 0.05] <- "DOWN"
+
+
+#Output of the non-filtered DESeq2 results
+write.csv(results_DEG_4, "3_output_data/raw_DEG_results_4.csv") 
+write.csv(results_DEG_12, "3_output_data/raw_DEG_results_12.csv")
+write.csv(results_DEG_48, "3_output_data/raw_DEG_results_48.csv")
+write.csv(results_DEG_TEMP, "3_output_data/raw_DEG_results_TEMPORAL.csv")

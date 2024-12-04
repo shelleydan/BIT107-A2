@@ -9,16 +9,19 @@
 
 ## LIBRARY INSTALL/LOAD --------------------------------------------------------
 
-install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently. 
+# !!!Installing Packages - Commented for ease of running (uncomment if you need to install)!!!
+
+# When installing BiocManager, if prompted to restart select 'yes'
+#install.packages("BiocManager") #Some Packages are now built under Bioconductor and needs to be installed differently
 library(BiocManager)
 
-BiocManager::install("timecoursedata")
-BiocManager::install("moanin")
-BiocManager::install("topGO")
-BiocManager::install("biomaRt")
-BiocManager::install("BiocWorkflowTools")
-install.packages("NMF")
-install.packages("ggfortify")
+#BiocManager::install("timecoursedata")
+#BiocManager::install("moanin")
+#BiocManager::install("topGO")
+#BiocManager::install("biomaRt")
+#BiocManager::install("BiocWorkflowTools")
+#install.packages("NMF")
+#install.packages("ggfortify")
 
 library(timecoursedata)
 library(moanin)
@@ -28,27 +31,9 @@ library(BiocWorkflowTools)
 library(NMF)
 library(ggfortify)
 
-save_pheatmap <- function(x, filename, width=12, height=12){
-  stopifnot(!missing(x))
-  stopifnot(!missing(filename))
-  if(grepl(".png",filename)){
-    png(filename, width=width, height=height, units = "in", res=300)
-    grid::grid.newpage()
-    grid::grid.draw(x$gtable)
-    dev.off()
-  }
-  else if(grepl(".pdf",filename)){
-    pdf(filename, width=width, height=height)
-    grid::grid.newpage()
-    grid::grid.draw(x$gtable)
-    dev.off()
-  }
-  else{
-    print("Filename did not contain '.png' or '.pdf'")
-  }
-}
-
 ## DATA INPUT & CLEANING -------------------------------------------------------
+
+rm(list = ls(all.names = T))
 
 #NOTE!: Start with a Fresh Environment
 
@@ -142,15 +127,18 @@ head(hour_de_analysis)
 
 GeneList <- c("LOC112268133", "CLIC4", "NDNF", "MGLL", "CTH", "ACE2", "ACE", "TMPRSS2")
 
-png(filename="4_figures/TEMPORAL_ANALYSIS/Figure_4_MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
+png(filename="4_figures/Figure_5_MoaninModel.png", width = 30, height = 30, units = 'cm', res = 200, pointsize = 20)
 
 MoaninPlot <- plot_splines_data(moaninModel, 
                   subset_data=GeneList,
                   colors=ann_colours$Test,
                   smooth=TRUE,
                   ylim = c(-10000, 10000),
-                  ylab = "Time (hrs)",
-                  xlab = "Counts")
+                  yaxis = T,
+                  xaxis = T,
+                  xlab = "Time (hrs)",
+                  mar = c(3, 3, 3, 3),
+                  ylab = "Counts")
 
 dev.off()
 

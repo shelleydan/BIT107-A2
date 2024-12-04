@@ -1,5 +1,7 @@
 ## DIVIDING SAMPLES ------------------------------------------------------------
 
+rm(list = ls(all.names = T))
+
 # Setting Format for Targets for TS analysis
 
 TS_target <- read.delim("2_rawdata/2_targets/TEMP_targets.txt", sep = ",")
