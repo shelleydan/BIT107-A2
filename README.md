@@ -67,13 +67,13 @@ All scripts can be found within the `1_analysis_scripts`, with one exception of 
     <td>6.1_Profile_Analysis.R</td>
     <td>Profile analysis makes use of the KEGG, REACTOME and GO:BP pathway enrichment databases and used locally in R, this script is able to accept different settings to use a user specified database.</td>
     <td>R</td>
-    <td><a href=https://github.com/biostatsquid>BioStatsSquid [6]</a></td>
+    <td><a href=https://github.com/biostatsquid>BioStatsSquid [4]</a></td>
   </tr>
   <tr>
     <td>6.2_SUPPLEMENTARY<br>_Profile_Analysis.R</td>
     <td>Same functionality as `6.1_Profile_Analysis.R` but looks specifically at the individual timepoints (4, 12, 48hrs)</td>
     <td>R</td>
-    <td><a href=https://github.com/biostatsquid>BioStatsSquid [6]</a></td>
+    <td><a href=https://github.com/biostatsquid>BioStatsSquid [4]</a></td>
   </tr>
 </table>
 
