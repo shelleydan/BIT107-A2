@@ -29,30 +29,6 @@ theme_set(theme_classic(base_size = 15) +
               legend.title=element_blank()
             ))
 
-## PHEATMAP SAVE FUNCTION ------------------------------------------------------
-
-#Credit: https://gist.github.com/mathzero/a2070a24a6b418740c44a5c023f5c01e
-
-save_pheatmap <- function(x, filename, width=12, height=12){
-  stopifnot(!missing(x))
-  stopifnot(!missing(filename))
-  if(grepl(".png",filename)){
-    png(filename, width=width, height=height, units = "in", res=300)
-    grid::grid.newpage()
-    grid::grid.draw(x$gtable)
-    dev.off()
-  }
-  else if(grepl(".pdf",filename)){
-    pdf(filename, width=width, height=height)
-    grid::grid.newpage()
-    grid::grid.draw(x$gtable)
-    dev.off()
-  }
-  else{
-    print("Filename did not contain '.png' or '.pdf'")
-  }
-}
-
 ## READING IN DATA -------------------------------------------------------------
 
 rm(list = ls(all.names = T))
@@ -96,7 +72,7 @@ ggplot(fiss,
        color = "Group")
   scale_y_log10()
 
-ggsave("4_figures/TEMPORAL_ANALYSIS/Figure_3_Temp_DESeq_Counts.png",
+ggsave("4_figures/Figure_3_Temp_DESeq_Counts.png",
        height = 20,
        width = 20,
        units = "cm",
