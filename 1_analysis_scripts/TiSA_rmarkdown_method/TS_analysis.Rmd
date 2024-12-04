@@ -1,5 +1,5 @@
 ---
-title: "TimeSeries Analysis – PBMC IgM vs LPS"
+title: "TimeSeries Analysis – COVID Mock vs Infected"
 author: "Yohan Lefol"
 date: '`r format(Sys.Date(), "%d. %B %Y")`'
 bibliography: references.bib
