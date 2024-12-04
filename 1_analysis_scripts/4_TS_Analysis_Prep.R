@@ -5,7 +5,7 @@ rm(list = ls(all.names = T))
 # Setting Format for Targets for TS analysis
 
 TS_target <- read.delim("2_rawdata/2_targets/TEMP_targets.txt", sep = ",")
-names(TS_target)[names(TS_target) == 'X'] <- 'samples'
+names(TS_target)[names(TS_target) == 'X'] <- 'sample'
 
 TS_target$replicate <- c("infected_1","infected_2","infected_3",
                         "infected_1","infected_2","infected_3",
@@ -15,7 +15,9 @@ TS_target$replicate <- c("infected_1","infected_2","infected_3",
                         "mock_1","mock_2","mock_3")
 TS_target$replicate <- as.factor(TS_target$replicate)
 
-write.csv(TS_target, "2_rawdata/4_TS_Data/sample_file.csv", row.names = F)
+TS_target <- TS_target[ , c("sample", "group", "replicate", "timepoint")]
+
+write.csv(TS_target, "1_analysis_scripts/TiSA_rmarkdown_method/data/COVID/sample_file.csv", row.names = F)
 
 # Setting Format for the Counts for TS Analysis
 
@@ -24,7 +26,7 @@ rows <- rownames(TS_counts)
 ids <- colnames(TS_counts)
 
 for (i in ids){
-  dfname <- paste0("2_rawdata/4_TS_Data/raw_counts_TS/",i,".counts")
+  dfname <- paste0("1_analysis_scripts/TiSA_rmarkdown_method/data/COVID/raw_counts_TS/",i,".counts")
   dfsubset <- data.frame(TS_counts[,i])
   dfsubset <- cbind(rows, dfsubset)
   names(dfsubset) <- NULL
