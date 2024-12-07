@@ -1,5 +1,5 @@
 ---
-title: "TimeSeries Analysis – COVID Mock vs Infected"
+title: "TimeSeries Analysis – SARS-CoV2 Mock vs Infected"
 author: "Yohan Lefol"
 date: '`r format(Sys.Date(), "%d. %B %Y")`'
 bibliography: references.bib
@@ -23,8 +23,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```
 
-```{r ggplot_theme, include=FALSE}
-#Setting the theme for standardization
+```{r knitr_ggplot, include=FALSE}
+#Added from Original to change ggplot theme
 theme_set(theme_classic(base_size = 15) +
             theme(
               axis.title.y = element_text(face = 'bold', 
@@ -42,8 +42,6 @@ theme_set(theme_classic(base_size = 15) +
             ))
 
 ```
-
-
 # TimeSeries analysis
 
 ## Parameter set up
@@ -61,8 +59,8 @@ name_result_folder<-'TS_results_COVID/'
 obj_name<-'timeSeries_obj_COVID.Rdata'
 
 #Path to count data and sample data respectively
-my_path_data<-'raw_counts_TS'
-my_path_sample_dta<-'sample_file.csv'
+my_path_data<-'data/COVID/raw_counts_TS'
+my_path_sample_dta<-'data/COVID/sample_file.csv'
 
 #Set-up time series object parameters
 diff_exp_type<-'DESeq2' #package used for DE – can also be 'limma'
@@ -71,7 +69,7 @@ p_thresh<-0.05 #pvalue or padj value threshold for significance
 l2fc_thresh<-1 #log(2)foldChange threshold for significance
 name_control<-'mock' #Name of control as seen in the sample file
 name_experiment<-'infected' #Name of experiment as seen in the sample file
-graphic_vector<-c("#e31a1c","#1f78b4") #Pre-set colors for the groups
+graphic_vector<-c("#e31a1c","cornflowerblue") #Pre-set colors for the groups
 
 #Declare organism and load library, install if necessary
 org_sem_sim='org.Hs.eg.db'
@@ -97,7 +95,7 @@ my_org_gpro='hsapiens' #Set the species for the gprofiler analysis
 # this link: https://www.r-bloggers.com/2018/07/%F0%9F%8C%B1-setting-a-seed-in-r-when-using-parallel-simulation/
 PART_seed=123456
 
-PART_l2fc<-5 #log(2)foldChange threshold for PART clustering
+PART_l2fc<-1 #log(2)foldChange threshold for PART clustering
 PART_min_clust<-50 #Minimum cluster size for PART
 PART_recursion<-100 #Number of recursions, default is 100, using 10 for example
 
