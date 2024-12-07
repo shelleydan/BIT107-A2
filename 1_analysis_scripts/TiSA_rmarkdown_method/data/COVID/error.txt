@@ -1,0 +1,19 @@
+processing file: TS_analysis.Rmd
+                                                                                                               
+Error in `names(x) <- value`:
+! 'names' attribute [2] must be the same length as the vector [1]
+Backtrace:
+  1. rmarkdown::render(...)
+  2. knitr::knit(knit_input, knit_output, envir = envir, quiet = quiet)
+  3. knitr:::process_file(text, output)
+  6. knitr:::process_group(group)
+  7. knitr:::call_block(x)
+     ...
+ 14. base::withRestarts(...)
+ 15. base (local) withRestartList(expr, restarts)
+ 16. base (local) withOneRestart(withRestartList(expr, restarts[-nr]), restarts[[nr]])
+ 17. base (local) docall(restart$handler, restartArgs)
+ 19. evaluate (local) fun(base::quote(`<smplErrr>`))
+
+Quitting from lines 118-130 [create_base_TS] (TS_analysis.Rmd)
+Execution halted
