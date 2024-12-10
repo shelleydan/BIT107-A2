@@ -44,7 +44,7 @@ Samples were categorised as infected (n=9) or mock (n=9) and investigated over-t
 ## Differential Analysis at Independent Timepoints. 
 DEGs were identified across all timepoints (Figure 2). We identified the greatest number of DEGs at 12hrs (n=2583), followed by 48hrs (n=1251) and 4hrs (n=1140). At 12hrs we identified 89.9% (n=2322/2583) of DEGs to be upregulated compared to only 10.1% (n=261/2583) to be downregulated. ACE2 was identified to be significantly downregulated at both 4 and 12hrs but was not differentially expressed at 48hrs. Furthermore, TMPRSS2 was not identified to be significantly altered at any timepoint.
 
-```{r prep_for_analysis}
+```{r prep_for_analysis, echo=FALSE, message=FALSE, warning=FALSE}
 #Library Loading
 library(pheatmap)
 library(dplyr)
@@ -241,7 +241,7 @@ results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
 
 ```
 
-```{r figure_1}
+```{r figure_1_prep, echo=FALSE, message=FALSE, warning=FALSE, results='hide', fig.show='hide'}
 ## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
 counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
@@ -429,6 +429,9 @@ plot_12_48 <- ggplot(data = results_DEG_MOCK1, aes(x = log2FoldChange,
 
 plot_12_48
 
+```
+
+```{r figure_1_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 10, fig.align = "center"}
 ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
           labels = c("A", "B", "C", "D"),
           ncol = 2, 
@@ -438,6 +441,7 @@ ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
   bgcolor("White") +
   border("White")
 ```
+
 
 ## Temporal DEG Analysis 
 In this paper, we investigate the temporal changes in DEGs, to do so we have scrutinised three publicly available methods for applying this method of analysis including conventional DESeq2, Moanin and Time Series Analysis. Information regarding applying these analyses can be found in supplementary-methods 1.4. 
