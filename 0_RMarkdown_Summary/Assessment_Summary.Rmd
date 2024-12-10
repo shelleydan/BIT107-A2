@@ -21,48 +21,522 @@ output:
 
 <body style="background-color:white;">
 
-# Abstract & Introduction
-In early 2020, the World Health Organisation (WHO) announced a global pandemic caused by the novel severe acute respiratory syndrome coronavirus 2 (SARS-CoV2), and is suspected to have a zoonotic origin with first detection of the virus particle in Chinese animal markets in late 2019 (WHO, 2024). 
+# Abstract 
+In response to the 2020 declaration of a global SARS-CoV-2 pandemic by the World Health Organization, significant research emerged to identify the viral impact on the host transcriptome. These effects are dynamic, site-dependent, and often long-lasting, emphasising the need for further investigation. This study analyses temporal transcriptomic changes following SARS-CoV-2 infection using data from Adams et al. (2023). Employing differential and pathway analysis, along with two time-series models, TiSA and Moanin, we reveal time-dependent differential gene expression. Our findings include alterations in cancer pathways linked to Caco-2 cell usage, downregulation of xenobiotic processes, and upregulation of leukocyte activation in the presence of the virus as detected by TiSA.
 
-Infectivity Cycle – 
+# Introduction
 
-The attachment of the SARS-CoV2 spike protein to the angiotensin-converting enzyme 2 (ACE2) is the first stage of the virus particles life cycle, followed by proteolytic cleavage of the spike protein by the serine protease TMPRSS2 and cellular internalisation (Wyler et al., 2021; Hoffman et al., 2020).  The spike protein of SARS-CoV2 is a highly glycosylated molecule which over the course of the pandemic has acquired numerous mutations with the ability to influence transmissibility and infectivity, but simultaneously allowed for global evolutionary mapping (Li et al., 2020). These mutations to the spike protein aim to improve the binding affinity to ACE2 which is a known host receptor to mediate SARS-CoV2 entry (Lekto et al., 2020; Harvey et al., 2021). This is accomplished by mutations in the receptor-binding domain (RBD) of the spike protein, a noteworthy mutation which increases binding affinity is N439K, which simultaneously is known to reduce the activity of some monoclonal antibodies (Harvey et al., 2021). 
+In early 2020, the World Health Organisation (WHO) announced a global pandemic caused by the novel severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2). Since the beginning of the pandemic, vast amounts of data and information has been generated regarding SARS-CoV-2, but questions remain for how this virus effects individuals’ overtime and post-recovery. 
 
-Summary of Paper Transcriptomics – 
+The attachment of the SARS-CoV-2 spike protein to angiotensin-converting enzyme 2 (ACE2) initiates viral entry, followed by spike protein cleavage by TMPRSS2 and cellular internalization [14,36]. The spike protein, a highly glycosylated molecule, has undergone mutations during the pandemic, enhancing transmissibility and binding affinity to ACE2 [12,20,21]. Notable mutations in the receptor-binding domain (e.g., N439K) improve ACE2 binding but can reduce monoclonal antibody efficacy [12]. The downstream effects of SARS-CoV-2 infection remain poorly understood and vary widely across cell types, highlighting the need for comprehensive transcriptome analyses to address cell-type variability [30]. In SARS-CoV-2 pathogenicity, ACE2 plays a critical role in maintaining balance with angiotensin-II [2]. When the renin-angiotensin-aldosterone system becomes imbalanced, such in SARS-CoV-2 infection, this leads to severe organ injury [2,6,15,26]. However, the full impact on the host transcriptome remains unclear and varies dynamically with time. Further investigation into the temporal host transcriptome is needed to understand SARS-CoV-2's dynamic effects.
 
-SARS-CoV2 targets and infects multiple systems of the host, including respiratory, cardiovascular, urinary and gastrointestinal, where upon infection, is known to manipulate the host transcriptome (Sun et al., 2021).  A study by Jain et al (2020) performed shotgun transcriptome sequencing on RNA acquired from nasopharyngeal swabs of SARS-CoV2 infected patients. Jain et al (2020) highlighted significantly increased expression of interferon/interleukin genes such as IFIH1, IFI44, IFIT1 and IL10; highlighting cytokine and immune-related responses. Along with these, Beyerstedt et al (2021) expresses the important role of ACE2 in SARS-CoV2 pathogenicity; where ACE2 and Angiotensin-II become imbalanced upon infection which trigger the activation of the renin-angiotensin-aldosterone system (where ACE2 is a key negative regulator (Banu et al., 2020; Ni et al., 2020)).  Furthermore, Banu et al (2020) confers that ACE2 expression is downregulated in cells infected by SARS-CoV2, where several studies have subsequently reported that this imbalance between ACE2 and Angiotensin-II leads to severe organ injury (Ni et al., 2020; Kebu et al., 2005; Golwacka et al., 2010). 
+SARS-CoV-2 notably infects respiratory cells, but the gastrointestinal tract has also been identified as a site for viral entry, prompting studies to assess the viral effects on the host transcriptome [30]. Widespread dysregulation of immune-related pathways and site-specific transcriptomic changes are observed [14,17]. An upregulation of cytokine-related genes, including IFIH1, IFI44, IFIT1, and IL10,  and interleukin-related genes have been identified in SARS-CoV-2 infection [13,17]. Feng et al. (2022) compared DEGs associated with common SARS-CoV-2 comorbidities such as hypertension, diabetes, and coronary artery disease and highlighted 11 shared genes, including TLR4, NLRP3, MBL2, IL6, IL1RN, IL1B, CX3CR1, CCR5, AGT, ACE, and F2. Some of these were previously linked to SARS-CoV-2 infection [13]. To explore non-immune DEGs, Sun et al. (2021) infected HEK293T cells with known immune-defects, finding upregulation of heat shock protein-encoding and molecular chaperone genes, revealing effects beyond classical immune pathways.
 
-Data from Paper plus summary - 
-
-This paper makes use of published transcriptomics data produced by Adam et al (2020), focusing on overtime analysis of SARS-CoV2 influence on Caco-2 (human colorectal adenocarcinoma) cells. RNA-seq was performed on Caco-2 cells infected with SARS-CoV2 at a multiplicity of infection of 5, with RNA extracted at timepoints 1, 2, 4, 7, 12, 24, and 48 hours-post-infection (hpi). However, controls/mocks exist only for 4, 12 and 48 hpi; these and their equivalent infected cell data will be used in the analysis (Adam et al., 2023). This paper aims to firstly, identify and analyse differentially expressed genes (DEGs) at each independent timepoint and secondly, investigate temporal changes in DEGs via three different analytical techniques. 
+This paper makes use of published transcriptomic data, focusing on overtime analysis of SARS-CoV-2 influence on Caco-2 (human colorectal adenocarcinoma) cells [1]. RNA-seq was performed on Caco-2 cells infected with SARS-CoV-2 at a multiplicity of infection of 5, with RNA extracted at timepoints 1, 2, 4, 7, 12, 24, and 48 hours-post-infection. However, controls/mocks exist only for 4, 12 and 48hrs; these and their equivalent infected cell will be used in the analysis [1]. This paper aims to firstly, identify and analyse differentially expressed genes (DEGs) at each independent timepoint and secondly, investigate temporal changes in DEGs via three different analytical techniques. 
 
 
-# Individual Timepoint Analysis
+# Results
 
-Some Example Code:
-```{r}
-setwd('~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/')
-TS_target <- read.delim("~/BIT107-A2-LPT-SAVE/ASSIGNMENT/BIT107-A2/2_rawdata/2_targets/TEMP_targets.txt", sep = ",")
-names(TS_target)[names(TS_target) == 'X'] <- 'samples'
+## Sample Relationships
+Samples were categorised as infected (n=9) or mock (n=9) and investigated over-time as described in supplementary-methods 1.3. Samples of matching condition and timepoints appeared to cluster closely together, with less distinction at 4hrs. A dendrogram grouped SKA03_19,  an infected 4hr sample with the 4hr controls (Figure 1A). Similarly, this can be observed in a figure 1B, where the same isolate appears to cluster more closely with the controls.  We investigated the change in DEGs between mocks only due to the use of Caco-2 cells. We identified 558 DEGs at 4vs12hrs, and 2589 at 12vs48hrs (Figure 1C & 1D). Clustering based on sample-to-sample distance matrices do not clearly distinguish between all samples (supplementary figure 1). When limited to the top ten DEGs (ranked p-adjusted value), sample clustering is conditional and timepoint distinct (supplementary figure 2). Samples at 4hrs are more closely related to those at 12hrs than 48hrs.
 
-TS_target$replicate <- c("infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "infected_1","infected_2","infected_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3",
-                        "mock_1","mock_2","mock_3")
-TS_target$replicate <- as.factor(TS_target$replicate)
+
+## Differential Analysis at Independent Timepoints. 
+DEGs were identified across all timepoints (Figure 2). We identified the greatest number of DEGs at 12hrs (n=2583), followed by 48hrs (n=1251) and 4hrs (n=1140). At 12hrs we identified 89.9% (n=2322/2583) of DEGs to be upregulated compared to only 10.1% (n=261/2583) to be downregulated. ACE2 was identified to be significantly downregulated at both 4 and 12hrs but was not differentially expressed at 48hrs. Furthermore, TMPRSS2 was not identified to be significantly altered at any timepoint.
+
+```{r prep_for_analysis}
+#Library Loading
+library(pheatmap)
+library(dplyr)
+library(tidyverse)
+library(Rsamtools)
+library(apeglm)
+library(DESeq2)
+library(dendextend)
+library(RColorBrewer)
+library(ggplot2)
+library(ggrepel)
+library(ggpubr)
+library(tidyverse)
+library(cluster)
+library(factoextra)
+library(ggdendro)
+library(plotly)
+library(ggplotify)
+
+setwd("../")
+
+## SETTING GGPLOT2 DOCUMENT THEME -----------------------------------------------
+
+#Setting the theme for standardization
+theme_set(theme_classic(base_size = 15) +
+            theme(
+              axis.title.y = element_text(face = 'bold', 
+                                          margin = margin(0,20,0,0), 
+                                          size = rel(1), 
+                                          color = 'black'),
+              axis.title.x = element_text(hjust = 0.5, 
+                                          face = "bold", 
+                                          margin = margin(20,0,0,0), 
+                                          size = rel(1), 
+                                          color = 'black'),
+              plot.title = element_text(hjust = 0,
+                                        size = 15),
+              legend.title=element_blank()
+            ))
+
+
+## PHEATMAP SAVE FUNCTION ------------------------------------------------------
+
+#Credit: https://gist.github.com/mathzero/a2070a24a6b418740c44a5c023f5c01e
+
+save_pheatmap <- function(x, filename, width=12, height=12){
+  stopifnot(!missing(x))
+  stopifnot(!missing(filename))
+  if(grepl(".png",filename)){
+    png(filename, width=width, height=height, units = "in", res=300)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else if(grepl(".pdf",filename)){
+    pdf(filename, width=width, height=height)
+    grid::grid.newpage()
+    grid::grid.draw(x$gtable)
+    dev.off()
+  }
+  else{
+    print("Filename did not contain '.png' or '.pdf'")
+  }
+}
+
+## IMPORTING DATA (COUNTS AND TARGETS) -----------------------------------------
+
+#READ IN COUNTS DATA
+counts_data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv",
+                        header = T, 
+                        row.names = 1)
+
+#READ IN AND EXTRACT TARGETS DATA
+target_data <- read.delim("2_rawdata/targets.txt", 
+                          sep = "", 
+                          header = T) #Inputting the targets.
+
+target_data <- target_data[,8:10] #Separating out the necessary columns.
+target_data$Condition <- as.factor(target_data$Condition) #Setting 'Condition' (AKA Time) to factors.
+
+names(target_data)[names(target_data) == 'Test'] <- 'group'
+names(target_data)[names(target_data) == 'Condition'] <- 'timepoint'
+names(target_data)[names(target_data) == 'Sample'] <- 'sample'
+
+#SUBSET THE TARGETS DATA (4,12,48 hrs which all have controls)
+target_data <- data.frame(target_data, row.names = 3) #Setting sample names as the rownames
+
+target_data_4 <- target_data[target_data$timepoint %in% 4, ] #Targets for 4hrs
+target_data_12 <- target_data[target_data$timepoint %in% 12, ] #Targets for 12hrs
+target_data_48 <- target_data[target_data$timepoint %in% 48, ] #Tagrets for 48hrs
+target_data_TEMP <- target_data[target_data$timepoint %in% c(4,12,48), ] #Tagrets for TEMPORAL
+
+#ORDER THE COUNT DATA (DESeq2 requires).
+counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
+counts_data<- counts_data[, counts_data_order]
+
+#SUBSET THE COUNT DATA (4, 12, 48hrs).
+counts_data_4 <- counts_data[, colnames(counts_data) %in% row.names(target_data_4)] #Counts for 4hrs
+counts_data_12 <- counts_data[, colnames(counts_data) %in% row.names(target_data_12)] #Counts for 12hrs
+counts_data_48 <- counts_data[, colnames(counts_data) %in% row.names(target_data_48)] #Counts for 48hrs
+counts_data_TEMP <- counts_data[, colnames(counts_data) %in% row.names(target_data_TEMP)] #Counts for 48hrs
+
+#TIDYING THE ENVIRONMENT
+rm(counts_data)
+rm(target_data)
+rm(counts_data_order)
+
+#SAVING COUNTS FOR EXTERNAL ANALYSIS
+write.csv(counts_data_TEMP, "2_rawdata/1_counts/TEMP_counts.txt")
+write.csv(counts_data_4, "2_rawdata/1_counts/4HRS_counts.txt")
+write.csv(counts_data_12, "2_rawdata/1_counts/12HRS_counts.txt")
+write.csv(counts_data_48, "2_rawdata/1_counts/48HRS_counts.txt")
+
+#SAVING TARGETS FOR EXTERNAL ANALYSIS
+write.csv(target_data_TEMP, "2_rawdata/2_targets/TEMP_targets.txt")
+write.csv(target_data_4, "2_rawdata/2_targets/4HRS_targets.txt")
+write.csv(target_data_12, "2_rawdata/2_targets/12HRS_targets.txt")
+write.csv(target_data_48, "2_rawdata/2_targets/48HRS_targets.txt")
+
+## ASSIGNING FACTOR LEVELS -----------------------------------------------------
+
+#FACTOR LEVELS FOR 4HRS
+target_data_4$group <- factor(target_data_4$group) 
+target_data_4$timepoint <- factor(target_data_4$timepoint) 
+
+#FACTOR LEVELS FOR 12HRS
+target_data_12$group <- factor(target_data_12$group) 
+target_data_12$timepoint <- factor(target_data_12$timepoint) 
+
+#FACTOR LEVELS FOR 48HRS
+target_data_48$group <- factor(target_data_48$group) 
+target_data_48$timepoint <- factor(target_data_48$timepoint) 
+
+#FACTOR LEVELS FOR TEMPORAL
+target_data_TEMP$group <- factor(target_data_TEMP$group) 
+target_data_TEMP$timepoint <- factor(target_data_TEMP$timepoint)
+
+## CREATING DESEQ2 MATRICIES ---------------------------------------------------
+
+#If we're looking at a multi-factor analysis, we want to input our primary factor should be inputted last.
+
+#The first level in the list is what becomes the base level, which the other levels will be compared to. We want this to be the control/mock group
+
+#4HRS 
+DEG_4 <- DESeqDataSetFromMatrix(countData = counts_data_4, 
+                                colData = target_data_4, #Adding targets data
+                                design = ~group) #Factors for Comparison
+DEG_4$group <- factor(DEG_4$group, levels = c("mock", "infected")) 
+
+#12HRS
+DEG_12 <- DESeqDataSetFromMatrix(countData = counts_data_12, 
+                                 colData = target_data_12, #Adding targets data
+                                 design = ~group) #Factors for Comparison
+DEG_12$group <- factor(DEG_12$group, levels = c("mock", "infected")) 
+
+#48HRS
+DEG_48 <- DESeqDataSetFromMatrix(countData = counts_data_48, 
+                                 colData = target_data_48, #Adding targets data
+                                 design = ~group) #Factors for Comparison
+DEG_48$group <- factor(DEG_48$group, levels = c("mock", "infected")) 
+
+#TEMPORAL
+DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
+                                   colData = target_data_TEMP, #Adding targets data
+                                   design = ~ group + timepoint + group:timepoint) #Factors for Comparison
+DEG_TEMP$group <- factor(DEG_TEMP$group, levels = c("mock", "infected"))
+DEG_TEMP$timepoint <- factor(DEG_TEMP$timepoint, levels = c(4,12,48))
+
+## PERFORMING DESEQ2 ANALYSIS --------------------------------------------------
+
+#4HRS
+DEG_4 <- DESeq2::DESeq(DEG_4) #Perform the Analysis
+results_DEG_4 <- DESeq2::results(DEG_4) #Coalating the results into a dataframe
+summary(results_DEG_4$padj)
+results_DEG_4 <- as.data.frame(results_DEG_4) # Produces and R dataframe
+
+#12HRS
+DEG_12 <- DESeq2::DESeq(DEG_12) #Perform the Analysis
+results_DEG_12 <- DESeq2::results(DEG_12) #Coalating the results into a dataframe
+summary(results_DEG_12$padj)
+results_DEG_12 <- as.data.frame(results_DEG_12) # Produces and R dataframe
+
+#48HRS
+DEG_48 <- DESeq2::DESeq(DEG_48) #Perform the Analysis
+results_DEG_48 <- DESeq2::results(DEG_48) #Coalating the results into a dataframe
+summary(results_DEG_48$padj)
+results_DEG_48 <- as.data.frame(results_DEG_48) # Produces and R dataframe
+
+#ACROSS TIME
+DEG_TEMP <- DESeq2::DESeq(DEG_TEMP) #Perform the Analysis
+results_DEG_TEMP <- DESeq2::results(DEG_TEMP) #Coalating the results into a dataframe
+summary(results_DEG_TEMP$padj)
+results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
+
 ```
 
+```{r figure_1}
+## COMPARATIVE SAMPLE HCA ANALYSIS ---------------------------------------------
+counts_TEMP <- t(counts_data_TEMP) # Needs to be transposed for HCA Analysis 
 
-# KEGG Clustering Analysis
+HCA_TEMP <- scale(counts_TEMP)
 
-# Temporal Analysis Models
+# Dissimilarity matrix - There is little difference between using 10000 or 20000 genes. 
+dist_TEMP <- dist(HCA_TEMP[,1:20000], method = "euclidean")
 
-## Moanin Model
+# Hierarchical clustering using Complete Linkage
+hc1 <- hclust(dist_TEMP, method = "complete" )
+hc1 <- as.dendrogram(hc1)
+hc1 <- dendro_data(hc1) # Ready to Plot
 
-## TimeSeriesAnalysis
+order <- hc1$labels$label
+hca_targets <- target_data_TEMP[order,]
+hc1$labels$timepoint <- hca_targets$timepoint
+hc1$labels$group <- hca_targets$group
 
-## Regression Analysis
+cols <- c("4.infected"="#f04546","12.infected"="#3591d1","48.infected"="#62c76b","4.mock"="#f04546","12.mock"="#3591d1","48.mock"="#62c76b")
+
+cols <- interaction(hc1$labels$timepoint, hc1$labels$group)
+
+ggHCA <- ggplot(segment(hc1)) + 
+  geom_text(data = label(hc1),
+            show.legend = T,
+            aes(label = label, 
+                x = x, 
+                y = 0, 
+                color = cols, 
+                angle = 90,
+                vjust = 1.5,
+                hjust = 0,
+                fontface = 2)) +
+  guides(colour = guide_legend(title="Condition", 
+                               override.aes=list(alpha=1, shape=19, size=5))) +
+  geom_segment(show.legend = F,
+               colour = "gray",
+               aes(x = x, 
+                   y = y,
+                   xend = xend, 
+                   yend = yend)) +
+  labs(x = "Samples",
+       y = "Distance") +
+  theme(aspect.ratio=1,
+        legend.position="bottom",
+        legend.box.background = element_rect(colour = "black"))
+
+ggHCA # This will be arranges later with the PCA in one plot
+
+## PCA of All Samples ----------------------------------------------------------
+
+#TEMPORAL
+# Variance stabilisation transformation
+vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
+
+# Generating the PCA Plot
+TEMPData <- plotPCA(vst_TEMP, 
+                    intgroup = c("group", "timepoint"),
+                    returnData = T)
+
+TEMPData$group.1 #Some reason the infected/mock is stored as group.1 instead and group is a combination of both factor levels. 
+
+percentVar <- round(100 * attr(TEMPData, "percentVar"))
+ggPCA <- ggplot(TEMPData, aes(PC1, PC2, color=group.1, shape=timepoint)) +
+  geom_point(size=5) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) + 
+  coord_fixed() + 
+  theme(aspect.ratio=1,
+        legend.position="top",
+        legend.box.background = element_rect(colour = "black"))
+
+ggPCA # This will be arranged/viewd later
+
+## MOCK DEG COMPARISON 4hrs vs 12hrs -------------------------------------------
+MOCK_DEG_TARGET <- target_data_TEMP[target_data_TEMP$timepoint %in% c(4,12), ] #Targets for 4hrs
+MOCK_DEG_TARGET <- MOCK_DEG_TARGET[MOCK_DEG_TARGET$group %in% "mock", ] #Targets for 12hrs
+
+MOCK_DATA <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_DEG_TARGET)]
+
+#Performing Analysis w/ DESeq
+
+DEG_MOCK <- DESeqDataSetFromMatrix(countData = MOCK_DATA, 
+                                   colData = MOCK_DEG_TARGET, #Adding targets data
+                                   design = ~timepoint) #Factors for Comparison
+DEG_MOCK$group <- factor(DEG_MOCK$group, levels = c(4,12)) 
+
+DEG_MOCK <- DESeq2::DESeq(DEG_MOCK) #Perform the Analysis
+results_DEG_MOCK <- DESeq2::results(DEG_MOCK) #Coalating the results into a dataframe
+summary(results_DEG_MOCK$padj)
+results_DEG_MOCK <- as.data.frame(results_DEG_MOCK) # Produces and R dataframe
+
+#Volcano 4hrs vs 12hrs MOCK
+#Setting a column for the Volcano plot
+results_DEG_MOCK$diffexpressed <- "NO"
+results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange > 1 & results_DEG_MOCK$pvalue < 0.05] <- "UP"
+results_DEG_MOCK$diffexpressed[results_DEG_MOCK$log2FoldChange < -1 & results_DEG_MOCK$pvalue < 0.05] <- "DOWN"
+
+sum(results_DEG_MOCK$diffexpressed == "UP" | results_DEG_MOCK$diffexpressed == "DOWN")
+
+## VOLCANO PLOT OF DIFFERENTIATION ##
+
+#Extracting GeneIDs from the row.names without needing for a new GeneID column
+top10DEGs_4 <- results_DEG_MOCK[order(results_DEG_MOCK$padj), ][1:10,]
+results_DEG_MOCK$difflabel <- ifelse(row.names(results_DEG_MOCK) %in% row.names(top10DEGs_4), row.names(results_DEG_MOCK), NA)
+summary(results_DEG_MOCK$difflabel)
+
+#Volcano Plot with ggplot2
+plot_4_12 <- ggplot(data = results_DEG_MOCK, aes(x = log2FoldChange, 
+                                                 y = -log10(pvalue), 
+                                                 col = diffexpressed, 
+                                                 label = difflabel)) +
+  geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
+             col = "gray", 
+             linetype = "dashed") + #Adding vertical lines to show fold change cut off
+  geom_hline(yintercept = c(-log10(0.05)), 
+             col = "gray", 
+             linetype = "dashed") + #Adding Horizontal line to show p-value cut off
+  geom_point(shape=19) + #Setting Point size
+  guides(color = guide_legend(override.aes = list(size = 3))) +
+  #scale_shape_manual(values = 6) +
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  coord_cartesian(ylim = c(0, 250), xlim = c(-10,10)) + #Applying figure axis limits
+  scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
+  labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
+       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+  ggtitle("4Hrs vs 12Hrs") + # Setting a Figure Title
+  geom_text_repel(max.overlaps = 2000, size=5, show.legend = F) #Adding labels which we express in ggplot line 1
+
+## MOCK DEG COMPARISON 12hrs vs 48hrs ------------------------------------------
+MOCK_DEG_TARGET1 <- target_data_TEMP[target_data_TEMP$timepoint %in% c(12,48), ] #Targets for 4hrs
+MOCK_DEG_TARGET1 <- MOCK_DEG_TARGET1[MOCK_DEG_TARGET1$group %in% "mock", ] #Targets for 12hrs
+
+MOCK_DATA1 <- counts_data_TEMP[, colnames(counts_data_TEMP) %in% row.names(MOCK_DEG_TARGET1)]
+
+#Performing Analysis w/ DESeq
+DEG_MOCK1 <- DESeqDataSetFromMatrix(countData = MOCK_DATA1, 
+                                    colData = MOCK_DEG_TARGET1, #Adding targets data
+                                    design = ~timepoint) #Factors for Comparison
+DEG_MOCK1$timepoint <- factor(DEG_MOCK1$timepoint, levels = c(12,48)) 
+
+DEG_MOCK1 <- DESeq2::DESeq(DEG_MOCK1) #Perform the Analysis
+results_DEG_MOCK1 <- DESeq2::results(DEG_MOCK1) #Coalating the results into a dataframe
+summary(results_DEG_MOCK1$padj)
+results_DEG_MOCK1 <- as.data.frame(results_DEG_MOCK1) # Produces and R dataframe
+
+#Volcano 4hrs vs 12hrs MOCK
+#Setting a column for the Volcano plot
+results_DEG_MOCK1$diffexpressed <- "NO"
+results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange > 1 & results_DEG_MOCK1$padj < 0.05] <- "UP"
+results_DEG_MOCK1$diffexpressed[results_DEG_MOCK1$log2FoldChange < -1 & results_DEG_MOCK1$padj < 0.05] <- "DOWN"
+
+sum(results_DEG_MOCK1$diffexpressed == "UP" | results_DEG_MOCK1$diffexpressed == "DOWN")
+
+## VOLCANO PLOT OF DIFFERENTIATION ##
+
+#Extracting GeneIDs from the row.names without needing for a new GeneID column
+top10DEGs_mock1 <- results_DEG_MOCK1[order(results_DEG_MOCK1$padj), ][1:10,]
+results_DEG_MOCK1$difflabel <- ifelse(row.names(results_DEG_MOCK1) %in% row.names(top10DEGs_mock1), row.names(results_DEG_MOCK), NA)
+summary(results_DEG_MOCK1$difflabel)
+
+#Volcano Plot with ggplot2
+plot_12_48 <- ggplot(data = results_DEG_MOCK1, aes(x = log2FoldChange, 
+                                                   y = -log10(pvalue), 
+                                                   col = diffexpressed, 
+                                                   label = difflabel)) +
+  geom_vline(xintercept = c(1, -1), #Manually adding cutoff lines 
+             col = "gray", 
+             linetype = "dashed") + #Adding vertical lines to show fold change cut off
+  geom_hline(yintercept = c(-log10(0.05)), 
+             col = "gray", 
+             linetype = "dashed") + #Adding Horizontal line to show p-value cut off
+  geom_point(shape=19) + #Setting Point size
+  guides(color = guide_legend(override.aes = list(size = 3))) +
+  #scale_shape_manual(values = 6) +
+  scale_color_manual(values = c("cornflowerblue", "gray", "#bb0c00"), #Changing plot colours
+                     labels = c("Downregulated","Not Significant", "Upregulated")) + #Changing label titles
+  coord_cartesian(ylim = c(0, 250), xlim = c(-10,10)) + #Applying figure axis limits
+  scale_x_continuous(breaks = seq(-10, 10, 2)) + # Setting continuous breaks (min, max, step)
+  labs(x = expression("log"[2]*" Fold Change"), #Changing the x axis
+       y = expression("-log"[10]*" p-adjusted")) + #Changing the y axis
+  ggtitle("12Hrs vs 48Hrs") + # Setting a Figure Title
+  geom_text_repel(max.overlaps = 2000, size=5, show.legend = F) #Adding labels which we express in ggplot line 1
+
+plot_12_48
+
+ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
+          labels = c("A", "B", "C", "D"),
+          ncol = 2, 
+          nrow = 2,
+          common.legend = F, 
+          legend = "bottom") + 
+  bgcolor("White") +
+  border("White")
+```
+
+## Temporal DEG Analysis 
+In this paper, we investigate the temporal changes in DEGs, to do so we have scrutinised three publicly available methods for applying this method of analysis including conventional DESeq2, Moanin and Time Series Analysis. Information regarding applying these analyses can be found in supplementary-methods 1.4. 
+
+
+### (i) Conventional DESeq2
+Basic temporal analysis with DESeq2 identified a gradual decrease in read-counts across time (Figure 3). Mocks were identified to have higher read-counts at all timepoints compared to infected. Furthermore, across time mocks did not experience as great of a decrease in counts as infected. 
+
+### (ii) Moanin
+As described in supplementary-methods 1.4, a list of DEGs were produced for use in both models. Moanin applies a spline function (figure 4) to the dataset for each selected genes and identified higher expression of LOC112268133, NDNF, MGLL and TMPRSS2 compared to mocks. However, Moanin also identified that overtime, many genes (NDNF, MGLL, CTCH, ACE2 and TMPRSS2) in mocks also change. ACE was not observed to have any change overtime in either condition. 
+
+### (iii) Time Series Analysis 
+TiSA (Supplementary-methods 1.4) revealed changes in read-counts across all genes of interest between conditions (Figure 5). LOC112268133 showed the most drastic change, with a steep decline compared to mock samples. Genes like ACE followed a similar negative trend between conditions, while CTH remained stable in infected samples but fluctuated in mocks. Notably, only CLIC4 and CTH had lower read-counts in mocks than infected samples at 48 hours. Overall, mocks generally exhibited higher read-counts than infected samples, except for LOC112268133.
+
+### Pathway Enrichment Analysis
+DEGs were analysed to identify significantly enriched pathways (Supplementary-methods 1.5). For downregulated DEGs, top GO:BP pathways included cytoplasmic translation, small molecule catabolic processes, and generation of precursor metabolites and energy (Figure 6A, 6C). Notably, xenobiotic metabolic and cellular response to xenobiotic stimulus pathways were downregulated (21/769 genes). Upregulated pathways included mitotic cell cycle phase transition, cell substrate adhesion, cell cycle regulation, and sprouting angiogenesis (Figure 7). KEGG analysis highlighted upregulation in small cell lung cancer, cancer pathways, and aminoacyl tRNA biosynthesis, with downregulation in xenobiotics by cytochrome P450 and disease pathways (Alzheimer's, Huntington's, and Parkinson's; Supplementary Figures 3-4). REACTOME revealed upregulation in signal transduction, cytosolic tRNA aminoacylation, and NGF-stimulated transcription (Supplementary Figure 5) and downregulation in influenza infection, SARS-CoV host interactions, and host transcription machinery modulation (Supplementary Figure 6).
+
+# Discussion
+The analyses highlighted in this paper express the dynamic nature of SARS-CoV-2 on the transcriptome of Caco-2 cell with an emphasis towards genes related to both cancer progression and viral infection. We compared differential gene analysis, with time course and pathway enrichment investigation to determine the effect of SARS-CoV-2 infection. It is difficult to use the results presented here to infer SARS-CoV-2 effects on normal-host epithelium, otherwise stated by Adams et al (2023). 
+
+At 4 and 12hrs, we identified ACE2, a key gene in viral entry, as a significantly downregulated gene; however, this was not observed at 48hrs. Studies also report ACE2 downregulation following infection, also highlighting its role in the renin-angiotensin system [2,29]. ACE2 negatively regulates angiotensin-II, and its loss during infection disrupts this pathway, contributing to effects like hypertension and hypokalemia [29]. ACE2 downregulation appears more efficiently suppressed in SARS-CoV-1 infections compared to SARS-CoV-2 [23]. Conversely, ACE2 upregulation has been observed in severe infections, such as individuals predisposed to diabetes, hypertension, and lung fibrosis [32]. Gheware et al. (2023) observed ACE2 upregulation in severe cases based on lung postmortems. But did not address predisposing conditions. These findings suggest ACE2 expression is multifactorial, including infection severity, disease predisposition, sex, and age [3].
+
+This study compares two methods for time-course RNA-seq analysis: TiSA [19] and the Moanin [31]. Both aim to analyse longitudinal transcriptomic data and infer biological relevance using cluster and pathway enrichment analyses. TiSA excels in handling uneven data distributions and small sample replicates, while Moanin is better suited for long developmental datasets and prioritises overall trends [19,31]. TiSA uses DESeq2 or limma for DEG analysis, and gprofiler2 for enrichment, whereas Moanin employs splines to analyse entire temporal datasets and integrates GO and KEGG tools. Visually, the models differ due to their approaches. Moanin normalizes counts across the entire time-series and uses a spline-based k-means approach to provide continuous trends. TiSA uses stepwise comparisons with PART to track raw-reads overtime. For ACE; Moanin suggested no change in expression and TiSA an almost-identical negative slope in both infected and mock may reveal the same results (figure 4). We identified ACE to have no significant differential change overtime, therefore Moanin suggests overall there is no change in expression where TiSA, although not significant appreciates there is change overtime. TiSA also provides extensive visual aids and a reproducible workflow, compared to Moanin's more time-intensive setup. Overall, TiSA is better suited for event-based analyses, while Moanin captures continuous temporal dynamics [19,31].
+
+To infer biological relevance, this paper compared DEGs primarily with GO:BP to identify significantly enriched pathways. A majority identified pathway were related to cancer progression which are a consequence of using Caco-2 cells. When comparing DEGs related to mocks at 4vs12hrs and 12vs48hrs, we identified that 84.2% (n=16/19) were relevant to cancer pathways as identified with GenBank (supplementary table 1). Therefore, it is difficult to interpret the true effect of SARS-CoV-2 on these pathways. However, we may comment that infection with SARS-CoV-2 may influence cancer pathways. Studies suggests that the pro-inflammatory and immune suppression witnessed with SARS-CoV-2 provide a suitable niche for tumourigenesis, which may suggest why we observed an upregulation of sprouting angiogenesis and mitotic cell cycle transition (figure 7) [8]. However, the TiSA model does provide insight into the upregulation of leukocyte activation which is likely due to a cellular antiviral response and not cancer progression (supplementary figure 7) [16].
+
+# Conclusion 
+Following the SARS-CoV-2 pandemic, questions remain regarding the extent of the over-time effect being diagnosed as long COVID [25]. Therefore, the rationale of this study remains crucial, but for more accurate representation further analyses should be carried out using more relevant cell-lines to better capture the normal-epithelial gut lining. Collectively, two models were used to analyse time-course data, this paper suggests the use of TiSA due to high reproducibility. Through this, we report leukocyte activation in response to viral infection and downregulation of xenobiotic processes to maintain viral survival.
+
+# Acknowledgments
+
+We acknowledge Adams et al  for providing the dataset used in this study, originally published in Science Signalling (2023, DOI: 10.1126/scisignal.abl8266). 
+
+We acknowledge the use of TimeSeriesAnalysis (https://github.com/Ylefol/TimeSeriesAnalysis) and Moanin (https://github.com/NelleV/moanin) hosted on GitHub for time-series data analysis. 
+
+All analyses conducted in this paper  can be found at BIT107-A2 on GitHub: (https://github.com/shelleydan/BIT107-A2)
+
+# References
+1.	Adam, L. et al. Science Signaling 16, 804. (2023).
+2.	Banu, N., Panikar, S.S., Leal, L.R. , Leal, A.R. Life Sciences 256, 117905. (2020).
+3.	Bastolla, U., Chambers, P., Abia, D., Garcia-Bermejo, M.-L. , Fresno, M. Frontiers in Drug Discovery 1. (2022).
+4.	Batut, B. et al. 2016. Reference-based RNA-Seq data analysis. Available at: https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html [4 December 2024].
+5.	Batut, B. et al. Cell Systems 6, 752-758. (2018).
+6.	Beyerstedt, S., Casaro, E.B. , Rangel, É.B. European Journal of Clinical Microbiology & Infectious Diseases 40(5), 905. (2021).
+7.	Carlson M (2023). org.Hs.eg.db. R package version 3.18.0.
+8.	du Plessis, M., Fourie, C., Riedemann, J., de Villiers, W.J.S. , Engelbrecht, A.M. Cytokine & Growth Factor Reviews 63, 78–89. (2020).
+9.	Feng, S. et al. International Journal of Medical Sciences 19(2),402–415. (2022).
+10.	Gheware, A. et al. Scientific Reports 12(1), 4058. (2022).
+11.	Glowacka, I. et al.  Journal of Virology 84(2), 1198–1205. (2010).
+12.	Harvey, W.T. et al. Nature Reviews Microbiology 19(7), 409–424. (2021).
+13.	Hasankhani, A. et al. Frontiers in Immunology 12. (2021).
+14.	Hoffmann, M. et al. 2020. Cell 181(2), 271. (2020).
+15.	Hoque, M.N. et al. Frontiers in Immunology 13. (2022).
+16.	Hottz, E.D. , Bozza, P.T. Research , Practice in Thrombosis , Haemostasis 6(3), e12709. (2022).
+17.	Jain, R. et al. Computational , Structural Biotechnology Journal 19, 153–160. (2020).
+18.	Kolde R (2019). Pheatmap. R package version 1.0.12, 
+19.	Lefol, Y. et al. NAR Genomics , Bioinformatics 5(1), lqad020. (2023).
+20.	Letko, M., Marzi, A. , Munster, V. Nature Microbiology 5(4), 562. (2020).
+21.	Li, Q. et al. Cell 182(5), 1284. (2020).
+22.	Love, M.I., Huber, W., Anders, S. Genome Biology 15(12), 550. (2014).
+23.	Lu, Y., Zhu, Q., Fox, D.M., Gao, C., Stanley, S.A. , Luo, K. Molecular Biology of the Cell 33(14), 147. (2022).
+24.	Morgan M, Ramos M . BiocManager R package version 1.30.25, (2024)
+25.	NHS. 2023.https://www.nhs.uk/conditions/covid-19/long-term-effects-of-covid-19-long-covid/ [7 December 2024].
+26.	Ni, W. et al. Critical Care 24(1), 422. (2020).
+27.	R Core Team. Austria. <https://www.R-project.org/>. (2023).
+28.	RStudio Team. Boston, URL:http://www.rstudio.com/. (2020).
+29.	Silhol, F., Sarlon, G., Deharo, J.-C. , Vaïsse, B. Hypertension Research 43(8), 854–856. (2020).
+30.	Sun, G. et al. Scientific Reports 11(1), 17146. (2021).
+31.	Varoquaux, N., Purdom, E. F1000Research 9, 1447. (2020).
+32.	Wang, C.-W., Chuang, H.-C. , Tan, T.-H. Journal of Biomedical Science 30(1), 71. (2023)
+33.	WHO. 2024. https://www.who.int/europe/emergencies/situations/covid-19 [18 Nov 2024].
+34.	Wickham H. ggplot2. R package, New York, 2016.
+35.	Wu, T., et al. The Innovation. 2(3):100141. (2021).
+36.	Wyler, E. et al. iScience 24(3), 102151. (2021).
+37.	Yu G. Enrichplot, R package version 1.22.0, (2023).
+
+# Supplementary
+
+## Methods
+
+### (1.1) Study Design and Data Availability
+
+This study makes use of readily available RNAseq data generated by Adams et al (2023) investigating the transcriptome dynamics of host epithelial cells, through using Caco-2 cells infected by SARS-CoV-2. Data is stored on the NCBI Gene Expression Omnibus (GEO) under the identification GSE217504. A subset of this data, where mocks and infected samples existed for a given time point (only 4, 12 and 48hrs) where used in analysis, no mock controls existed for subsequent time points. Counts matrix and meta data were downloaded remotely though command line and relevant information (sample ID, timepoint and group) were extracted. All data, scripts and analyses generated in this study can be found on the authors GitHub account under BIT107-A2; found at https://github.com/shelleydan/BIT107-A2.  
+
+### (1.2) Graphical Visualisation
+
+All graphical visualisations were produced in RStudio (version 2024.9.1.394) using a collection of ggplot2 (version 3.5.1) packages unless stated otherwise. The collection of these packages included ggplotify (version 0.1.2),  ggfortify (version 0.4.17), ggrepel (version 0.9.6), ggdendro (version 0.2.0), ggupset (version 0.4.0), and ggpubr (version 0.6.0) [28,34]. 
+
+### (1.3) Differentail gene Expression
+
+All analysis was achieved through R programming language (version 4.3.2) via the RStudio interface (version 2024.9.1.394) [27,28]. DEG analysis was performed using DESeq2 (version 1.42.1) available at Bioconductor and installed using the BiocManager package (version 1.30.25) [22,24]. DEG analysis was applied at individual time points (4, 12, 48hrs) with a design of ‘~group’ and irrespective of time with a design of ‘~group + timepoint + group:timepoint’. Hierarchical cluster analysis was performed using base R, with a Euclidean distance matrix calculated using the top 20,000 genes (as imported) and visualised as described in 1.2. Principle component analysis was performed on a DESeq2 (version 1.42.1) matrix following a variance stabilisation transformation. Heatmaps were produced to compare samples to samples based on gene count data or using the top 10 DEGs (ranked by p-adjusted value) and generated using pheatmap (version 1.0.12) [19]. DEGs were visualised within volcano plots and annotated based on downregulated (log fold chance <= -1, p-adjust <= 0.05), upregulated (log fold chance >= 1, p-adjust <= 0.05) and otherwise non-significant DEGs. The alpha cut off value for this analysis was 0.05. 
+
+### (1.4) Temporal DEG Analysis
+
+Temporal analysis was performed on the raw count data via three methods: conventional DESeq2 (version 1.42.1), Moanin Modelling (version 1.10.0) and Time Series Analysis [4,5,22,31,19]. A pre-determined list of genes were generated to compare both the Moanin and TiSA methods for temporal DEG analysis. This list was generated by selecting 5 random genes from a list of top ten DEGs at each timepoint ranked by p-adjusted value. Furthermore, three genes; ACE2, ACE and TMPRSS2 were included due to their relevance in SARS-CoV-2 infections. The final gene list included: LOC112268133, CLIC4, NDNF, MGLL, CTH, ACE2, ACE, and TMPRSS2. Visualisation of all were automated processes built into their individual packages but used processes as described in methods 1.2. Furthermore, figures generated from TiSA were manually combined in Microsoft PowerPoint (version 2410) to match the order generated by the Moanin model. 
+
+### (1.5) Pathway Enrichment Analysis
+
+Pathway analysis was conducted locally in RStudio (version 2024.9.1.394) using gene sets downloaded from the Gene Set Enrichment Analysis, found here [28]. Gene sets downloaded included KEGG_LEGACY subset of canonical pathway, Reactome subset of canonical pathway, and BP: subset of GO. These GMT files were read into RStudio and subset to include all genes investigated (n=46863) [1]. DEGs identified from methods 1.3 were imported and used for analysis. A p-adjusted cutoff value was set at 0.05, and a minimum gene count within pathways to 5. Cluster analysis was performed using clusterProfiler (version 4.10.1) [35]. Plots were limited to top 20 enriched pathway, with bar plots and dot plots created using base R and supplied an enrichment matrix. Network gene cluster analysis was generated using enrichplot (version 1.22.0) [37].
+
 
 
