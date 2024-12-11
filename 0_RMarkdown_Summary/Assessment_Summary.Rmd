@@ -1,5 +1,5 @@
 ---
-title: "Manipulate and Survive: SARS-CoV2 mediated survival through manipulation of the host cell transcriptional activity. "
+title: "SARS-CoV-2 Infection Mediates Time-Dependant Alterations to the Host Transcriptome."
 subtitle: "Assessment_Summary"
 author: "Dan R Shelley"
 date: "2024-11-22"
@@ -15,11 +15,16 @@ output:
    number_sections: true
    num_depth: 2
    smooth_scrolling: true
-
-
 ---
 
 <body style="background-color:white;">
+
+Authors: Dan R. Shelley^1^
+
+^1^ Cardiff University, School of Biosciences, Sir Martin Evans Building
+
+Correspondence: Dan R. Shelley BSc, School of Biosciences, Sir Martin Evans Building, Cardiff University, Museum Ave, Cardiff CF10 3AT, UK (shelleydr@cardiff.ac.uk).
+
 
 # Abstract 
 In response to the 2020 declaration of a global SARS-CoV-2 pandemic by the World Health Organization, significant research emerged to identify the viral impact on the host transcriptome. These effects are dynamic, site-dependent, and often long-lasting, emphasising the need for further investigation. This study analyses temporal transcriptomic changes following SARS-CoV-2 infection using data from Adams et al. (2023). Employing differential and pathway analysis, along with two time-series models, TiSA and Moanin, we reveal time-dependent differential gene expression. Our findings include alterations in cancer pathways linked to Caco-2 cell usage, downregulation of xenobiotic processes, and upregulation of leukocyte activation in the presence of the virus as detected by TiSA.
@@ -33,7 +38,6 @@ The attachment of the SARS-CoV-2 spike protein to angiotensin-converting enzyme 
 SARS-CoV-2 notably infects respiratory cells, but the gastrointestinal tract has also been identified as a site for viral entry, prompting studies to assess the viral effects on the host transcriptome [30]. Widespread dysregulation of immune-related pathways and site-specific transcriptomic changes are observed [14,17]. An upregulation of cytokine-related genes, including IFIH1, IFI44, IFIT1, and IL10,  and interleukin-related genes have been identified in SARS-CoV-2 infection [13,17]. Feng et al. (2022) compared DEGs associated with common SARS-CoV-2 comorbidities such as hypertension, diabetes, and coronary artery disease and highlighted 11 shared genes, including TLR4, NLRP3, MBL2, IL6, IL1RN, IL1B, CX3CR1, CCR5, AGT, ACE, and F2. Some of these were previously linked to SARS-CoV-2 infection [13]. To explore non-immune DEGs, Sun et al. (2021) infected HEK293T cells with known immune-defects, finding upregulation of heat shock protein-encoding and molecular chaperone genes, revealing effects beyond classical immune pathways.
 
 This paper makes use of published transcriptomic data, focusing on overtime analysis of SARS-CoV-2 influence on Caco-2 (human colorectal adenocarcinoma) cells [1]. RNA-seq was performed on Caco-2 cells infected with SARS-CoV-2 at a multiplicity of infection of 5, with RNA extracted at timepoints 1, 2, 4, 7, 12, 24, and 48 hours-post-infection. However, controls/mocks exist only for 4, 12 and 48hrs; these and their equivalent infected cell will be used in the analysis [1]. This paper aims to firstly, identify and analyse differentially expressed genes (DEGs) at each independent timepoint and secondly, investigate temporal changes in DEGs via three different analytical techniques. 
-
 
 # Results
 
@@ -427,7 +431,7 @@ ggarrange(ggHCA, ggPCA, plot_4_12, plot_12_48,
   border("White")
 ```
 
-##### Figure 1: Sample Comparison. (A) Dendrogram showing distinct relationships among samples at 12 and 48 hours, with less distinction at 4 hours (see supplementary 1.3). (B) PCA plots (supplementary-methods 1.3) demonstrate clustering by control state and timepoints, with wide differences detected within infected samples of 4 and 12hrs. (C, D) Volcano plots DEGs identified and annotated with top ten DEGs (based on adjusted p-values), color-coded as downregulated (blue), upregulated (red), or not significant (grey). (C) 558 DEGs were identified between 4 and 12 hours, and (D) 2589 DEGs between 12 and 48 hours.
+Figure 1: Sample Comparison. (A) Dendrogram showing distinct relationships among samples at 12 and 48 hours, with less distinction at 4 hours (see supplementary 1.3). (B) PCA plots (supplementary-methods 1.3) demonstrate clustering by control state and timepoints, with wide differences detected within infected samples of 4 and 12hrs. (C, D) Volcano plots DEGs identified and annotated with top ten DEGs (based on adjusted p-values), color-coded as downregulated (blue), upregulated (red), or not significant (grey). (C) 558 DEGs were identified between 4 and 12 hours, and (D) 2589 DEGs between 12 and 48 hours.
 
 ## Differential Analysis at Independent Timepoints. 
 DEGs were identified across all timepoints (Figure 2). We identified the greatest number of DEGs at 12hrs (n=2583), followed by 48hrs (n=1251) and 4hrs (n=1140). At 12hrs we identified 89.9% (n=2322/2583) of DEGs to be upregulated compared to only 10.1% (n=261/2583) to be downregulated. ACE2 was identified to be significantly downregulated at both 4 and 12hrs but was not differentially expressed at 48hrs. Furthermore, TMPRSS2 was not identified to be significantly altered at any timepoint.
@@ -567,7 +571,7 @@ ggarrange(VP4, VP12, VP48, legendVP,
   border("White")
 ```
 
-##### Figure 2: DEGs identified at individual timepoints.  DEGs were identified at all timepoints and visualised in volcano plots as described in supplementary-methods 1.3. All volcano plots are annotated with the top ten DEGs ranked by their p-adjusted value and colour coordinated by DEGs which are downregulated (blue), upregulated (red) and non-significant (grey). DEGs were identified at 4hrs (A; n=1140), 12hrs (B; n=2583), and 48hrs (C; n=1251). 
+Figure 2: DEGs identified at individual timepoints.  DEGs were identified at all timepoints and visualised in volcano plots as described in supplementary-methods 1.3. All volcano plots are annotated with the top ten DEGs ranked by their p-adjusted value and colour coordinated by DEGs which are downregulated (blue), upregulated (red) and non-significant (grey). DEGs were identified at 4hrs (A; n=1140), 12hrs (B; n=2583), and 48hrs (C; n=1251). 
 
 ## Temporal DEG Analysis 
 In this paper, we investigate the temporal changes in DEGs, to do so we have scrutinised three publicly available methods for applying this method of analysis including conventional DESeq2, Moanin and Time Series Analysis. Information regarding applying these analyses can be found in supplementary-methods 1.4. 
@@ -646,7 +650,7 @@ ggplot(fiss,
 
 ```
 
-##### Figure 3: Temporal analysis of Counts with DESeq2.  A counts average at each timepoints for mocks (blue) and infected (red) were taken and a line plotted. Infected cells are shown to have a lower average count overtime and experiences a greater decrease than seen in the mocks. This does not provide any information regarding independent gene trends. 
+Figure 3: Temporal analysis of Counts with DESeq2.  A counts average at each timepoints for mocks (blue) and infected (red) were taken and a line plotted. Infected cells are shown to have a lower average count overtime and experiences a greater decrease than seen in the mocks. This does not provide any information regarding independent gene trends. 
 
 ### (ii) Moanin
 As described in supplementary-methods 1.4, a list of DEGs were produced for use in both models. Moanin applies a spline function (figure 4) to the dataset for each selected genes and identified higher expression of LOC112268133, NDNF, MGLL and TMPRSS2 compared to mocks. However, Moanin also identified that overtime, many genes (NDNF, MGLL, CTCH, ACE2 and TMPRSS2) in mocks also change. ACE was not observed to have any change overtime in either condition. 
@@ -778,21 +782,21 @@ plot_splines_data(moaninModel,
 
 ```
 
-##### Figure 4: Moanin temporal analysis. A spline was applied to gene expression data overtime (x-axis: hours, y-axis: expression change). Average expression for three mock (blue) or infected (red) samples per timepoint is plotted. No change is observed for ACE, while TMPRSS2 shows the greatest variation in both mock and infected, and CLIC4 in infected only.
+Figure 4: Moanin temporal analysis. A spline was applied to gene expression data overtime (x-axis: hours, y-axis: expression change). Average expression for three mock (blue) or infected (red) samples per timepoint is plotted. No change is observed for ACE, while TMPRSS2 shows the greatest variation in both mock and infected, and CLIC4 in infected only.
 
 ### (iii) Time Series Analysis 
 TiSA (Supplementary-methods 1.4) revealed changes in read-counts across all genes of interest between conditions (Figure 5). LOC112268133 showed the most drastic change, with a steep decline compared to mock samples. Genes like ACE followed a similar negative trend between conditions, while CTH remained stable in infected samples but fluctuated in mocks. Notably, only CLIC4 and CTH had lower read-counts in mocks than infected samples at 48 hours. Overall, mocks generally exhibited higher read-counts than infected samples, except for LOC112268133.
 
-```{r}
+<center>
+![](../4_figures/fig5_TiSA_9x9_plot.png)
+</center>
 
-```
-
-##### Figure 5: TiSA temporal analysis.  Eight genes were analysed with TiSA as described in supplementary-methods 1.4. Overtime, genes in mocks (blue) are found to have higher average read-count than infected (red). CLIC4 and CTH cross prior to 48hrs suggesting a greater read-count in infected samples rather than mocks. LOC112268133 was found to have a drastic change in infected across time, with very low read-counts in mocks. All other genes were found to have very similar slope changes overtime. 
+Figure 5: TiSA temporal analysis.  Eight genes were analysed with TiSA as described in supplementary-methods 1.4. Overtime, genes in mocks (blue) are found to have higher average read-count than infected (red). CLIC4 and CTH cross prior to 48hrs suggesting a greater read-count in infected samples rather than mocks. LOC112268133 was found to have a drastic change in infected across time, with very low read-counts in mocks. All other genes were found to have very similar slope changes overtime. 
 
 ### Pathway Enrichment Analysis
 DEGs were analysed to identify significantly enriched pathways (Supplementary-methods 1.5). For downregulated DEGs, top GO:BP pathways included cytoplasmic translation, small molecule catabolic processes, and generation of precursor metabolites and energy (Figure 6A, 6C). Notably, xenobiotic metabolic and cellular response to xenobiotic stimulus pathways were downregulated (21/769 genes). Upregulated pathways included mitotic cell cycle phase transition, cell substrate adhesion, cell cycle regulation, and sprouting angiogenesis (Figure 7). KEGG analysis highlighted upregulation in small cell lung cancer, cancer pathways, and aminoacyl tRNA biosynthesis, with downregulation in xenobiotics by cytochrome P450 and disease pathways (Alzheimer's, Huntington's, and Parkinson's; Supplementary Figures 3-4). REACTOME revealed upregulation in signal transduction, cytosolic tRNA aminoacylation, and NGF-stimulated transcription (Supplementary Figure 5) and downregulation in influenza infection, SARS-CoV host interactions, and host transcription machinery modulation (Supplementary Figure 6).
 
-```{r figure_6_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r figure_6_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
 # Start Fresh
 rm(list = ls(all.names = T))
 setwd("../")
@@ -970,9 +974,9 @@ ggarrange(
 
 ```
 
-##### Figure 6: Downregulated GO:BP Enriched Pathways. Cluster analysis was able to identify 769 genes in total within GO:BP pathways. (A) Network analysis highlighting which genes belong to significantly downregulated pathways. Highly significant pathways include cytoplasmic translation (41/769), small molecule catabolic process (40/769), aerobic respiration (26/769), Oxidative phosphorylation (22/769), and ATP synthesis coupled electron transport (17/769). (B) Signifies the top enriched pathways based on p-adjusted value against gene count and (C) based on gene ratios. A pathway to note is the downregulation of xenobiotic metabolic process (17/769).Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Figure 6: Downregulated GO:BP Enriched Pathways. Cluster analysis was able to identify 769 genes in total within GO:BP pathways. (A) Network analysis highlighting which genes belong to significantly downregulated pathways. Highly significant pathways include cytoplasmic translation (41/769), small molecule catabolic process (40/769), aerobic respiration (26/769), Oxidative phosphorylation (22/769), and ATP synthesis coupled electron transport (17/769). (B) Signifies the top enriched pathways based on p-adjusted value against gene count and (C) based on gene ratios. A pathway to note is the downregulation of xenobiotic metabolic process (17/769).Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
-```{r figure_7_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r figure_7_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
 ################################### SETTINGS ################################### 
 setwd("../")
 
@@ -1087,7 +1091,7 @@ ggarrange(
 
 ```
 
-##### Figure 7: Upregulated GO:BP Enriched Pathways. Cluster analysis of upregulated DEGs identify 470 within the GO:BP database. (A) Network analysis of top clusters as ranked by p-adjusted values. The top significantly upregulated pathways include mitotic cell cycle phase transition (30/470), cell substrate adhesion (29/470), regulation of substrate adhesion (21/470), cell matrix adhesion (21/470), and regulation of response to wound healing (18/470). (B) Highlights the top twenty enriched pathway ranked by p-adjusted value and bars signifying their gene count. (C) Indicated the top fifteen enriched pathways based on gene ratio. Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Figure 7: Upregulated GO:BP Enriched Pathways. Cluster analysis of upregulated DEGs identify 470 within the GO:BP database. (A) Network analysis of top clusters as ranked by p-adjusted values. The top significantly upregulated pathways include mitotic cell cycle phase transition (30/470), cell substrate adhesion (29/470), regulation of substrate adhesion (21/470), cell matrix adhesion (21/470), and regulation of response to wound healing (18/470). (B) Highlights the top twenty enriched pathway ranked by p-adjusted value and bars signifying their gene count. (C) Indicated the top fifteen enriched pathways based on gene ratio. Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
 # Discussion
 The analyses highlighted in this paper express the dynamic nature of SARS-CoV-2 on the transcriptome of Caco-2 cell with an emphasis towards genes related to both cancer progression and viral infection. We compared differential gene analysis, with time course and pathway enrichment investigation to determine the effect of SARS-CoV-2 infection. It is difficult to use the results presented here to infer SARS-CoV-2 effects on normal-host epithelium, otherwise stated by Adams et al (2023). 
@@ -1174,50 +1178,654 @@ Pathway analysis was conducted locally in RStudio (version 2024.9.1.394) using g
 
 ## Figures
 
-```{r sup_figure_1_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r sup_figure_1_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 12.5, fig.align = "center"}
+#READ IN COUNTS DATA
+setwd("../")
 
+library(pheatmap)
+
+counts_data <- read.csv("2_rawdata/GSE217504_host_counts_matrix.csv",
+                        header = T, 
+                        row.names = 1)
+
+#READ IN AND EXTRACT TARGETS DATA
+target_data <- read.delim("2_rawdata/targets.txt", 
+                          sep = "", 
+                          header = T) #Inputting the targets.
+
+target_data <- target_data[,8:10] #Separating out the necessary columns.
+target_data$Condition <- as.factor(target_data$Condition) #Setting 'Condition' (AKA Time) to factors.
+
+names(target_data)[names(target_data) == 'Test'] <- 'group'
+names(target_data)[names(target_data) == 'Condition'] <- 'timepoint'
+names(target_data)[names(target_data) == 'Sample'] <- 'sample'
+
+#SUBSET THE TARGETS DATA (4,12,48 hrs which all have controls)
+target_data <- data.frame(target_data, row.names = 3) #Setting sample names as the rownames
+
+target_data_TEMP <- target_data[target_data$timepoint %in% c(4,12,48), ] #Tagrets for TEMPORAL
+
+#ORDER THE COUNT DATA (DESeq2 requires).
+counts_data_order = sort(colnames(counts_data)) #Re-order column names to alpha-numerical
+counts_data<- counts_data[, counts_data_order]
+
+#SUBSET THE COUNT DATA (4, 12, 48hrs).
+counts_data_TEMP <- counts_data[, colnames(counts_data) %in% row.names(target_data_TEMP)] #Counts for 48hrs
+
+#FACTOR LEVELS FOR TEMPORAL
+target_data_TEMP$group <- factor(target_data_TEMP$group) 
+target_data_TEMP$timepoint <- factor(target_data_TEMP$timepoint)
+
+#TEMPORAL
+DEG_TEMP <- DESeqDataSetFromMatrix(countData = counts_data_TEMP, 
+                                   colData = target_data_TEMP, #Adding targets data
+                                   design = ~ group + timepoint + group:timepoint) #Factors for Comparison
+DEG_TEMP$group <- factor(DEG_TEMP$group, levels = c("mock", "infected"))
+DEG_TEMP$timepoint <- factor(DEG_TEMP$timepoint, levels = c(4,12,48))
+
+#ACROSS TIME
+DEG_TEMP <- DESeq2::DESeq(DEG_TEMP) #Perform the Analysis
+results_DEG_TEMP <- DESeq2::results(DEG_TEMP) #Coalating the results into a dataframe
+results_DEG_TEMP <- as.data.frame(results_DEG_TEMP) # Produces and R dataframe
+
+#TEMPORAL
+# Variance stabilisation transformation
+vst_TEMP <- DESeq2::vst(DEG_TEMP, blind = F)
+
+## HEATMAPS --------------------------------------------------------------------
+
+#This used pheatmaps to analyse some gene expression clusting.
+
+# Log transformed normalised counts (using top 10 genes)
+
+DEG_padj_orders <- results_DEG_TEMP[order(results_DEG_TEMP$padj),] #Ascending order of padj values
+
+topDEGs <- results_DEG_TEMP[order(results_DEG_TEMP$padj), ][1:10,] #Selecting the top 10
+topDEGs_names <- row.names(topDEGs) #Extracting names of the top 10 genes
+
+rld <- rlog(DEG_TEMP, blind = F) #Performling a log transformation
+
+anno_info <- as.data.frame(colData(DEG_TEMP)[, c("timepoint", "group")]) #Setting Annotation Levels
+anno_info$timepoint <- as.character(anno_info$timepoint) #Changing Condition from continuous to ordinal
+
+# Sample-to-sample distance matrix (normalised counts)
+
+sampleDist <- dist(t(assay(vst_TEMP)))
+
+sampleDistMatrix <- as.matrix(sampleDist) # Generate a matrix
+colours <- colorRampPalette(rev(brewer.pal(9, "Blues")))(255) #Setting the colours and range of those. 
+
+#Generating the Heatmap
+pheatmap(sampleDistMatrix, #Matrix input
+                   clustering_distance_rows = sampleDist,
+                   clustering_distance_cols = sampleDist,
+                   color = colours,
+                   annotation_col = anno_info) #as defined above
 ```
 
-##### Supplementary Figure 1:  Heatmap of comparative sample dissimilarity. Following a variance stabilisation transformation as described in supplementary-methods 1.2, a sample-to-sample distance matrix was generated and plotted against gene counts. Samples measured at 48hrs appeared most dissimilar to each other and cluster appropriately. However, infected samples between 4hrs and 12hrs appeared more like each other potentially suggesting a similar transcriptome between these times. Furthermore, mock samples for 4hrs and 12hrs also appeared to cluster together. Heatmap was plotted on a blue scale, with darker blue signifying a lower dissimilarity score (as apparent by a 0 score when samples were compared against themselves). 
+Supplementary Figure 1:  Heatmap of comparative sample dissimilarity. Following a variance stabilisation transformation as described in supplementary-methods 1.2, a sample-to-sample distance matrix was generated and plotted against gene counts. Samples measured at 48hrs appeared most dissimilar to each other and cluster appropriately. However, infected samples between 4hrs and 12hrs appeared more like each other potentially suggesting a similar transcriptome between these times. Furthermore, mock samples for 4hrs and 12hrs also appeared to cluster together. Heatmap was plotted on a blue scale, with darker blue signifying a lower dissimilarity score (as apparent by a 0 score when samples were compared against themselves). 
 
-```{r sup_figure_2_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
-
+```{r sup_figure_2_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 10, fig.width = 12.5, fig.align = "center"}
+pheatmap(assay(rld)[topDEGs_names,], #Subset by labels extracted
+         cluster_rows = T, #Adds column tree-clustering
+         show_rownames = T, 
+         cluster_cols = T, #Adds rows tree-clustering
+         annotation_col = anno_info) 
 ```
 
-##### Supplementary Figure 2: Heatmap of top ten DEGs identified across all samples. Heatmap was generated following supplementary-methods 1.3. The lower x-axis denotes sample ID, upper x-axis a relationship dendrogram and grouping annotations, left y-axis a dendrogram comparing DEGs which are labelled on the right y-axis. Samples cluster together broadly within their timepoints and more narrowly within their group. The dendrogram above heatmap signifies which category the samples belong and highlights the closer relationship between 4hrs and 12hrs, and the more distant relationship between 4hrs and 48hrs signifying an overtime change. The top ten DEGs identified across all groups are DUSP1, ATF3, PLK2, AFP, STC2, CLRN3, GPR55, MGLL, HDAC9 and PDGFRA; these are located on the right y-axis. 
+Supplementary Figure 2: Heatmap of top ten DEGs identified across all samples. Heatmap was generated following supplementary-methods 1.3. The lower x-axis denotes sample ID, upper x-axis a relationship dendrogram and grouping annotations, left y-axis a dendrogram comparing DEGs which are labelled on the right y-axis. Samples cluster together broadly within their timepoints and more narrowly within their group. The dendrogram above heatmap signifies which category the samples belong and highlights the closer relationship between 4hrs and 12hrs, and the more distant relationship between 4hrs and 48hrs signifying an overtime change. The top ten DEGs identified across all groups are DUSP1, ATF3, PLK2, AFP, STC2, CLRN3, GPR55, MGLL, HDAC9 and PDGFRA; these are located on the right y-axis. 
 
-```{r sup_figure_3_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r sup_figure_3_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
+# Start Fresh
+rm(list = ls(all.names = T))
+setwd("../")
+## Library --------------------------------------------------------------------
 
+library(tidyverse)
+library(RColorBrewer)
+library(clusterProfiler)
+library(org.Hs.eg.db)
+library(DOSE)
+library(enrichplot)
+library(ggupset)
+library(ggpubr)
+
+## Setting Path Variables ------------------------------------------------------
+gene_path <- '5_Gene_Lists/'
+output <- '3_output_data/2_pathway_analysis/'
+
+## Loading in our data (4HRS) --------------------------------------------------
+
+DEGTEMP <- read.csv("3_output_data/raw_DEG_results_TEMPORAL.csv", 
+                    header = T)
+names(DEGTEMP)[names(DEGTEMP) == 'X'] <- 'gene_symbol'
+DEGTEMPdf <- as.data.frame(cbind(DEGTEMP$gene_symbol, 
+                                 DEGTEMP$pvalue, 
+                                 DEGTEMP$padj, 
+                                 DEGTEMP$log2FoldChange, 
+                                 DEGTEMP$diffexpressed))
+names(DEGTEMPdf)[names(DEGTEMPdf) == 'V1'] <- 'gene_symbol'
+names(DEGTEMPdf)[names(DEGTEMPdf) == 'V2'] <- 'pval'
+names(DEGTEMPdf)[names(DEGTEMPdf) == 'V3'] <- 'padj'
+names(DEGTEMPdf)[names(DEGTEMPdf) == 'V4'] <- 'log2fc'
+names(DEGTEMPdf)[names(DEGTEMPdf) == 'V5'] <- 'diffexpressed'
+
+DEGTEMPdf <- DEGTEMPdf[DEGTEMPdf$diffexpressed == 'UP'| DEGTEMPdf$diffexpressed == 'DOWN',]
+deg_results_list_TEMP <- split(DEGTEMPdf, DEGTEMPdf$diffexpressed)
+
+## Aquiring Reference Genes ---------------------------------------------------
+
+# Gene sets can be downloaded here: https://www.gsea-msigdb.org/gsea/msigdb/collections.jsp
+# Gene Sets used in this analysis are found in '5_Gene_Sets'
+# These need to be the whole number of genes used in the experiement - the 46863 in this assingment
+DEG_Genes <- DEGTEMP$gene_symbol #All time points have the same total genes
+
+gmt_files <- list.files(path = '5_Gene_Lists/', 
+                        pattern = '.gmt', 
+                        full.names = T)
+
+# Reads in the gmt file and filters for our genes and makes a new subset
+for (file in gmt_files) {
+  pwl2 <- read.gmt(file)
+  pwl2 <- pwl2[pwl2$gene %in% DEG_Genes,]
+  filename_gs <- paste(gsub('c.\\.', '', gsub('.v2024.1.*$', '', file)), '.RDS', sep = '')
+  saveRDS(pwl2, filename_gs)
+}
+
+## Environment Housekeeping ----------------------------------------------------
+rm(file)
+rm(filename_gs)
+rm(gmt_files)
+rm(pwl2)
+
+## Filtering Gene Sets (REACTOME, KEGG, GO) ------------------------------------
+# We look for profiles enriched in both our up regulated and down regulated. 
+
+################################### SETTINGS ################################### 
+name_of_comparison <- 'mock_vs_infected' # for our filename
+
+background_genes <- 'KEGG' # Choose GO, KEGG or REACTOME
+
+bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+
+up_or_down <- 'UP' # Set this to UP or DOWN
+
+padj_cutoff <- 0.05 # p-adjusted threshold.
+
+genecount_cutoff <- 5 # minimum number of genes in the pathway.
+
+filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
+
+if(background_genes == 'KEGG'){
+  bg_genes <- readRDS(paste0(gene_path, 'kegg_legacy.RDS'))
+} else if(background_genes == 'REACTOME'){
+  bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS'))
+} else if(background_genes == 'GO'){
+  bg_genes <- readRDS(paste0(gene_path, 'go.bp.RDS'))
+} else {
+  stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
+}
+
+## Performing Cluster Analysis (AUTO) ------------------------------------------
+
+resTEMP <- lapply(names(deg_results_list_TEMP),
+                  function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
+                                       TERM2GENE = bg_genes))
+
+names(resTEMP) <- names(deg_results_list_TEMP) # Apply the UP and DOWN tags
+
+res_dfTEMP <- lapply(names(resTEMP), function(x) rbind(resTEMP[[x]]@result))
+names(res_dfTEMP) <- names(resTEMP) # Apply the UP and DOWN tags
+res_dfTEMP <- do.call(rbind, res_dfTEMP)
+
+res_dfTEMP <- res_dfTEMP %>% mutate(minuslog10padj = -log10(p.adjust),
+                                    diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                         rownames(res_dfTEMP)))
+
+# Subset the pathways by (i) padj value, (ii) Gene count
+target_pws <- unique(res_dfTEMP$ID[res_dfTEMP$p.adjust < padj_cutoff & res_dfTEMP$Count > genecount_cutoff])
+res_dfTEMP <- res_dfTEMP[res_dfTEMP$ID %in% target_pws,]
+
+# HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
+
+res_dfTEMP <- res_dfTEMP %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_dfTEMP) <- res_dfTEMP$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_dfTEMP$Description <- gsub('(H|h)iv', 'HIV', 
+                               gsub('pd 1', 'PD-1',
+                                    gsub('ecm', 'ECM', 
+                                         gsub('(I|i)nterleukin', 'IL', 
+                                              gsub('(R|r)na', 'RNA', 
+                                                   gsub('(D|d)na', 'DNA',
+                                                        gsub(' i ', ' I ', 
+                                                             gsub('(A|a)tp ', 'ATP ', 
+                                                                  gsub('(N|n)adh ', 'NADH ', 
+                                                                       gsub('(N|n)ad ', 'NAD ',
+                                                                            gsub('t cell', 'T cell',
+                                                                                 gsub('b cell', 'B cell',
+                                                                                      gsub('built from .*', ' (...)',
+                                                                                           gsub('mhc', 'MHC',
+                                                                                                gsub('mhc class i', 'MHC I', 
+                                                                                                     gsub('mhc class ii', 'MHC II', 
+                                                                                                          stringr::str_to_sentence(
+                                                                                                            gsub('_', ' ',  
+                                                                                                                 gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
+
+## ENRICHMENT ANALYSIS
+
+enrichres <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_dfTEMP,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEGTEMP$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+#class(enrichres) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+## VISUALISATION ---------------------------------------------------------------
+
+# This process will automatically produce figures (arranges) for all options above
+
+## 4HRS PLOTS ------------------------------------------------------------------
+
+#Do not run if looking at downregulated reactome
+p4.1 <- barplot(enrichres, showCategory = 20)
+
+p4.2 <- dotplot(enrichres, showCategory = 15)
+
+p4.3 <- enrichplot::cnetplot(enrichres)
+
+ggarrange(
+  p4.3,
+  ggarrange(p4.1, p4.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
 ```
 
-##### Supplementary Figure 3: Upregulated enriched KEGG pathways. Within the KEGG pathway, 159 upregulated DEGs were identified in the gene set. (A) Network analysis highlighting the top enriched pathways by p-adjusted value including small cell lung cancer (10/159), pathways in cancer (21/159) and aminoacyl tRNA biosynthesis (6/159). (B & C) are bar plots based on gene count and dot plots on gene ratio, both highlight the same three pathways identified in (A). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Supplementary Figure 3: Upregulated enriched KEGG pathways. Within the KEGG pathway, 159 upregulated DEGs were identified in the gene set. (A) Network analysis highlighting the top enriched pathways by p-adjusted value including small cell lung cancer (10/159), pathways in cancer (21/159) and aminoacyl tRNA biosynthesis (6/159). (B & C) are bar plots based on gene count and dot plots on gene ratio, both highlight the same three pathways identified in (A). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
-```{r sup_figure_4_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r sup_figure_4_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
+################################### SETTINGS ################################### 
+setwd("../")
+name_of_comparison <- 'mock_vs_infected' # for our filename
 
+background_genes <- 'KEGG' # Choose GO, KEGG or REACTOME
+
+bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+
+up_or_down <- 'DOWN' # Set this to UP or DOWN
+
+padj_cutoff <- 0.05 # p-adjusted threshold.
+
+genecount_cutoff <- 5 # minimum number of genes in the pathway.
+
+filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
+
+if(background_genes == 'KEGG'){
+  bg_genes <- readRDS(paste0(gene_path, 'kegg_legacy.RDS'))
+} else if(background_genes == 'REACTOME'){
+  bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS'))
+} else if(background_genes == 'GO'){
+  bg_genes <- readRDS(paste0(gene_path, 'go.bp.RDS'))
+} else {
+  stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
+}
+
+## Performing Cluster Analysis (AUTO) ------------------------------------------
+
+resTEMP <- lapply(names(deg_results_list_TEMP),
+                  function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
+                                       TERM2GENE = bg_genes))
+
+names(resTEMP) <- names(deg_results_list_TEMP) # Apply the UP and DOWN tags
+
+res_dfTEMP <- lapply(names(resTEMP), function(x) rbind(resTEMP[[x]]@result))
+names(res_dfTEMP) <- names(resTEMP) # Apply the UP and DOWN tags
+res_dfTEMP <- do.call(rbind, res_dfTEMP)
+
+res_dfTEMP <- res_dfTEMP %>% mutate(minuslog10padj = -log10(p.adjust),
+                                    diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                         rownames(res_dfTEMP)))
+
+# Subset the pathways by (i) padj value, (ii) Gene count
+target_pws <- unique(res_dfTEMP$ID[res_dfTEMP$p.adjust < padj_cutoff & res_dfTEMP$Count > genecount_cutoff])
+res_dfTEMP <- res_dfTEMP[res_dfTEMP$ID %in% target_pws,]
+
+# HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
+
+res_dfTEMP <- res_dfTEMP %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_dfTEMP) <- res_dfTEMP$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_dfTEMP$Description <- gsub('(H|h)iv', 'HIV', 
+                               gsub('pd 1', 'PD-1',
+                                    gsub('ecm', 'ECM', 
+                                         gsub('(I|i)nterleukin', 'IL', 
+                                              gsub('(R|r)na', 'RNA', 
+                                                   gsub('(D|d)na', 'DNA',
+                                                        gsub(' i ', ' I ', 
+                                                             gsub('(A|a)tp ', 'ATP ', 
+                                                                  gsub('(N|n)adh ', 'NADH ', 
+                                                                       gsub('(N|n)ad ', 'NAD ',
+                                                                            gsub('t cell', 'T cell',
+                                                                                 gsub('b cell', 'B cell',
+                                                                                      gsub('built from .*', ' (...)',
+                                                                                           gsub('mhc', 'MHC',
+                                                                                                gsub('mhc class i', 'MHC I', 
+                                                                                                     gsub('mhc class ii', 'MHC II', 
+                                                                                                          stringr::str_to_sentence(
+                                                                                                            gsub('_', ' ',  
+                                                                                                                 gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
+
+## ENRICHMENT ANALYSIS
+
+enrichres <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_dfTEMP,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEGTEMP$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+#class(enrichres) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+## VISUALISATION ---------------------------------------------------------------
+
+# This process will automatically produce figures (arranges) for all options above
+
+## 4HRS PLOTS ------------------------------------------------------------------
+
+#Do not run if looking at downregulated reactome
+p4.1 <- barplot(enrichres, showCategory = 20)
+
+p4.2 <- dotplot(enrichres, showCategory = 15)
+
+p4.3 <- enrichplot::cnetplot(enrichres)
+
+ggarrange(
+  p4.3,
+  ggarrange(p4.1, p4.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
 ```
 
-##### Supplementary Figure 4: Downregulated enriched KEGG pathways. Within the KEGG pathway, 259 downregulated DEGs were identified in the gene set. (A) Network analysis of the top five pathways by p-adjusted value including ribosome (37/259), Parkinson’s disease (17/259), oxidative phosphorylation (21/259), drug metabolism of cytochrome p450 (14/259) and metabolism of xenobiotics by cytochrome p450 (17/259). In both gene count and ratio (B & C), pathways involving the Ribosome are most enriched with a count of 37. Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Supplementary Figure 4: Downregulated enriched KEGG pathways. Within the KEGG pathway, 259 downregulated DEGs were identified in the gene set. (A) Network analysis of the top five pathways by p-adjusted value including ribosome (37/259), Parkinson’s disease (17/259), oxidative phosphorylation (21/259), drug metabolism of cytochrome p450 (14/259) and metabolism of xenobiotics by cytochrome p450 (17/259). In both gene count and ratio (B & C), pathways involving the Ribosome are most enriched with a count of 37. Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
-```{r sup_figure_5_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r sup_figure_5_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
+################################### SETTINGS ################################### 
+setwd("../")
+name_of_comparison <- 'mock_vs_infected' # for our filename
 
+background_genes <- 'REACTOME' # Choose GO, KEGG or REACTOME
+
+bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+
+up_or_down <- 'UP' # Set this to UP or DOWN
+
+padj_cutoff <- 0.05 # p-adjusted threshold.
+
+genecount_cutoff <- 5 # minimum number of genes in the pathway.
+
+filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
+
+if(background_genes == 'KEGG'){
+  bg_genes <- readRDS(paste0(gene_path, 'kegg_legacy.RDS'))
+} else if(background_genes == 'REACTOME'){
+  bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS'))
+} else if(background_genes == 'GO'){
+  bg_genes <- readRDS(paste0(gene_path, 'go.bp.RDS'))
+} else {
+  stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
+}
+
+## Performing Cluster Analysis (AUTO) ------------------------------------------
+
+resTEMP <- lapply(names(deg_results_list_TEMP),
+                  function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
+                                       TERM2GENE = bg_genes))
+
+names(resTEMP) <- names(deg_results_list_TEMP) # Apply the UP and DOWN tags
+
+res_dfTEMP <- lapply(names(resTEMP), function(x) rbind(resTEMP[[x]]@result))
+names(res_dfTEMP) <- names(resTEMP) # Apply the UP and DOWN tags
+res_dfTEMP <- do.call(rbind, res_dfTEMP)
+
+res_dfTEMP <- res_dfTEMP %>% mutate(minuslog10padj = -log10(p.adjust),
+                                    diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                         rownames(res_dfTEMP)))
+
+# Subset the pathways by (i) padj value, (ii) Gene count
+target_pws <- unique(res_dfTEMP$ID[res_dfTEMP$p.adjust < padj_cutoff & res_dfTEMP$Count > genecount_cutoff])
+res_dfTEMP <- res_dfTEMP[res_dfTEMP$ID %in% target_pws,]
+
+# HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
+
+res_dfTEMP <- res_dfTEMP %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_dfTEMP) <- res_dfTEMP$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_dfTEMP$Description <- gsub('(H|h)iv', 'HIV', 
+                               gsub('pd 1', 'PD-1',
+                                    gsub('ecm', 'ECM', 
+                                         gsub('(I|i)nterleukin', 'IL', 
+                                              gsub('(R|r)na', 'RNA', 
+                                                   gsub('(D|d)na', 'DNA',
+                                                        gsub(' i ', ' I ', 
+                                                             gsub('(A|a)tp ', 'ATP ', 
+                                                                  gsub('(N|n)adh ', 'NADH ', 
+                                                                       gsub('(N|n)ad ', 'NAD ',
+                                                                            gsub('t cell', 'T cell',
+                                                                                 gsub('b cell', 'B cell',
+                                                                                      gsub('built from .*', ' (...)',
+                                                                                           gsub('mhc', 'MHC',
+                                                                                                gsub('mhc class i', 'MHC I', 
+                                                                                                     gsub('mhc class ii', 'MHC II', 
+                                                                                                          stringr::str_to_sentence(
+                                                                                                            gsub('_', ' ',  
+                                                                                                                 gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
+
+## ENRICHMENT ANALYSIS
+
+enrichres <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_dfTEMP,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEGTEMP$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+#class(enrichres) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+## VISUALISATION ---------------------------------------------------------------
+
+# This process will automatically produce figures (arranges) for all options above
+
+## 4HRS PLOTS ------------------------------------------------------------------
+
+#Do not run if looking at downregulated reactome
+p4.1 <- barplot(enrichres, showCategory = 20)
+
+p4.2 <- dotplot(enrichres, showCategory = 15)
+
+p4.3 <- enrichplot::cnetplot(enrichres)
+
+ggarrange(
+  p4.3,
+  ggarrange(p4.1, p4.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
 ```
 
-##### Supplementary Figure 5: Upregulated enriched REACTOME pathways. Within the REACTOME pathway, 327 upregulated DEGs were identified. (A) Network analysis of top clusters as ranked by p-adjusted values. Highly enriched pathways included cytosolic tRNA aminoacylation (6/327), signal transduction by I1 (6/327) and Ngf stimulated transcription (7/327). (B & C) are bar plots based on gene count and dot plots on gene ratio, both highlight the same three pathways identified in (A). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Supplementary Figure 5: Upregulated enriched REACTOME pathways. Within the REACTOME pathway, 327 upregulated DEGs were identified. (A) Network analysis of top clusters as ranked by p-adjusted values. Highly enriched pathways included cytosolic tRNA aminoacylation (6/327), signal transduction by I1 (6/327) and Ngf stimulated transcription (7/327). (B & C) are bar plots based on gene count and dot plots on gene ratio, both highlight the same three pathways identified in (A). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
-```{r sup_figure_6_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
+```{r sup_figure_6_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 20, fig.width = 15, fig.align = "center"}
+################################### SETTINGS ################################### 
+setwd("../")
+name_of_comparison <- 'mock_vs_infected' # for our filename
 
+background_genes <- 'REACTOME' # Choose GO, KEGG or REACTOME
+
+bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS')) # background genes.
+
+up_or_down <- 'DOWN' # Set this to UP or DOWN
+
+padj_cutoff <- 0.05 # p-adjusted threshold.
+
+genecount_cutoff <- 5 # minimum number of genes in the pathway.
+
+filename <- paste0(output, 'clusterProfiler/', name_of_comparison, '_', background_genes) # filename of our PEA results
+
+if(background_genes == 'KEGG'){
+  bg_genes <- readRDS(paste0(gene_path, 'kegg_legacy.RDS'))
+} else if(background_genes == 'REACTOME'){
+  bg_genes <- readRDS(paste0(gene_path, 'reactome.RDS'))
+} else if(background_genes == 'GO'){
+  bg_genes <- readRDS(paste0(gene_path, 'go.bp.RDS'))
+} else {
+  stop('Invalid background genes. Select one of the following: KEGG, Reactome, GO, or add new pwl to function')
+}
+
+## Performing Cluster Analysis (AUTO) ------------------------------------------
+
+resTEMP <- lapply(names(deg_results_list_TEMP),
+                  function(x) enricher(gene = deg_results_list_TEMP[[x]]$gene_symbol,
+                                       TERM2GENE = bg_genes))
+
+names(resTEMP) <- names(deg_results_list_TEMP) # Apply the UP and DOWN tags
+
+res_dfTEMP <- lapply(names(resTEMP), function(x) rbind(resTEMP[[x]]@result))
+names(res_dfTEMP) <- names(resTEMP) # Apply the UP and DOWN tags
+res_dfTEMP <- do.call(rbind, res_dfTEMP)
+
+res_dfTEMP <- res_dfTEMP %>% mutate(minuslog10padj = -log10(p.adjust),
+                                    diffexpressed = gsub('\\.GOBP.*$|\\.KEGG.*$|\\.REACTOME.*$', '', 
+                                                         rownames(res_dfTEMP)))
+
+# Subset the pathways by (i) padj value, (ii) Gene count
+target_pws <- unique(res_dfTEMP$ID[res_dfTEMP$p.adjust < padj_cutoff & res_dfTEMP$Count > genecount_cutoff])
+res_dfTEMP <- res_dfTEMP[res_dfTEMP$ID %in% target_pws,]
+
+# HERE FILTER BASED ON UP OR DOWN REGULATED AS SPECIFIED IN SETTINGS
+
+res_dfTEMP <- res_dfTEMP %>% filter(diffexpressed == up_or_down) %>% 
+  dplyr::select(!c('minuslog10padj', 'diffexpressed')) 
+rownames(res_dfTEMP) <- res_dfTEMP$ID
+
+# For visualisation purposes, let's shorten the pathway names
+res_dfTEMP$Description <- gsub('(H|h)iv', 'HIV', 
+                               gsub('pd 1', 'PD-1',
+                                    gsub('ecm', 'ECM', 
+                                         gsub('(I|i)nterleukin', 'IL', 
+                                              gsub('(R|r)na', 'RNA', 
+                                                   gsub('(D|d)na', 'DNA',
+                                                        gsub(' i ', ' I ', 
+                                                             gsub('(A|a)tp ', 'ATP ', 
+                                                                  gsub('(N|n)adh ', 'NADH ', 
+                                                                       gsub('(N|n)ad ', 'NAD ',
+                                                                            gsub('t cell', 'T cell',
+                                                                                 gsub('b cell', 'B cell',
+                                                                                      gsub('built from .*', ' (...)',
+                                                                                           gsub('mhc', 'MHC',
+                                                                                                gsub('mhc class i', 'MHC I', 
+                                                                                                     gsub('mhc class ii', 'MHC II', 
+                                                                                                          stringr::str_to_sentence(
+                                                                                                            gsub('_', ' ',  
+                                                                                                                 gsub('GOBP_|KEGG_|REACTOME_', '', res_dfTEMP$Description)))))))))))))))))))
+
+## ENRICHMENT ANALYSIS
+
+enrichres <- new("enrichResult",
+                 readable = FALSE,
+                 result = res_dfTEMP,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "BH",
+                 qvalueCutoff = 0.2,
+                 organism = "human",
+                 ontology = "UNKNOWN",
+                 gene = DEGTEMP$gene_symbol,
+                 keytype = "UNKNOWN",
+                 universe = unique(bg_genes$gene),
+                 gene2Symbol = character(0),
+                 geneSets = bg_genes)
+#class(enrichres) # CHECK THIS HAS BECOME AN ENRICHMENT CLASS
+
+## VISUALISATION ---------------------------------------------------------------
+
+# This process will automatically produce figures (arranges) for all options above
+
+## 4HRS PLOTS ------------------------------------------------------------------
+
+#Do not run if looking at downregulated reactome
+p4.1 <- barplot(enrichres, showCategory = 20)
+
+p4.2 <- dotplot(enrichres, showCategory = 15)
+
+p4.3 <- enrichplot::cnetplot(enrichres)
+
+ggarrange(
+  p4.3,
+  ggarrange(p4.1, p4.2, ncol = 2, labels = c("B", "C")), 
+  nrow = 2, 
+  labels = "A") + 
+  bgcolor("White") +
+  border("White")
 ```
 
-##### Supplementary Figure 6: Downregulated enriched REACTOME pathways. Within the REACTOME pathway, 526 downregulated DEGs were identified. (A) Network analysis of top clusters as ranked by p-adjusted values. Highly enriched pathways included eukaryotic translation initiation (40/526), eukaryotic translation elongation (39/526), response to amino acid deficiency (39/526), Srp dependant co-translation protein targeting (39/526) and Nonsense mediated decay nmd (41/526). (B & C) are bar plots based on gene count and dot plots on gene ratio, with the highest enriched pathway both my gene count and gene ration being metabolism of amino acids and derivatives (56/526). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
+Supplementary Figure 6: Downregulated enriched REACTOME pathways. Within the REACTOME pathway, 526 downregulated DEGs were identified. (A) Network analysis of top clusters as ranked by p-adjusted values. Highly enriched pathways included eukaryotic translation initiation (40/526), eukaryotic translation elongation (39/526), response to amino acid deficiency (39/526), Srp dependant co-translation protein targeting (39/526) and Nonsense mediated decay nmd (41/526). (B & C) are bar plots based on gene count and dot plots on gene ratio, with the highest enriched pathway both my gene count and gene ration being metabolism of amino acids and derivatives (56/526). Figure generated per Supplementary Material 1.5, with bars and dots coloured by p-adjusted values.
 
-##### Supplementary Table 1:  Top 10 DEGs identified when comparing mocks only. The top ten DEGs identified when comparing 4 vs 12hrs and 12 vs 48hrs were searched on GenBank and identified as having a role in cancer or not. Of the 19 genes found on GenBank, 84.2% (n=16) were identified to have some relationship to any named cancer. Only 15.8% (n=3) we’re not found to be related to cancer. The JDR2 gene which was identified as being upregulated between 12vs48hrs was not able to be found on GenBank. NB: * BMF was not directly found to have a role within cancer but can be repressed by other genes and become a marker of colon cancer. The searched GenBank IDs can be found below. 
+Supplementary Table 1:  Top 10 DEGs identified when comparing mocks only. The top ten DEGs identified when comparing 4 vs 12hrs and 12 vs 48hrs were searched on GenBank and identified as having a role in cancer or not. Of the 19 genes found on GenBank, 84.2% (n=16) were identified to have some relationship to any named cancer. Only 15.8% (n=3) we’re not found to be related to cancer. The JDR2 gene which was identified as being upregulated between 12vs48hrs was not able to be found on GenBank. NB: * BMF was not directly found to have a role within cancer but can be repressed by other genes and become a marker of colon cancer. The searched GenBank IDs can be found below. 
 
-```{r}
+| Gene Symbol | Up/Down Regulated | GenBank ID | Cancer Related (Y/N) |
+|-------------|--------------------|------------|-----------------------|
+| CYP1A1      | DOWN               | 1543       | Y                     |
+| DDIT4       | DOWN               | 54541      | Y                     |
+| CHAC1       | DOWN               | 79094      | Y                     |
+| STC2        | DOWN               | 8614       | N                     |
+| CEBPB       | DOWN               | 1051       | Y                     |
+| SLC7A11     | DOWN               | 23657      | Y                     |
+| TRIB3       | DOWN               | 57761      | Y                     |
+| ATF3        | DOWN               | 467        | Y                     |
+| JDR2        | DOWN               | N/A        | N/A                   |
+| MTHFD2      | DOWN               | 10797      | Y                     |
+| SCD         | UP                 | 6319       | Y                     |
+| HMGCS2      | UP                 | 3158       | Y                     |
+| HK2         | DOWN               | 3099       | Y                     |
+| FOSL1       | DOWN               | 8061       | Y                     |
+| OCD1        | DOWN               | 4953       | Y                     |
+| IDH1        | UP                 | 3417       | Y                     |
+| OAT         | UP                 | 4942       | Y                     |
+| PDCD4       | UP                 | 27250      | Y                     |
+| IDI1        | UP                 | 3422       | N                     |
+| BMF         | UP                 | 90427      | N*                    |
 
-```
+<center>
+![](../4_figures/Sup_Figure_7_Ancestor_Plot.png)
+</center>
 
-```{r sup_figure_7_plot, echo=FALSE, message=FALSE, warning=FALSE, fig.height = 35, fig.width = 20, fig.align = "center"}
-
-```
-
-##### Supplementary Figure 7:  Ancestor Query Plot of Immune-related processes. TiSA utilises inputted GO-terms for ancestry analysis such as GO:0002376 for immune system processes as described above and plotted on a multidimensional scale. All C1 clusters identified by TiSA containing 714 DEGs were enriched in the ancestry plot, with involvement in leukocyte activation (lymphocyte differentiation, T-cell differentiation, αβ-T-Cell differentiation and T-cell activation) and regulation of immune system processes (regulation of T-cell differentiation, regulation of lymphocyte differentiation, regulation of leukocyte differentiation, positive regulation of leukocyte differentiation, positive regulation of hemopoiesis). Pathways are likely enriched in response to SARS-CoV-2 infection triggering an antiviral response. 
+Supplementary Figure 7:  Ancestor Query Plot of Immune-related processes. TiSA utilises inputted GO-terms for ancestry analysis such as GO:0002376 for immune system processes as described above and plotted on a multidimensional scale. All C1 clusters identified by TiSA containing 714 DEGs were enriched in the ancestry plot, with involvement in leukocyte activation (lymphocyte differentiation, T-cell differentiation, αβ-T-Cell differentiation and T-cell activation) and regulation of immune system processes (regulation of T-cell differentiation, regulation of lymphocyte differentiation, regulation of leukocyte differentiation, positive regulation of leukocyte differentiation, positive regulation of hemopoiesis). Pathways are likely enriched in response to SARS-CoV-2 infection triggering an antiviral response. 
