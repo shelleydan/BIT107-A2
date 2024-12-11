@@ -8,17 +8,24 @@ The analysis provided in this git repository supports the assignments of BIT101 
 * Download RNAseq metadata from their GEO IDs,
 * Analyse DEGs,
 * Investigate the temporal nature of DEGs,
-* Investigate pathways and molecular systems modified. 
+* Investigate pathways effected. 
 
-The analysis provided here, and written in the BIT101 Scientific Communication Style Report uses data under the $${\color{#0969DA}GEOID \space GSE217504.}$$
+>[!TIP]
+> The analysis provided here, and written in the BIT101 Scientific Communication Style Report uses data under the GEOID GSE217504.
 
 <h2>Visualisation of the Workflow</h2>
 
 ![workflow](https://github.com/user-attachments/assets/39bd6a87-b149-4c77-8e9e-ba4f5e78228f)
 
+<h2>RMarkdown Method</h2>
+
+A comprehensive RMarkdown can be found in `0_RMarkdown_Summary/Assessment_Summary.Rmd`. To recreate all elements of the BIT101 report submission knit this markdown. Note, it will take approximately 5 minutes to render.
+
+Figure 5 & Supplementary Figure 7 were created using the TiSA method (mentioned below) and have been included in the RMarkdown as images. Manual editing of Figure 5 was needed to arrange similarly to Figure 6. 
+
 <h2>Overview of Scripts</h2>
 
-All scripts can be found within the `1_analysis_scripts`, with one exception of `1_analysis_scripts/TiSA_rmarkdown_method/5_TS_analysis.rmd1`.
+All scripts can be found within the `1_analysis_scripts` directory, with the exception of `1_analysis_scripts/TiSA_rmarkdown_method/5_TS_analysis.rmd1`.
 
 <table style="width:100%">
   <tr>
@@ -37,31 +44,31 @@ All scripts can be found within the `1_analysis_scripts`, with one exception of 
     <td>1_DEG_Analysis.R</td>
     <td>DEGs are identified across time and at each individual timepoint. This script produces figures used for differential analysis.</td>
     <td>R</td>
-    <td>Batut et al., 2024, <br>  Hiltemann et al., 2023, <br> Batut et al., 2018,</td>
+    <td><a href=https://training.galaxyproject.org/training-material/topics/transcriptomics/tutorials/ref-based/tutorial.html>Batut et al., 2016 [1], </a><br>  <a href=https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1010752>Hiltemann et al., 2023 [3], </a><br> <a href=https://pubmed.ncbi.nlm.nih.gov/29953864/>Batut et al., 2018 [2],</a></td>
   </tr>
   <tr>
     <td>2_Temporal_Analysis_<br>DESeq2.R</td>
     <td>The first script of the time series analysis, conventional DESeq2 provides basic temporal information for the change of counts over time.</td>
     <td>R</td>
-    <td>Love et al., 2019</td>
+    <td><a href=https://master.bioconductor.org/packages/release/workflows/vignettes/rnaseqGene/inst/doc/rnaseqGene.html>Love et al., 2019 [6],</a></td>
   </tr>
   <tr>
     <td> 3_Temporal_Analysis_<br>Moanin.R</td>
-    <td>This model takes genes of interest(*) and fits spline curve to track their change over time. Similar to DESeq2, this uses the change in counts.</td>
+    <td>This model takes genes of interest(*) and fits a spline curve to track their change over time.</td>
     <td>R</td>
-    <td>Varoquaux & Purdom., 2020, </td>
+    <td><a href=https://f1000research.com/articles/9-1447 >Varoquaux & Purdom., 2020 [7], </a></td>
   </tr>
   <tr>
     <td>4_TS_Analysis_Prep.R</td>
-    <td>This is a preperation script for the following time series analysis which requires the input data to be properly formatted; metadata needs to be tab seperated, and each sample to have its own count matrix. </td>
+    <td>This is a preperation script for the following time series analysis which requires the input data to be properly formatted; metadata needs to be comma seperated, and each sample to have its own count matrix which is tab seperated. </td>
     <td>R</td>
     <td>N/A</td>
   </tr>
   <tr>
     <td>5_TS_analysis.rmd</td>
     <td>This is a sample taken from the larger TiSA pipeline, this was chosen due to its automation. This runs a time series analysis for genes of interest(*).</td>
-    <td>R</td>
-    <td>Lefol et al., 2023,</td>
+    <td>Rmd</td>
+    <td><a href=https://academic.oup.com/nargab/article/5/1/lqad020/7069286>Lefol et al., 2023 [5],</a></td>
   </tr>
   <tr>
     <td>6.1_Profile_Analysis.R</td>
@@ -78,10 +85,12 @@ All scripts can be found within the `1_analysis_scripts`, with one exception of 
 </table>
 
 > [!TIP]
-> (*) - The genes of interest used in this analysis have been kept constant between the two time series analysis to be able to compare both methods. These genes include the following: LOC112268133, CLIC4, NDNF, MGLL, CTH, ACE2, ACE, & TMPRSS2. The majority of the genes were selected at random from a list of the top 10 p-adjusted DEGs. ACE2, ACE and TMPRSS2 were specifically selected due to their importance in viral entry to the host cell. 
+> (*) - The genes of interest used in this analysis have been kept constant between Moanin and TiSA to compare both methods. These genes include: LOC112268133, CLIC4, NDNF, MGLL, CTH, ACE2, ACE, & TMPRSS2. <br>
+> <br>
+> ACE2, ACE and TMPRSS2 were specifically selected due to their importance in viral entry and the remaining selected at random from a list of the top 10 p-adjusted DEGs.  
 
 
-<h2>Installation & Running Instructions</h2>
+<h2>Installation</h2>
 
 This workflow is designed to be able to run as soon as it is downloaded. All of the scripts that need to be run can be found in 1_analysis_scripts and are numbered based on the order of analysis (also highlighted in the visualisation of the workflow above). 
 
@@ -92,9 +101,10 @@ This workflow is designed to be able to run as soon as it is downloaded. All of 
 
 To successfully do this, copy **https://github.com/shelleydan/BIT107-A2.git** and open a **new project** in RStudio. Select **Version Control** and **Git**, there paste the copied github repository URL. This will clone the repository. 
 
-**Running the Analysis.**
-1. Run 0_matrix_download.sh, you will be prompted to input a GEOID, to follow the analysis in this repository use `GSE217504`.
-2. Next, a targets.txt will be generated from the bash script can be manually exported and inported into RStudio, saved into `2_rawdata`. Unfortunately, the count matrices all have unique HTMLs and must be downloaded manually.
+<h2>Running the Analysis.</h2>
+
+1. Run `0_matrix_download.sh`, you will be prompted to input a GEOID, to follow the analysis in this repository use `GSE217504`.
+2. Next, a targets.txt will be generated from the bash script; manually exported into RStudio, saved into `2_rawdata`. Unfortunately, the count matrices all have unique HTMLs and must be downloaded manually.
 3. The first script to use is `1_analysis_scripts/1_DEG_Analysis.R` - this will clean the rawdata and apply the DESeq2 Analysis to individual timepoints.
 4. The beginning of the temporal analysis starts with `1_analysis_scripts/2_Temporal_Analysis_DESeq2.R` to apply some basic analysis.
 5. The Moanin model (`1_analysis_scripts/3_Temporal_Analysis_Moanin.R`) is the secomnd temporal analysis, this will take the genes of intesest and fit a spline to their expression overtime.
@@ -105,12 +115,12 @@ To successfully do this, copy **https://github.com/shelleydan/BIT107-A2.git** an
 1. The RMarkdown to use for this analysis is found here: `1_analysis_scripts/TiSA_rmarkdown_method/5_TS_analysis.rmd` - this pipeline was designed by Lefol et al. (2023)
 2. From the initial DESeq2 analysis, we save the cleaned targets and count data to `2_rawdata/1_counts` and `2_rawdata/2_targets`.
 3. Firstly, we need to prepare the data for analysis - this is done using `1_analysis_scripts/4_TS_Analysis_Prep.R`. **NB: The counts data needs to be tab seperated for the pipeline to function, do not alted the preperation script and all will be good.**
-4. All parameters have been set withing `1_analysis_scripts/TiSA_rmarkdown_method/5_TS_analysis.rmd`, including a list of genes used to compare the temporal methods. To run this analysis with the settings for this assingment simply **knit the RMarkdown**. 
+4. All parameters have been set within `1_analysis_scripts/TiSA_rmarkdown_method/5_TS_analysis.rmd`, including a list of genes used to compare the temporal methods. To run this analysis with the settings for this assingment simply **knit the RMarkdown**. 
 
 **Note:** Performing this analysis on the assignment dataset may take some time - the initial run took ~3hrs, the .html is provided as an example of what the markdown would produce. 
 
 <h2>Bug Reporting</h2>
-Please understand that although this is for an assignment, this workflow may be continued to work on in the future - especially to reuse some of the code generated here. If anyone identified any issues or errors with this analysis please submit an **issue.**
+Please understand that although this is for an assignment, this workflow may be continued to work on in the future - especially to reuse some of the code generated here. If anyone identifies any issues or errors with this analysis please submit an **issue.**
 
 <h2>Known Issues</h2>
 Some of the errors that can be produced are the following, but they do not impact the analysis:
@@ -118,6 +128,8 @@ Some of the errors that can be produced are the following, but they do not impac
 *  Some errors producing the volcano plots with ggplot2 will be printed into the console - this is only due to the sheer volume of points to plot - the volcano plots will plot despite this. 
 * The Moanin model will express that the fit of the spline is outside of the area - the area is maximised to balance resolution of the other genes, this is unfortunate but avoids sacrificing any other information.
 * If you attempt to run `6.2_SUPPLEMENTARY_Profile_Analysis.R` be aware that at 4hrs for downregulated DEGs, and at 12hrs upregulated DEGs there are no significant pathways for REACTOME analysis - therefore this will flag an error and not work. 
+
+If using the RMarkdown method found in `0_RMarkdown_Method`, none of this errors appear and the markdown is rendered. 
 
 <h2>Referances</h2>
 
